@@ -4,21 +4,27 @@
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey.svg)](README.md)
 
-Утилита на **Rust** для переключения прокси, контроля IP/локации, диагностики и управления переменными окружения в Zsh и Bash.
+Универсальная CLI-утилита на **Rust** для переключения прокси, контроля IP/локации, тестирования скорости и управления переменными окружения в **macOS** и **Linux** (Zsh / Bash).
 
 ---
 
 ## ⚡ Быстрый старт
 
+### 🍏 macOS
 ```bash
-# 1. Сборка и установка
 cargo build --release
 cp target/release/proxy-cli /opt/homebrew/bin/
 
-# 2. Подключение к Zsh (~/.zshrc)
+# Добавить в ~/.zshrc:
 eval "$(proxy-cli init zsh)"
+```
 
-# 3. Подключение к Bash (~/.bashrc)
+### 🐧 Linux
+```bash
+cargo build --release
+sudo cp target/release/proxy-cli /usr/local/bin/
+
+# Добавить в ~/.bashrc (или ~/.zshrc):
 eval "$(proxy-cli init bash)"
 ```
 
@@ -39,16 +45,16 @@ eval "$(proxy-cli init bash)"
 | `proxy ping` | Параллельный пинг целевых сервисов |
 | `proxy diagnose` | Проверить локальный сокет и доступность API |
 | `proxy run -- <cmd>` | Выполнить команду через прокси |
-| `proxy-cli completions zsh` | Сгенерировать автодополнение для zsh |
+| `proxy-cli completions zsh` | Сгенерировать автодополнение |
 
 ---
 
 ## 📚 Документация
 
-- [📦 **Установка**](docs/INSTALLATION.md) — Сборка, зависимости, пути PATH.
+- [📦 **Установка (macOS & Linux)**](docs/INSTALLATION.md) — Подробная сборка, настройки PATH.
 - [🐚 **Интеграция с оболочками**](docs/SHELL_INTEGRATION.md) — Zsh, Bash, Powerlevel10k.
 - [⚙️ **Конфигурация**](docs/CONFIGURATION.md) — Схема `settings.json` и `config.json`.
-- [📖 **Справочник команд**](docs/USAGE.md) — Полное описание всех подкоманд.
+- [📖 **Справочник команд**](docs/USAGE.md) — Описание всех подкоманд.
 
 ---
 
