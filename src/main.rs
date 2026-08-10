@@ -37,6 +37,15 @@ pub enum Commands {
     #[command(subcommand)]
     Profile(ProfileCommands),
 
+    /// Интерактивный выбор активного прокси-профиля
+    Switch,
+
+    /// Измерить пинг и скорость всех прокси-профилей
+    Benchmark,
+
+    /// Автоматически выбрать самый быстрый прокси с минимальной задержкой
+    Best,
+
     /// Замер задержки (пинг) до сервисов из config.json
     Ping {
         /// Таймаут ожидания в миллисекундах (по умолчанию 4000)
@@ -77,6 +86,8 @@ pub enum Commands {
 pub enum ProfileCommands {
     /// Показать список всех доступных профилей
     List,
+    /// Интерактивный выбор профиля из списка
+    Select,
     /// Выбрать активный профиль по ключу (например: throne, v2ray)
     Use {
         /// Ключ профиля из config.json
@@ -104,6 +115,10 @@ pub enum ProfileCommands {
         /// Ключ профиля
         key: String,
     },
+    /// Измерить скорость и задержку всех профилей
+    Benchmark,
+    /// Выбрать самый быстрый профиль
+    Best,
 }
 
 #[derive(Subcommand)]
@@ -130,7 +145,6 @@ pub enum SettingsCommands {
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Respect NO_COLOR standard environment variable
     if env::var("NO_COLOR").is_ok() {
         colored::control::set_override(false);
     }
@@ -145,9 +159,21 @@ async fn main() -> Result<()> {
         Commands::Env { mode } => {
             proxy_cli::cmd::env::print_env_commands(&mode, &config);
         }
+        Commands::Switch => {
+            profile::select_profile_interactive(&mut config)?;
+        }
+        Commands::Benchmark => {
+            profile::run_benchmark(&config).await?;
+        }
+        Commands::Best => {
+            profile::select_best_profile(&mut config).await?;
+        }
         Commands::Profile(profile_cmd) => match profile_cmd {
             ProfileCommands::List => {
                 profile::list_profiles(&config);
+            }
+            ProfileCommands::Select => {
+                profile::select_profile_interactive(&mut config)?;
             }
             ProfileCommands::Use { key } => {
                 profile::use_profile(&mut config, &key)?;
@@ -157,6 +183,12 @@ async fn main() -> Result<()> {
             }
             ProfileCommands::Remove { key } => {
                 profile::remove_profile(&mut config, &key)?;
+            }
+            ProfileCommands::Benchmark => {
+                profile::run_benchmark(&config).await?;
+            }
+            ProfileCommands::Best => {
+                profile::select_best_profile(&mut config).await?;
             }
         },
         Commands::Ping { timeout } => {

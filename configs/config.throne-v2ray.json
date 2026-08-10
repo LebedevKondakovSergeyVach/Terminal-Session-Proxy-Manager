@@ -1,5 +1,5 @@
 {
-  "active_profile": "throne",
+  "active_profile": "v2ray",
   "enabled": false,
   "profiles": {
     "throne": {
@@ -16,15 +16,36 @@
     }
   },
   "ping_targets": [
-    { "name": "Google API", "url": "https://generativelanguage.googleapis.com" },
-    { "name": "GitHub", "url": "https://github.com" },
-    { "name": "OpenAI API", "url": "https://api.openai.com" },
-    { "name": "Anthropic API", "url": "https://api.anthropic.com" },
-    { "name": "Telegram API", "url": "https://api.telegram.org" }
+    {
+      "name": "Google API",
+      "url": "https://generativelanguage.googleapis.com"
+    },
+    {
+      "name": "GitHub",
+      "url": "https://github.com"
+    },
+    {
+      "name": "OpenAI API",
+      "url": "https://api.openai.com"
+    },
+    {
+      "name": "Anthropic API",
+      "url": "https://api.anthropic.com"
+    },
+    {
+      "name": "Telegram API",
+      "url": "https://api.telegram.org"
+    }
   ],
   "diagnose_endpoints": [
-    { "name": "Gemini API", "url": "https://generativelanguage.googleapis.com" },
-    { "name": "Cloud Code", "url": "https://daily-cloudcode-pa.googleapis.com" }
+    {
+      "name": "Gemini API",
+      "url": "https://generativelanguage.googleapis.com"
+    },
+    {
+      "name": "Cloud Code",
+      "url": "https://daily-cloudcode-pa.googleapis.com"
+    }
   ],
   "geo_apis": [
     "https://ifconfig.co/json",
