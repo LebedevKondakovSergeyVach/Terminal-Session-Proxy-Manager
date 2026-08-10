@@ -1,13 +1,17 @@
 # ⚙️ Конфигурация
 
 ## 1. `settings.json`
-Указывает путь к файлу конфигурации. Ищется по путям `./settings.json` -> `./settings.local.json` -> `~/.config/proxy-cli/settings.json`.
+Указывает путь к файлу конфигурации и предпочитаемый язык интерфейса. Ищется по путям `./settings.json` -> `./settings.local.json` -> `~/.config/proxy-cli/settings.json`.
 
 ```json
 {
-  "config_path": "./configs/config.throne-v2ray.json"
+  "config_path": "./configs/config.throne-v2ray.json",
+  "lang": "ru"
 }
 ```
+
+- `"config_path"`: Путь к целевому файлу конфигурации.
+- `"lang"`: Код языка интерфейса (`"ru"` или `"en"`).
 
 ---
 
