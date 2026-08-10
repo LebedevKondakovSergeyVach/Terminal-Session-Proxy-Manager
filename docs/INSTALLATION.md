@@ -1,69 +1,29 @@
-# 📦 Руководство по Установке и Сборке Proxy CLI
+# 📦 Установка и Сборка
 
-В данном документе подробно описан процесс установки инструментария **Proxy CLI** из исходных текстов, настройка окружения и компиляция под macOS и Linux.
-
----
-
-## 📋 Требования к системе
-
-Перед сборкой убедитесь, что на вашей системе установлены:
-
-- **Rust toolchain** (`cargo` и `rustc` версии 1.70.0 или выше).
-- **Командные оболочки**: `zsh` (по умолчанию в macOS) или `bash` (Linux / macOS).
-- **Утилиты**: `curl` и `nc` (netcat) — обычно предустановлены в macOS и большинстве дистрибутивов Linux.
+## Требования
+- Rust 1.70+ (`cargo`, `rustc`)
+- Zsh или Bash
 
 ---
 
-## 🔨 Сборка из исходного кода
+## Сборка и установка
 
-### 1. Клонирование репозитория
 ```bash
-git clone https://github.com/your-username/proxy-cli-rs.git
-cd proxy-cli-rs
-```
+# 1. Клонирование
+git clone https://github.com/LebedevSergeyVach/Proxy-CLI-rs.git
+cd Proxy-CLI-rs
 
-### 2. Компиляция релизной версии
-Выполните сборку проекта в оптимизированном режиме `--release`:
-```bash
+# 2. Релизная компиляция
 cargo build --release
-```
-После успешного завершения компиляции готовый бинарный файл будет находиться по пути:
-`./target/release/proxy-cli`
 
----
-
-## 🚀 Установка бинарника в системный PATH
-
-Чтобы команда `proxy-cli` была доступна из любой директории терминала, скопируйте файл в директорию, находящуюся в вашей переменной `$PATH`.
-
-### Вариант A: Для пользователей macOS с Homebrew (Рекомендуется)
-```bash
-cp target/release/proxy-cli /opt/homebrew/bin/
+# 3. Установка бинарника (один из вариантов)
+cp target/release/proxy-cli /opt/homebrew/bin/   # macOS Homebrew
+# или:
+cp target/release/proxy-cli ~/.cargo/bin/        # Cargo PATH
 ```
 
-### Вариант B: Стандартная папка Cargo binaries
-```bash
-mkdir -p ~/.cargo/bin
-cp target/release/proxy-cli ~/.cargo/bin/
-```
-*(Убедитесь, что `~/.cargo/bin` добавлен в ваш `$PATH` в `~/.zshrc` или `~/.bashrc`)*.
-
-### Вариант C: Стандартный `/usr/local/bin`
-```bash
-sudo cp target/release/proxy-cli /usr/local/bin/
-```
-
----
-
-## 🔍 Проверка установки
-
-Выполните команду в терминале:
+## Проверка
 ```bash
 proxy-cli --version
+# proxy-cli 0.2.0
 ```
-*Ожидаемый вывод:*
-```text
-proxy-cli 0.2.0
-```
-
-Если версия успешно отображается, переходите к руководству по интеграции с оболочкой: [`SHELL_INTEGRATION.md`](SHELL_INTEGRATION.md).

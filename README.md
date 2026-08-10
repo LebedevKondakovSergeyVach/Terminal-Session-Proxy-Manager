@@ -1,94 +1,54 @@
-# ⚡ Proxy CLI (Universal Rust Proxy Toolkit)
+# ⚡ Proxy CLI
 
 [![Rust](https://img.shields.io/badge/rust-1.70%2B-orange.svg)](https://www.rust-lang.org)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey.svg)](README.md)
 
-Универсальный, высокопроизводительный CLI-инструментарий на **Rust** для управления прокси-серверами, переключения профилей, диагностики сети и управления переменными окружения в **Zsh** и **Bash**.
+Утилита на **Rust** для переключения прокси, контроля IP/локации, диагностики и управления переменными окружения в Zsh и Bash.
 
 ---
 
-## 📚 Разделы документации
+## ⚡ Быстрый старт
 
-Для удобства подробная документация разбита по специализированным руководствам:
-
-- [📦 **Установка и Сборка** (`docs/INSTALLATION.md`)](docs/INSTALLATION.md) — Сборка из исходников, зависимости, интеграция в PATH.
-- [🐚 **Интеграция с Шеллами** (`docs/SHELL_INTEGRATION.md`)](docs/SHELL_INTEGRATION.md) — Настройка `.zshrc`, `.bashrc`, Powerlevel10k instant prompt и prompt-сегменты.
-- [⚙️ **Конфигурация** (`docs/CONFIGURATION.md`)](docs/CONFIGURATION.md) — Описание `settings.json`, схемы `config.json`, пресеты и поля.
-- [📖 **Руководство по Использованию** (`docs/USAGE.md`)](docs/USAGE.md) — Подробный справочник всех команд (`status`, `profile`, `ping`, `diagnose`, `run`).
-
----
-
-## ⚡ Быстрый старт (За 1 минуту)
-
-### 1. Сборка и установка
 ```bash
+# 1. Сборка и установка
 cargo build --release
 cp target/release/proxy-cli /opt/homebrew/bin/
-```
 
-### 2. Подключение к Zsh
-Добавьте в `~/.zshrc`:
-```zsh
+# 2. Подключение к Zsh (~/.zshrc)
 eval "$(proxy-cli init zsh)"
-```
 
-### 3. Подключение к Bash
-Добавьте в `~/.bashrc`:
-```bash
+# 3. Подключение к Bash (~/.bashrc)
 eval "$(proxy-cli init bash)"
 ```
 
 ---
 
-## 🚀 Основные команды
+## 🚀 Команды
 
-```bash
-proxy status         # Показать статус, IPv4, IPv6 и Локацию
-proxy status --json  # Статус в формате JSON
-proxy on             # Включить прокси для текущей вкладки
-proxy off            # Выключить прокси
-proxy use v2ray      # Переключить профиль на v2rayN
-proxy use throne     # Переключить профиль на Throne
-proxy ping           # Параллельный замер задержки до сервисов
-proxy diagnose       # Расширенная диагностика TCP сокета и API
-proxy run -- <cmd>   # Выполнить команду через прокси
-proxy-cli completions zsh # Сгенерировать автодополнение для zsh
-```
+| Команда | Описание |
+| :--- | :--- |
+| `proxy status` | Проверить статус прокси, IPv4, IPv6 и локацию |
+| `proxy status --json` | Вывести статус в формате JSON |
+| `proxy on` | Включить прокси для текущей сессии |
+| `proxy off` | Выключить прокси |
+| `proxy use <profile>` | Переключить профиль (`throne`, `v2ray`) |
+| `proxy ping` | Параллельный пинг целевых сервисов |
+| `proxy diagnose` | Проверить локальный сокет и доступность API |
+| `proxy run -- <cmd>` | Выполнить команду через прокси |
+| `proxy-cli completions zsh` | Сгенерировать автодополнение для zsh |
 
 ---
 
-## 📂 Структура репозитория
+## 📚 Документация
 
-```text
-proxy-cli-rs/
-├── .gitignore              # Исключения для Git
-├── Cargo.toml              # Конфигурация Rust и зависимости
-├── settings.json           # Файл с указанием пути к активному конфигу
-├── README.md               # Главный файл документации
-├── docs/                   # Подробные руководства по категориям
-│   ├── INSTALLATION.md
-│   ├── SHELL_INTEGRATION.md
-│   ├── CONFIGURATION.md
-│   └── USAGE.md
-├── configs/                # Пресеты и шаблоны конфигураций
-│   ├── config.default.json
-│   └── config.throne-v2ray.json
-├── shell/                  # Скрипты инициализации
-│   ├── proxy-cli.zsh
-│   └── proxy-cli.bash
-└── src/                    # Исходный код Rust engine
-    ├── main.rs
-    ├── config.rs
-    ├── status.rs
-    ├── ping.rs
-    ├── diagnose.rs
-    ├── env_cmd.rs
-    └── init.rs
-```
+- [📦 **Установка**](docs/INSTALLATION.md) — Сборка, зависимости, пути PATH.
+- [🐚 **Интеграция с оболочками**](docs/SHELL_INTEGRATION.md) — Zsh, Bash, Powerlevel10k.
+- [⚙️ **Конфигурация**](docs/CONFIGURATION.md) — Схема `settings.json` и `config.json`.
+- [📖 **Справочник команд**](docs/USAGE.md) — Полное описание всех подкоманд.
 
 ---
 
 ## 📄 Лицензия
 
-Проект распространяется под лицензией **GNU Affero General Public License v3.0 (AGPL-3.0)**. Смотрите файл [`LICENSE`](LICENSE) для получения полной информации.
+[GNU AGPLv3](LICENSE)
