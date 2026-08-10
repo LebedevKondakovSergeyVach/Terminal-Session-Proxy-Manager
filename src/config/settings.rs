@@ -3,8 +3,10 @@ use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
 
+/// Environment settings pointing to active configuration file.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct AppSettings {
+    /// Custom path to `config.json`.
     pub config_path: Option<String>,
 }
 
@@ -17,6 +19,7 @@ impl Default for AppSettings {
 }
 
 impl AppSettings {
+    /// Resolves the filesystem path to `settings.json`.
     pub fn get_settings_path() -> PathBuf {
         let local_path = PathBuf::from("./settings.json");
         if local_path.exists() {
@@ -34,6 +37,7 @@ impl AppSettings {
             .join("settings.json")
     }
 
+    /// Loads `settings.json` or returns default settings if absent.
     pub fn load() -> Self {
         let path = Self::get_settings_path();
         if path.exists() {
@@ -48,6 +52,7 @@ impl AppSettings {
         default_settings
     }
 
+    /// Persists `settings.json` to the filesystem.
     pub fn save(&self) -> Result<()> {
         let path = Self::get_settings_path();
         if let Some(parent) = path.parent() {

@@ -6,25 +6,38 @@ use std::collections::BTreeMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 
+/// Target web service configuration for latency ping testing.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct PingTarget {
+    /// Service name displayed in ping results.
     pub name: String,
+    /// HTTPS URL endpoint to probe.
     pub url: String,
 }
 
+/// Endpoint configuration for network diagnostics.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct DiagnoseEndpoint {
+    /// Endpoint description.
     pub name: String,
+    /// HTTPS URL to test accessibility.
     pub url: String,
 }
 
+/// Main application proxy configuration.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct AppConfig {
+    /// Currently active profile key in `profiles` map.
     pub active_profile: String,
+    /// Whether proxy environment variables are active.
     pub enabled: bool,
+    /// Map of profile keys to Profile objects.
     pub profiles: BTreeMap<String, Profile>,
+    /// Web targets for latency testing.
     pub ping_targets: Vec<PingTarget>,
+    /// Endpoints for network diagnostic checks.
     pub diagnose_endpoints: Vec<DiagnoseEndpoint>,
+    /// List of IP/Geo JSON API endpoints.
     pub geo_apis: Vec<String>,
 }
 
@@ -90,6 +103,7 @@ fn expand_tilde<P: AsRef<Path>>(path: P) -> PathBuf {
 }
 
 impl AppConfig {
+    /// Resolves the filesystem path to active `config.json`.
     pub fn get_config_path() -> PathBuf {
         let settings = AppSettings::load();
         if let Some(ref custom_path) = settings.config_path {
@@ -115,6 +129,7 @@ impl AppConfig {
             .join("config.json")
     }
 
+    /// Loads `config.json` from resolved path or returns default configuration.
     pub fn load() -> Self {
         let path = Self::get_config_path();
         if path.exists() {
@@ -129,6 +144,7 @@ impl AppConfig {
         default_cfg
     }
 
+    /// Saves `config.json` to the filesystem.
     pub fn save(&self) -> Result<()> {
         let path = Self::get_config_path();
         if let Some(parent) = path.parent() {
@@ -141,14 +157,17 @@ impl AppConfig {
         Ok(())
     }
 
+    /// Returns a reference to the active `Profile` if present.
     pub fn active_profile(&self) -> Option<&Profile> {
         self.profiles.get(&self.active_profile)
     }
 
+    /// Generates SOCKS5 URL string for active profile.
     pub fn get_socks_url(&self) -> Option<String> {
         self.active_profile().map(|p| format!("{}://{}:{}", p.protocol, p.host, p.port))
     }
 
+    /// Generates HTTP URL string for active profile.
     pub fn get_http_url(&self) -> Option<String> {
         self.active_profile().map(|p| format!("http://{}:{}", p.host, p.port))
     }

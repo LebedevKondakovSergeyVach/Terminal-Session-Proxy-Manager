@@ -5,6 +5,7 @@ use std::env;
 use std::net::TcpStream;
 use std::time::Duration;
 
+/// Runs diagnostic tests on local sockets, session env vars, and HTTP endpoints.
 pub async fn run_diagnose(config: &AppConfig) -> Result<()> {
     println!("{}", "==========================================================".cyan().bold());
     println!("      🔍 {}", "РАСШИРЕННАЯ ДИАГНОСТИКА СЕТИ И ПРОКСИ".white().bold());

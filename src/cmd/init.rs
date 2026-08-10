@@ -1,3 +1,4 @@
+/// Generates shell initialization code for `zsh` or `bash`.
 pub fn generate_shell_init(shell_type: &str) {
     match shell_type {
         "zsh" => {

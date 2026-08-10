@@ -5,14 +5,22 @@ use serde::{Deserialize, Serialize};
 use std::env;
 use std::time::Duration;
 
+/// Holds resolved network IP, proxy status, and physical location information.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct StatusInfo {
+    /// Friendly status string (`🟢 ВКЛЮЧЕН` or `🔴 НАПРЯМУЮ`).
     pub status: String,
+    /// Profile key identifier.
     pub profile_key: String,
+    /// Profile display name.
     pub profile_name: String,
+    /// Active proxy URL string if enabled.
     pub active_proxy: Option<String>,
+    /// Resolved external IPv4 address.
     pub ipv4: String,
+    /// Resolved external IPv6 address.
     pub ipv6: String,
+    /// Resolved physical location (e.g. `City, Country (ISO)`).
     pub location: String,
 }
 
@@ -43,6 +51,7 @@ fn build_client(proxy_url: Option<&str>) -> reqwest::Client {
     builder.build().unwrap_or_default()
 }
 
+/// Resolves external IPv4, IPv6, and physical location from configured Geo APIs.
 pub async fn get_status_info(config: &AppConfig) -> StatusInfo {
     let proxy_env = env::var("ALL_PROXY").or_else(|_| env::var("http_proxy")).ok();
     let client = build_client(proxy_env.as_deref());
@@ -146,6 +155,7 @@ pub async fn get_status_info(config: &AppConfig) -> StatusInfo {
     }
 }
 
+/// Formats and prints network status either as human-readable text or formatted JSON.
 pub async fn print_status(config: &AppConfig, as_json: bool) -> Result<()> {
     let info = get_status_info(config).await;
 

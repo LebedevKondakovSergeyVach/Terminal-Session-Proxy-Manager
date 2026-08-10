@@ -1,5 +1,6 @@
 use crate::config::AppConfig;
 
+/// Prints shell environment export or unset statements for `eval`.
 pub fn print_env_commands(mode: &str, config: &AppConfig) {
     match mode {
         "on" => {

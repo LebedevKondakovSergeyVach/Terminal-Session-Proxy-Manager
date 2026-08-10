@@ -2,6 +2,7 @@ use crate::config::{AppConfig, Profile};
 use anyhow::Result;
 use colored::Colorize;
 
+/// Displays all configured proxy profiles.
 pub fn list_profiles(config: &AppConfig) {
     println!("{}", "📋 Список профилей в config.json:".cyan().bold());
     for (key, prof) in &config.profiles {
@@ -21,6 +22,7 @@ pub fn list_profiles(config: &AppConfig) {
     }
 }
 
+/// Switches active profile to specified key.
 pub fn use_profile(config: &mut AppConfig, key: &str) -> Result<()> {
     if config.profiles.contains_key(key) {
         config.active_profile = key.to_string();
@@ -34,6 +36,7 @@ pub fn use_profile(config: &mut AppConfig, key: &str) -> Result<()> {
     Ok(())
 }
 
+/// Creates or updates a profile in configuration.
 pub fn set_profile(
     config: &mut AppConfig,
     key: String,
@@ -62,6 +65,7 @@ pub fn set_profile(
     Ok(())
 }
 
+/// Removes a profile from configuration by key.
 pub fn remove_profile(config: &mut AppConfig, key: &str) -> Result<()> {
     if config.profiles.remove(key).is_some() {
         if config.active_profile == key {

@@ -5,6 +5,7 @@ use futures::future::join_all;
 use std::env;
 use std::time::{Duration, Instant};
 
+/// Probes configured ping targets in parallel and displays connection latency.
 pub async fn run_ping(config: &AppConfig, timeout_ms: u64) -> Result<()> {
     let proxy_env = env::var("ALL_PROXY").or_else(|_| env::var("http_proxy")).ok();
 
