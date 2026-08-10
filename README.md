@@ -38,12 +38,12 @@ eval "$(proxy-cli init bash)"
 | `proxy status --json` | Вывести статус в формате JSON |
 | `proxy on` | Включить прокси для текущей сессии |
 | `proxy off` | Выключить прокси |
-| `proxy lang <ru|en>` | Переключить язык интерфейса (`ru`, `en`) |
+| `proxy lang <ru/en>` | Переключить язык интерфейса (`ru`, `en`) |
 | `proxy use <profile>` | Переключить профиль (`throne`, `v2ray`) |
 | `proxy switch` | Интерактивное меню выбора профиля |
 | `proxy benchmark` | Измерить пинг и доступность всех профилей |
 | `proxy best` | Автоматически выбрать самый быстрый прокси |
-| `proxy import <file/url>` | Импортировать профили из JSON файла или URL |
+| `proxy import <source>` | Импортировать профили из JSON файла или URL |
 | `proxy ping` | Параллельный пинг целевых сервисов |
 | `proxy diagnose` | Проверить локальный сокет и доступность API |
 | `proxy run -- <cmd>` | Выполнить команду через прокси |
