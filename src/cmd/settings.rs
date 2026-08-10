@@ -20,6 +20,9 @@ pub fn set_config_path(path: String) -> Result<()> {
     let mut settings = AppSettings::load();
     settings.config_path = Some(path.clone());
     settings.save()?;
-    println!("⚙️ Установлен новый путь к конфигу в settings.json: {}", path.green().bold());
+    println!(
+        "⚙️ Установлен новый путь к конфигу в settings.json: {}",
+        path.green().bold()
+    );
     Ok(())
 }

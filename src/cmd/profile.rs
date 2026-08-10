@@ -31,10 +31,20 @@ pub fn use_profile(config: &mut AppConfig, key: &str) -> Result<()> {
         config.active_profile = key.to_string();
         config.save()?;
         if let Some(p) = config.active_profile() {
-            println!("⚙️ Переключено на профиль: {} ({}:{})", p.name.green().bold(), p.host, p.port);
+            println!(
+                "⚙️ Переключено на профиль: {} ({}:{})",
+                p.name.green().bold(),
+                p.host,
+                p.port
+            );
         }
     } else {
-        eprintln!("{}", format!("❌ Профиль '{}' не найден в config.json!", key).red().bold());
+        eprintln!(
+            "{}",
+            format!("❌ Профиль '{}' не найден в config.json!", key)
+                .red()
+                .bold()
+        );
     }
     Ok(())
 }
@@ -48,23 +58,39 @@ pub fn set_profile(
     host: Option<String>,
     protocol: String,
 ) -> Result<()> {
-    let mut prof = config.profiles.get(&key).cloned().unwrap_or_else(|| Profile {
-        name: key.clone(),
-        host: "127.0.0.1".to_string(),
-        port: 2080,
-        protocol: "socks5".to_string(),
-    });
+    let mut prof = config
+        .profiles
+        .get(&key)
+        .cloned()
+        .unwrap_or_else(|| Profile {
+            name: key.clone(),
+            host: "127.0.0.1".to_string(),
+            port: 2080,
+            protocol: "socks5".to_string(),
+        });
 
-    if let Some(n) = name { prof.name = n; }
-    if let Some(p) = port { prof.port = p; }
-    if let Some(h) = host { prof.host = h; }
+    if let Some(n) = name {
+        prof.name = n;
+    }
+    if let Some(p) = port {
+        prof.port = p;
+    }
+    if let Some(h) = host {
+        prof.host = h;
+    }
     prof.protocol = protocol;
 
     config.profiles.insert(key.clone(), prof.clone());
     config.active_profile = key.clone();
     config.save()?;
 
-    println!("⚙️ Профиль '{}' сохранен: {} ({}:{})", key, prof.name.green().bold(), prof.host, prof.port);
+    println!(
+        "⚙️ Профиль '{}' сохранен: {} ({}:{})",
+        key,
+        prof.name.green().bold(),
+        prof.host,
+        prof.port
+    );
     Ok(())
 }
 
@@ -79,16 +105,32 @@ pub fn remove_profile(config: &mut AppConfig, key: &str) -> Result<()> {
         config.save()?;
         println!("🗑️ Профиль '{}' удален", key);
     } else {
-        eprintln!("{}", format!("❌ Профиль '{}' не найден!", key).red().bold());
+        eprintln!(
+            "{}",
+            format!("❌ Профиль '{}' не найден!", key).red().bold()
+        );
     }
     Ok(())
 }
 
 /// Interactive console profile selector.
 pub fn select_profile_interactive(config: &mut AppConfig) -> Result<()> {
-    println!("{}", "==========================================================".cyan().bold());
-    println!("      ⚡ {}", "ИНТЕРАКТИВНЫЙ ВЫБОР ПРОФИЛЯ ПРОКСИ".white().bold());
-    println!("{}", "==========================================================".cyan().bold());
+    println!(
+        "{}",
+        "=========================================================="
+            .cyan()
+            .bold()
+    );
+    println!(
+        "      ⚡ {}",
+        "ИНТЕРАКТИВНЫЙ ВЫБОР ПРОФИЛЯ ПРОКСИ".white().bold()
+    );
+    println!(
+        "{}",
+        "=========================================================="
+            .cyan()
+            .bold()
+    );
 
     let profile_keys: Vec<String> = config.profiles.keys().cloned().collect();
     if profile_keys.is_empty() {
@@ -99,7 +141,11 @@ pub fn select_profile_interactive(config: &mut AppConfig) -> Result<()> {
     for (idx, key) in profile_keys.iter().enumerate() {
         let prof = &config.profiles[key];
         let is_active = key == &config.active_profile;
-        let mark = if is_active { " [активный]".green().bold().to_string() } else { "".to_string() };
+        let mark = if is_active {
+            " [активный]".green().bold().to_string()
+        } else {
+            "".to_string()
+        };
         println!(
             "  [{}] {:<12} — {} ({}:{}){}",
             (idx + 1).to_string().yellow().bold(),
@@ -110,7 +156,12 @@ pub fn select_profile_interactive(config: &mut AppConfig) -> Result<()> {
             mark
         );
     }
-    println!("{}", "==========================================================".cyan().bold());
+    println!(
+        "{}",
+        "=========================================================="
+            .cyan()
+            .bold()
+    );
     print!("Выберите номер профиля (1-{}): ", profile_keys.len());
     io::stdout().flush()?;
 
@@ -169,11 +220,9 @@ pub async fn benchmark_profiles(config: &AppConfig) -> Vec<(String, u128, f64)> 
         let mut success_count = 0usize;
         let total_targets = config.ping_targets.len();
 
-        for r in task_results {
-            if let Ok(Some(ms)) = r {
-                total_ms += ms;
-                success_count += 1;
-            }
+        for ms in task_results.into_iter().flatten().flatten() {
+            total_ms += ms;
+            success_count += 1;
         }
 
         let avg_ms = if success_count > 0 {
@@ -197,15 +246,31 @@ pub async fn benchmark_profiles(config: &AppConfig) -> Vec<(String, u128, f64)> 
 
 /// Runs benchmark and displays ranking table.
 pub async fn run_benchmark(config: &AppConfig) -> Result<()> {
-    println!("{}", "==========================================================".cyan().bold());
-    println!("   🚀  {}", "БЕНЧМАРК И ТЕСТ СКОРОСТИ ВСЕХ ПРОФИЛЕЙ".white().bold());
-    println!("{}", "==========================================================".cyan().bold());
+    println!(
+        "{}",
+        "=========================================================="
+            .cyan()
+            .bold()
+    );
+    println!(
+        "   🚀  {}",
+        "БЕНЧМАРК И ТЕСТ СКОРОСТИ ВСЕХ ПРОФИЛЕЙ".white().bold()
+    );
+    println!(
+        "{}",
+        "=========================================================="
+            .cyan()
+            .bold()
+    );
     println!("Выполняется измерение задержки через каждый профиль...");
     println!();
 
     let results = benchmark_profiles(config).await;
 
-    println!("{:<14} {:<18} {:<12} {:<10}", "ПРОФИЛЬ", "НАЗВАНИЕ", "СР. ПИНГ", "ДОСТУПНОСТЬ");
+    println!(
+        "{:<14} {:<18} {:<12} {:<10}",
+        "ПРОФИЛЬ", "НАЗВАНИЕ", "СР. ПИНГ", "ДОСТУПНОСТЬ"
+    );
     println!("----------------------------------------------------------");
 
     for (key, avg_ms, rate) in results {
@@ -225,7 +290,12 @@ pub async fn run_benchmark(config: &AppConfig) -> Result<()> {
             rate_str.cyan()
         );
     }
-    println!("{}", "==========================================================".cyan().bold());
+    println!(
+        "{}",
+        "=========================================================="
+            .cyan()
+            .bold()
+    );
 
     Ok(())
 }
@@ -249,6 +319,11 @@ pub async fn select_best_profile(config: &mut AppConfig) -> Result<()> {
         }
     }
 
-    println!("{}", "❌ Все прокси-профили недоступны или превысили таймаут!".red().bold());
+    println!(
+        "{}",
+        "❌ Все прокси-профили недоступны или превысили таймаут!"
+            .red()
+            .bold()
+    );
     Ok(())
 }

@@ -7,17 +7,38 @@ use std::time::{Duration, Instant};
 
 /// Probes configured ping targets in parallel and displays connection latency.
 pub async fn run_ping(config: &AppConfig, timeout_ms: u64) -> Result<()> {
-    let proxy_env = env::var("ALL_PROXY").or_else(|_| env::var("http_proxy")).ok();
+    let proxy_env = env::var("ALL_PROXY")
+        .or_else(|_| env::var("http_proxy"))
+        .ok();
 
-    println!("{}", "==========================================================".cyan().bold());
-    println!("   ⚡  {}", "ЗАМЕР ЗАДЕРЖКИ (PING) СЕРВИСОВ ЧЕРЕЗ ПРОКСИ".white().bold());
-    println!("{}", "==========================================================".cyan().bold());
+    println!(
+        "{}",
+        "=========================================================="
+            .cyan()
+            .bold()
+    );
+    println!(
+        "   ⚡  {}",
+        "ЗАМЕР ЗАДЕРЖКИ (PING) СЕРВИСОВ ЧЕРЕЗ ПРОКСИ".white().bold()
+    );
+    println!(
+        "{}",
+        "=========================================================="
+            .cyan()
+            .bold()
+    );
 
     if let Some(ref p) = proxy_env {
-        let name = config.active_profile().map(|pr| pr.name.as_str()).unwrap_or("Active");
+        let name = config
+            .active_profile()
+            .map(|pr| pr.name.as_str())
+            .unwrap_or("Active");
         println!("Активный сокет: {} ({})", p.yellow().bold(), name);
     } else {
-        println!("Режим: {}", "🔴 ПРЯМОЕ СОЕДИНЕНИЕ (Без прокси)".red().bold());
+        println!(
+            "Режим: {}",
+            "🔴 ПРЯМОЕ СОЕДИНЕНИЕ (Без прокси)".red().bold()
+        );
     }
     println!();
 
@@ -55,25 +76,28 @@ pub async fn run_ping(config: &AppConfig, timeout_ms: u64) -> Result<()> {
 
     let results = join_all(tasks).await;
 
-    for res in results {
-        if let Ok((name, status, elapsed)) = res {
-            if let Some(code) = status {
-                println!(
-                    "  • {:<18} — {} [HTTP {}]",
-                    name.white().bold(),
-                    format!("✅ OK ({} ms)", elapsed).green().bold(),
-                    code
-                );
-            } else {
-                println!(
-                    "  • {:<18} — {}",
-                    name.white().bold(),
-                    "❌ Ошибка / Таймаут".red().bold()
-                );
-            }
+    for (name, status, elapsed) in results.into_iter().flatten() {
+        if let Some(code) = status {
+            println!(
+                "  • {:<18} — {} [HTTP {}]",
+                name.white().bold(),
+                format!("✅ OK ({} ms)", elapsed).green().bold(),
+                code
+            );
+        } else {
+            println!(
+                "  • {:<18} — {}",
+                name.white().bold(),
+                "❌ Ошибка / Таймаут".red().bold()
+            );
         }
     }
 
-    println!("{}", "==========================================================".cyan().bold());
+    println!(
+        "{}",
+        "=========================================================="
+            .cyan()
+            .bold()
+    );
     Ok(())
 }

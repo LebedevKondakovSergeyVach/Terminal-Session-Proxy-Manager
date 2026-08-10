@@ -178,7 +178,13 @@ async fn main() -> Result<()> {
             ProfileCommands::Use { key } => {
                 profile::use_profile(&mut config, &key)?;
             }
-            ProfileCommands::Set { key, name, port, host, protocol } => {
+            ProfileCommands::Set {
+                key,
+                name,
+                port,
+                host,
+                protocol,
+            } => {
                 profile::set_profile(&mut config, key, name, port, host, protocol)?;
             }
             ProfileCommands::Remove { key } => {
@@ -233,7 +239,10 @@ async fn main() -> Result<()> {
 
                 child.wait()?;
             } else {
-                eprintln!("{}", "❌ Не удалось загрузить настройки прокси!".red().bold());
+                eprintln!(
+                    "{}",
+                    "❌ Не удалось загрузить настройки прокси!".red().bold()
+                );
             }
         }
         Commands::Init { shell } => {

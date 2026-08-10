@@ -64,16 +64,37 @@ impl Default for AppConfig {
         );
 
         let ping_targets = vec![
-            PingTarget { name: "Google API".to_string(), url: "https://generativelanguage.googleapis.com".to_string() },
-            PingTarget { name: "GitHub".to_string(), url: "https://github.com".to_string() },
-            PingTarget { name: "OpenAI API".to_string(), url: "https://api.openai.com".to_string() },
-            PingTarget { name: "Anthropic API".to_string(), url: "https://api.anthropic.com".to_string() },
-            PingTarget { name: "Telegram API".to_string(), url: "https://api.telegram.org".to_string() },
+            PingTarget {
+                name: "Google API".to_string(),
+                url: "https://generativelanguage.googleapis.com".to_string(),
+            },
+            PingTarget {
+                name: "GitHub".to_string(),
+                url: "https://github.com".to_string(),
+            },
+            PingTarget {
+                name: "OpenAI API".to_string(),
+                url: "https://api.openai.com".to_string(),
+            },
+            PingTarget {
+                name: "Anthropic API".to_string(),
+                url: "https://api.anthropic.com".to_string(),
+            },
+            PingTarget {
+                name: "Telegram API".to_string(),
+                url: "https://api.telegram.org".to_string(),
+            },
         ];
 
         let diagnose_endpoints = vec![
-            DiagnoseEndpoint { name: "Gemini API".to_string(), url: "https://generativelanguage.googleapis.com".to_string() },
-            DiagnoseEndpoint { name: "Cloud Code".to_string(), url: "https://daily-cloudcode-pa.googleapis.com".to_string() },
+            DiagnoseEndpoint {
+                name: "Gemini API".to_string(),
+                url: "https://generativelanguage.googleapis.com".to_string(),
+            },
+            DiagnoseEndpoint {
+                name: "Cloud Code".to_string(),
+                url: "https://daily-cloudcode-pa.googleapis.com".to_string(),
+            },
         ];
 
         let geo_apis = vec![
@@ -164,11 +185,13 @@ impl AppConfig {
 
     /// Generates SOCKS5 URL string for active profile.
     pub fn get_socks_url(&self) -> Option<String> {
-        self.active_profile().map(|p| format!("{}://{}:{}", p.protocol, p.host, p.port))
+        self.active_profile()
+            .map(|p| format!("{}://{}:{}", p.protocol, p.host, p.port))
     }
 
     /// Generates HTTP URL string for active profile.
     pub fn get_http_url(&self) -> Option<String> {
-        self.active_profile().map(|p| format!("http://{}:{}", p.host, p.port))
+        self.active_profile()
+            .map(|p| format!("http://{}:{}", p.host, p.port))
     }
 }

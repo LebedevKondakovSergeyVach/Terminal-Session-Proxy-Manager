@@ -53,7 +53,9 @@ fn build_client(proxy_url: Option<&str>) -> reqwest::Client {
 
 /// Resolves external IPv4, IPv6, and physical location from configured Geo APIs.
 pub async fn get_status_info(config: &AppConfig) -> StatusInfo {
-    let proxy_env = env::var("ALL_PROXY").or_else(|_| env::var("http_proxy")).ok();
+    let proxy_env = env::var("ALL_PROXY")
+        .or_else(|_| env::var("http_proxy"))
+        .ok();
     let client = build_client(proxy_env.as_deref());
 
     let mut ip_from_json = String::new();
@@ -75,9 +77,15 @@ pub async fn get_status_info(config: &AppConfig) -> StatusInfo {
         }
 
         let city = data.city.unwrap_or_default();
-        let region = data.region_name.or(data.region_name_alt).unwrap_or_default();
+        let region = data
+            .region_name
+            .or(data.region_name_alt)
+            .unwrap_or_default();
         let country = data.country.unwrap_or_default();
-        let country_code = data.country_iso.or(data.country_code_alt).unwrap_or_default();
+        let country_code = data
+            .country_iso
+            .or(data.country_code_alt)
+            .unwrap_or_default();
 
         let mut parts = Vec::new();
         if !city.is_empty() {
@@ -136,7 +144,9 @@ pub async fn get_status_info(config: &AppConfig) -> StatusInfo {
 
     let profile = config.active_profile();
     let profile_key = config.active_profile.clone();
-    let profile_name = profile.map(|p| p.name.clone()).unwrap_or_else(|| "Default".to_string());
+    let profile_name = profile
+        .map(|p| p.name.clone())
+        .unwrap_or_else(|| "Default".to_string());
 
     let status = if proxy_env.is_some() {
         "🟢 ВКЛЮЧЕН".to_string()
@@ -166,7 +176,9 @@ pub async fn print_status(config: &AppConfig, as_json: bool) -> Result<()> {
         if let Some(ref p) = info.active_proxy {
             println!(
                 "Статус:  {}",
-                format!("🟢 ВКЛЮЧЕН [{} -> {}]", info.profile_name, p).green().bold()
+                format!("🟢 ВКЛЮЧЕН [{} -> {}]", info.profile_name, p)
+                    .green()
+                    .bold()
             );
         } else {
             println!(

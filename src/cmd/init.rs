@@ -2,7 +2,8 @@
 pub fn generate_shell_init(shell_type: &str) {
     match shell_type {
         "zsh" => {
-            println!(r#"# proxy-cli Zsh Integration
+            println!(
+                r#"# proxy-cli Zsh Integration
 proxy() {{
     if command -v proxy-cli >/dev/null 2>&1; then
         if [[ "$1" == "on" || "$1" == "off" ]]; then
@@ -35,10 +36,12 @@ proxy_best() {{ proxy-cli best "$@"; }}
 proxy_switch() {{ proxy-cli switch "$@"; }}
 proxy_run() {{ proxy-cli run -- "$@"; }}
 prompt_proxy_status() {{ proxy-cli prompt; }}
-"#);
+"#
+            );
         }
         "bash" => {
-            println!(r#"# proxy-cli Bash Integration
+            println!(
+                r#"# proxy-cli Bash Integration
 proxy() {{
     if command -v proxy-cli >/dev/null 2>&1; then
         if [ "$1" = "on" ] || [ "$1" = "off" ]; then
@@ -70,7 +73,8 @@ proxy_benchmark() {{ proxy-cli benchmark "$@"; }}
 proxy_best() {{ proxy-cli best "$@"; }}
 proxy_switch() {{ proxy-cli switch "$@"; }}
 proxy_run() {{ proxy-cli run -- "$@"; }}
-"#);
+"#
+            );
         }
         _ => {
             eprintln!("Unsupported shell. Choose 'zsh' or 'bash'");
