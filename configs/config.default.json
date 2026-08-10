@@ -1,0 +1,31 @@
+{
+  "active_profile": "default",
+  "enabled": false,
+  "profiles": {
+    "default": {
+      "name": "Default Proxy",
+      "host": "127.0.0.1",
+      "port": 1080,
+      "protocol": "socks5"
+    },
+    "custom": {
+      "name": "Custom HTTP Proxy",
+      "host": "127.0.0.1",
+      "port": 8080,
+      "protocol": "http"
+    }
+  },
+  "ping_targets": [
+    { "name": "Google", "url": "https://www.google.com" },
+    { "name": "GitHub", "url": "https://github.com" },
+    { "name": "Cloudflare", "url": "https://1.1.1.1" }
+  ],
+  "diagnose_endpoints": [
+    { "name": "Google API", "url": "https://generativelanguage.googleapis.com" },
+    { "name": "GitHub API", "url": "https://api.github.com" }
+  ],
+  "geo_apis": [
+    "https://ifconfig.co/json",
+    "http://ip-api.com/json"
+  ]
+}
