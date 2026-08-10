@@ -3,17 +3,25 @@ use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
 
-/// Environment settings pointing to active configuration file.
+/// Environment settings pointing to active configuration file and language preference.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct AppSettings {
     /// Custom path to `config.json`.
     pub config_path: Option<String>,
+    /// Language code (e.g., "ru", "en"). Defaults to "ru".
+    #[serde(default = "default_lang")]
+    pub lang: String,
+}
+
+fn default_lang() -> String {
+    "ru".to_string()
 }
 
 impl Default for AppSettings {
     fn default() -> Self {
         Self {
             config_path: Some("./configs/config.throne-v2ray.json".to_string()),
+            lang: default_lang(),
         }
     }
 }

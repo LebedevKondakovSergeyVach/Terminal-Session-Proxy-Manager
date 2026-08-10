@@ -1,4 +1,4 @@
-use crate::config::{AppConfig, Profile};
+use crate::config::{AppConfig, I18n, Profile};
 use anyhow::{anyhow, Result};
 use colored::Colorize;
 use std::collections::BTreeMap;
@@ -7,21 +7,21 @@ use std::path::Path;
 use url::Url;
 
 /// Imports proxy profiles from a local JSON file or a remote HTTP URL.
-pub async fn import_profiles(config: &mut AppConfig, source: &str) -> Result<()> {
+pub async fn import_profiles(config: &mut AppConfig, i18n: &I18n, source: &str) -> Result<()> {
     println!(
         "{}",
         "=========================================================="
             .cyan()
             .bold()
     );
-    println!("      📥 {}", "ИМПОРТ ПРОФИЛЕЙ ПРОКСИ".white().bold());
+    println!("      📥 {}", i18n.t("import_header").white().bold());
     println!(
         "{}",
         "=========================================================="
             .cyan()
             .bold()
     );
-    println!("Источник: {}", source.yellow());
+    println!("{} {}", i18n.t("import_source"), source.yellow());
     println!();
 
     let content = if source.starts_with("http://") || source.starts_with("https://") {
@@ -33,26 +33,23 @@ pub async fn import_profiles(config: &mut AppConfig, source: &str) -> Result<()>
     } else {
         let path = Path::new(source);
         if !path.exists() {
-            return Err(anyhow!("Файл '{}' не найден!", source));
+            let msg = i18n.t("import_file_not_found").replace("{}", source);
+            return Err(anyhow!(msg));
         }
         fs::read_to_string(path)?
     };
 
     let imported_profiles = parse_import_content(&content)?;
     if imported_profiles.is_empty() {
-        println!(
-            "{}",
-            "❌ Не удалось распознать профили прокси в источнике."
-                .red()
-                .bold()
-        );
+        println!("{}", i18n.t("import_no_profiles").red().bold());
         return Ok(());
     }
 
     let mut added_count = 0usize;
     for (key, profile) in imported_profiles {
         println!(
-            "  • Добавлен профиль: {:<14} — {} ({}:{})",
+            "  {} {:<14} — {} ({}:{})",
+            i18n.t("import_added"),
             key.yellow().bold(),
             profile.name,
             profile.host,
@@ -70,7 +67,8 @@ pub async fn import_profiles(config: &mut AppConfig, source: &str) -> Result<()>
             .bold()
     );
     println!(
-        "✅ Успешно импортировано профилей: {}",
+        "{} {}",
+        i18n.t("import_success"),
         added_count.to_string().green().bold()
     );
     Ok(())

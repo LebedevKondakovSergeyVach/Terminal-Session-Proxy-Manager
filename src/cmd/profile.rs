@@ -1,4 +1,4 @@
-use crate::config::{AppConfig, Profile};
+use crate::config::{AppConfig, I18n, Profile};
 use anyhow::Result;
 use colored::Colorize;
 use futures::future::join_all;
@@ -6,11 +6,14 @@ use std::io::{self, Write};
 use std::time::{Duration, Instant};
 
 /// Displays all configured proxy profiles.
-pub fn list_profiles(config: &AppConfig) {
-    println!("{}", "📋 Список профилей в config.json:".cyan().bold());
+pub fn list_profiles(config: &AppConfig, i18n: &I18n) {
+    println!("{}", i18n.t("profile_list_header").cyan().bold());
     for (key, prof) in &config.profiles {
         let active_mark = if key == &config.active_profile {
-            " (активный)".green().bold().to_string()
+            format!(" {}", i18n.t("active_tag"))
+                .green()
+                .bold()
+                .to_string()
         } else {
             "".to_string()
         };
@@ -26,25 +29,22 @@ pub fn list_profiles(config: &AppConfig) {
 }
 
 /// Switches active profile to specified key.
-pub fn use_profile(config: &mut AppConfig, key: &str) -> Result<()> {
+pub fn use_profile(config: &mut AppConfig, i18n: &I18n, key: &str) -> Result<()> {
     if config.profiles.contains_key(key) {
         config.active_profile = key.to_string();
         config.save()?;
         if let Some(p) = config.active_profile() {
             println!(
-                "⚙️ Переключено на профиль: {} ({}:{})",
+                "{} {} ({}:{})",
+                i18n.t("profile_switched"),
                 p.name.green().bold(),
                 p.host,
                 p.port
             );
         }
     } else {
-        eprintln!(
-            "{}",
-            format!("❌ Профиль '{}' не найден в config.json!", key)
-                .red()
-                .bold()
-        );
+        let err_msg = i18n.t("profile_not_found").replace("{}", key);
+        eprintln!("{}", err_msg.red().bold());
     }
     Ok(())
 }
@@ -52,6 +52,7 @@ pub fn use_profile(config: &mut AppConfig, key: &str) -> Result<()> {
 /// Creates or updates a profile in configuration.
 pub fn set_profile(
     config: &mut AppConfig,
+    i18n: &I18n,
     key: String,
     name: Option<String>,
     port: Option<u16>,
@@ -84,9 +85,10 @@ pub fn set_profile(
     config.active_profile = key.clone();
     config.save()?;
 
+    let msg = i18n.t("profile_saved").replace("{}", &key);
     println!(
-        "⚙️ Профиль '{}' сохранен: {} ({}:{})",
-        key,
+        "{} {} ({}:{})",
+        msg,
         prof.name.green().bold(),
         prof.host,
         prof.port
@@ -95,7 +97,7 @@ pub fn set_profile(
 }
 
 /// Removes a profile from configuration by key.
-pub fn remove_profile(config: &mut AppConfig, key: &str) -> Result<()> {
+pub fn remove_profile(config: &mut AppConfig, i18n: &I18n, key: &str) -> Result<()> {
     if config.profiles.remove(key).is_some() {
         if config.active_profile == key {
             if let Some((first_key, _)) = config.profiles.iter().next() {
@@ -103,18 +105,17 @@ pub fn remove_profile(config: &mut AppConfig, key: &str) -> Result<()> {
             }
         }
         config.save()?;
-        println!("🗑️ Профиль '{}' удален", key);
+        let msg = i18n.t("profile_removed").replace("{}", key);
+        println!("{}", msg);
     } else {
-        eprintln!(
-            "{}",
-            format!("❌ Профиль '{}' не найден!", key).red().bold()
-        );
+        let err_msg = i18n.t("profile_not_found").replace("{}", key);
+        eprintln!("{}", err_msg.red().bold());
     }
     Ok(())
 }
 
 /// Interactive console profile selector.
-pub fn select_profile_interactive(config: &mut AppConfig) -> Result<()> {
+pub fn select_profile_interactive(config: &mut AppConfig, i18n: &I18n) -> Result<()> {
     println!(
         "{}",
         "=========================================================="
@@ -123,7 +124,7 @@ pub fn select_profile_interactive(config: &mut AppConfig) -> Result<()> {
     );
     println!(
         "      ⚡ {}",
-        "ИНТЕРАКТИВНЫЙ ВЫБОР ПРОФИЛЯ ПРОКСИ".white().bold()
+        i18n.t("interactive_switch_header").white().bold()
     );
     println!(
         "{}",
@@ -134,7 +135,7 @@ pub fn select_profile_interactive(config: &mut AppConfig) -> Result<()> {
 
     let profile_keys: Vec<String> = config.profiles.keys().cloned().collect();
     if profile_keys.is_empty() {
-        println!("{}", "❌ В конфиге нет доступных профилей!".red());
+        println!("{}", i18n.t("no_profiles").red());
         return Ok(());
     }
 
@@ -142,7 +143,10 @@ pub fn select_profile_interactive(config: &mut AppConfig) -> Result<()> {
         let prof = &config.profiles[key];
         let is_active = key == &config.active_profile;
         let mark = if is_active {
-            " [активный]".green().bold().to_string()
+            format!(" [{}]", i18n.t("active_tag"))
+                .green()
+                .bold()
+                .to_string()
         } else {
             "".to_string()
         };
@@ -162,7 +166,7 @@ pub fn select_profile_interactive(config: &mut AppConfig) -> Result<()> {
             .cyan()
             .bold()
     );
-    print!("Выберите номер профиля (1-{}): ", profile_keys.len());
+    print!("{} (1-{}): ", i18n.t("prompt_choice"), profile_keys.len());
     io::stdout().flush()?;
 
     let mut input = String::new();
@@ -171,11 +175,11 @@ pub fn select_profile_interactive(config: &mut AppConfig) -> Result<()> {
     if let Ok(choice) = input.trim().parse::<usize>() {
         if choice >= 1 && choice <= profile_keys.len() {
             let selected_key = &profile_keys[choice - 1];
-            return use_profile(config, selected_key);
+            return use_profile(config, i18n, selected_key);
         }
     }
 
-    println!("{}", "❌ Некорректный выбор".red());
+    println!("{}", i18n.t("invalid_choice").red());
     Ok(())
 }
 
@@ -245,31 +249,31 @@ pub async fn benchmark_profiles(config: &AppConfig) -> Vec<(String, u128, f64)> 
 }
 
 /// Runs benchmark and displays ranking table.
-pub async fn run_benchmark(config: &AppConfig) -> Result<()> {
+pub async fn run_benchmark(config: &AppConfig, i18n: &I18n) -> Result<()> {
     println!(
         "{}",
         "=========================================================="
             .cyan()
             .bold()
     );
-    println!(
-        "   🚀  {}",
-        "БЕНЧМАРК И ТЕСТ СКОРОСТИ ВСЕХ ПРОФИЛЕЙ".white().bold()
-    );
+    println!("   🚀  {}", i18n.t("benchmark_header").white().bold());
     println!(
         "{}",
         "=========================================================="
             .cyan()
             .bold()
     );
-    println!("Выполняется измерение задержки через каждый профиль...");
+    println!("{}", i18n.t("benchmark_running"));
     println!();
 
     let results = benchmark_profiles(config).await;
 
     println!(
         "{:<14} {:<18} {:<12} {:<10}",
-        "ПРОФИЛЬ", "НАЗВАНИЕ", "СР. ПИНГ", "ДОСТУПНОСТЬ"
+        i18n.t("col_profile"),
+        i18n.t("col_name"),
+        i18n.t("col_ping"),
+        i18n.t("col_availability")
     );
     println!("----------------------------------------------------------");
 
@@ -278,7 +282,7 @@ pub async fn run_benchmark(config: &AppConfig) -> Result<()> {
         let ping_str = if avg_ms < 9999 {
             format!("{} ms", avg_ms).green().bold().to_string()
         } else {
-            "Таймаут".red().bold().to_string()
+            i18n.t("timeout_label").red().bold().to_string()
         };
 
         let rate_str = format!("{:.0}%", rate);
@@ -301,16 +305,17 @@ pub async fn run_benchmark(config: &AppConfig) -> Result<()> {
 }
 
 /// Finds the fastest profile and sets it as active.
-pub async fn select_best_profile(config: &mut AppConfig) -> Result<()> {
-    println!("⚡ Автоматический поиск и выбор самого быстрого прокси...");
+pub async fn select_best_profile(config: &mut AppConfig, i18n: &I18n) -> Result<()> {
+    println!("{}", i18n.t("best_searching"));
     let results = benchmark_profiles(config).await;
 
     if let Some((best_key, avg_ms, rate)) = results.first() {
         if *avg_ms < 9999 && *rate > 0.0 {
             let key = best_key.clone();
-            use_profile(config, &key)?;
+            use_profile(config, i18n, &key)?;
             println!(
-                "🏆 Самый быстрый профиль: {} (Пинг: {} ms, Успешность: {:.0}%)",
+                "{} {} (Ping: {} ms, Rate: {:.0}%)",
+                i18n.t("best_found"),
                 key.yellow().bold(),
                 avg_ms.to_string().green().bold(),
                 rate
@@ -319,11 +324,6 @@ pub async fn select_best_profile(config: &mut AppConfig) -> Result<()> {
         }
     }
 
-    println!(
-        "{}",
-        "❌ Все прокси-профили недоступны или превысили таймаут!"
-            .red()
-            .bold()
-    );
+    println!("{}", i18n.t("best_all_failed").red().bold());
     Ok(())
 }

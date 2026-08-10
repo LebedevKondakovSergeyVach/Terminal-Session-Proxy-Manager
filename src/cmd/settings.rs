@@ -1,4 +1,4 @@
-use crate::config::AppSettings;
+use crate::config::{AppSettings, I18n};
 use anyhow::Result;
 use colored::Colorize;
 
@@ -24,5 +24,19 @@ pub fn set_config_path(path: String) -> Result<()> {
         "⚙️ Установлен новый путь к конфигу в settings.json: {}",
         path.green().bold()
     );
+    Ok(())
+}
+
+/// Updates target `lang` inside `settings.json`.
+pub fn set_lang(lang: String) -> Result<()> {
+    let mut settings = AppSettings::load();
+    let code = match lang.to_lowercase().as_str() {
+        "en" | "english" => "en",
+        _ => "ru",
+    };
+    settings.lang = code.to_string();
+    settings.save()?;
+    let i18n = I18n::load(code);
+    println!("{} {}", i18n.t("lang_switched"), code.green().bold());
     Ok(())
 }

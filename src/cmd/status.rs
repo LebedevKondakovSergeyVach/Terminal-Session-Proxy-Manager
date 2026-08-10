@@ -1,4 +1,4 @@
-use crate::config::AppConfig;
+use crate::config::{AppConfig, I18n};
 use anyhow::Result;
 use colored::Colorize;
 use serde::{Deserialize, Serialize};
@@ -8,7 +8,7 @@ use std::time::Duration;
 /// Holds resolved network IP, proxy status, and physical location information.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct StatusInfo {
-    /// Friendly status string (`🟢 ВКЛЮЧЕН` or `🔴 НАПРЯМУЮ`).
+    /// Friendly status string.
     pub status: String,
     /// Profile key identifier.
     pub profile_key: String,
@@ -20,7 +20,7 @@ pub struct StatusInfo {
     pub ipv4: String,
     /// Resolved external IPv6 address.
     pub ipv6: String,
-    /// Resolved physical location (e.g. `City, Country (ISO)`).
+    /// Resolved physical location.
     pub location: String,
 }
 
@@ -52,14 +52,14 @@ fn build_client(proxy_url: Option<&str>) -> reqwest::Client {
 }
 
 /// Resolves external IPv4, IPv6, and physical location from configured Geo APIs.
-pub async fn get_status_info(config: &AppConfig) -> StatusInfo {
+pub async fn get_status_info(config: &AppConfig, i18n: &I18n) -> StatusInfo {
     let proxy_env = env::var("ALL_PROXY")
         .or_else(|_| env::var("http_proxy"))
         .ok();
     let client = build_client(proxy_env.as_deref());
 
     let mut ip_from_json = String::new();
-    let mut location = String::from("недоступно");
+    let mut location = i18n.t("unavailable").to_string();
 
     let mut resp_data: Option<GeoResponse> = None;
     for geo_url in &config.geo_apis {
@@ -107,7 +107,7 @@ pub async fn get_status_info(config: &AppConfig) -> StatusInfo {
         } else if !country_code.is_empty() {
             location = country_code;
         } else {
-            location = String::from("неизвестно");
+            location = i18n.t("unknown").to_string();
         }
     }
 
@@ -127,7 +127,7 @@ pub async fn get_status_info(config: &AppConfig) -> StatusInfo {
             }
         }
         if ipv4.is_empty() {
-            ipv4 = String::from("недоступен");
+            ipv4 = i18n.t("unavailable").to_string();
         }
     }
 
@@ -138,7 +138,7 @@ pub async fn get_status_info(config: &AppConfig) -> StatusInfo {
             }
         }
         if ipv6.is_empty() {
-            ipv6 = String::from("недоступен");
+            ipv6 = i18n.t("unavailable").to_string();
         }
     }
 
@@ -149,9 +149,9 @@ pub async fn get_status_info(config: &AppConfig) -> StatusInfo {
         .unwrap_or_else(|| "Default".to_string());
 
     let status = if proxy_env.is_some() {
-        "🟢 ВКЛЮЧЕН".to_string()
+        i18n.t("status_enabled").to_string()
     } else {
-        "🔴 НАПРЯМУЮ (Прокси выключен)".to_string()
+        i18n.t("status_direct").to_string()
     };
 
     StatusInfo {
@@ -166,8 +166,8 @@ pub async fn get_status_info(config: &AppConfig) -> StatusInfo {
 }
 
 /// Formats and prints network status either as human-readable text or formatted JSON.
-pub async fn print_status(config: &AppConfig, as_json: bool) -> Result<()> {
-    let info = get_status_info(config).await;
+pub async fn print_status(config: &AppConfig, i18n: &I18n, as_json: bool) -> Result<()> {
+    let info = get_status_info(config, i18n).await;
 
     if as_json {
         println!("{}", serde_json::to_string_pretty(&info)?);
@@ -175,21 +175,33 @@ pub async fn print_status(config: &AppConfig, as_json: bool) -> Result<()> {
         println!("----------------------------------------------------------");
         if let Some(ref p) = info.active_proxy {
             println!(
-                "Статус:  {}",
-                format!("🟢 ВКЛЮЧЕН [{} -> {}]", info.profile_name, p)
-                    .green()
-                    .bold()
+                "{:<9} {}",
+                i18n.t("status_header"),
+                format!(
+                    "{} [{} -> {}]",
+                    i18n.t("status_enabled"),
+                    info.profile_name,
+                    p
+                )
+                .green()
+                .bold()
             );
         } else {
             println!(
-                "Статус:  {} (Профиль: {})",
-                "🔴 НАПРЯМУЮ (Прокси выключен)".red().bold(),
+                "{:<9} {} ({}: {})",
+                i18n.t("status_header"),
+                i18n.t("status_direct").red().bold(),
+                i18n.t("profile_label"),
                 info.profile_name.yellow()
             );
         }
-        println!("IPv4:    {}", info.ipv4.bold());
-        println!("IPv6:    {}", info.ipv6.bold());
-        println!("Локация: {}", info.location.cyan().bold());
+        println!("{:<9} {}", i18n.t("ipv4_label"), info.ipv4.bold());
+        println!("{:<9} {}", i18n.t("ipv6_label"), info.ipv6.bold());
+        println!(
+            "{:<9} {}",
+            i18n.t("location_label"),
+            info.location.cyan().bold()
+        );
         println!("----------------------------------------------------------");
     }
 

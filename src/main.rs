@@ -3,7 +3,7 @@ use clap::{Parser, Subcommand};
 use clap_complete::Shell;
 use colored::Colorize;
 use proxy_cli::cmd::*;
-use proxy_cli::config::AppConfig;
+use proxy_cli::config::{AppConfig, AppSettings, I18n};
 use std::env;
 use std::process::Command;
 
@@ -32,6 +32,11 @@ pub enum Commands {
     Env {
         /// Режим: on или off
         mode: String,
+    },
+    /// Переключить язык приложения (ru, en)
+    Lang {
+        /// Код языка: ru или en
+        code: String,
     },
     /// Управление профилями прокси в config.json
     #[command(subcommand)]
@@ -150,7 +155,10 @@ pub enum SettingsCommands {
     Set {
         /// Путь к конфигу (например: ./configs/config.throne-v2ray.json)
         #[arg(short, long)]
-        config_path: String,
+        config_path: Option<String>,
+        /// Язык интерфейса (ru, en)
+        #[arg(short, long)]
+        lang: Option<String>,
     },
 }
 
@@ -161,36 +169,41 @@ async fn main() -> Result<()> {
     }
 
     let cli = Cli::parse();
+    let settings = AppSettings::load();
+    let i18n = I18n::load(&settings.lang);
     let mut config = AppConfig::load();
 
     match cli.command {
         Commands::Status { json } => {
-            status::print_status(&config, json).await?;
+            status::print_status(&config, &i18n, json).await?;
         }
         Commands::Env { mode } => {
             proxy_cli::cmd::env::print_env_commands(&mode, &config);
         }
+        Commands::Lang { code } => {
+            settings::set_lang(code)?;
+        }
         Commands::Switch => {
-            profile::select_profile_interactive(&mut config)?;
+            profile::select_profile_interactive(&mut config, &i18n)?;
         }
         Commands::Benchmark => {
-            profile::run_benchmark(&config).await?;
+            profile::run_benchmark(&config, &i18n).await?;
         }
         Commands::Best => {
-            profile::select_best_profile(&mut config).await?;
+            profile::select_best_profile(&mut config, &i18n).await?;
         }
         Commands::Import { source } => {
-            import_cmd::import_profiles(&mut config, &source).await?;
+            import_cmd::import_profiles(&mut config, &i18n, &source).await?;
         }
         Commands::Profile(profile_cmd) => match profile_cmd {
             ProfileCommands::List => {
-                profile::list_profiles(&config);
+                profile::list_profiles(&config, &i18n);
             }
             ProfileCommands::Select => {
-                profile::select_profile_interactive(&mut config)?;
+                profile::select_profile_interactive(&mut config, &i18n)?;
             }
             ProfileCommands::Use { key } => {
-                profile::use_profile(&mut config, &key)?;
+                profile::use_profile(&mut config, &i18n, &key)?;
             }
             ProfileCommands::Set {
                 key,
@@ -199,26 +212,26 @@ async fn main() -> Result<()> {
                 host,
                 protocol,
             } => {
-                profile::set_profile(&mut config, key, name, port, host, protocol)?;
+                profile::set_profile(&mut config, &i18n, key, name, port, host, protocol)?;
             }
             ProfileCommands::Import { source } => {
-                import_cmd::import_profiles(&mut config, &source).await?;
+                import_cmd::import_profiles(&mut config, &i18n, &source).await?;
             }
             ProfileCommands::Remove { key } => {
-                profile::remove_profile(&mut config, &key)?;
+                profile::remove_profile(&mut config, &i18n, &key)?;
             }
             ProfileCommands::Benchmark => {
-                profile::run_benchmark(&config).await?;
+                profile::run_benchmark(&config, &i18n).await?;
             }
             ProfileCommands::Best => {
-                profile::select_best_profile(&mut config).await?;
+                profile::select_best_profile(&mut config, &i18n).await?;
             }
         },
         Commands::Ping { timeout } => {
-            ping::run_ping(&config, timeout).await?;
+            ping::run_ping(&config, &i18n, timeout).await?;
         }
         Commands::Diagnose => {
-            diagnose::run_diagnose(&config).await?;
+            diagnose::run_diagnose(&config, &i18n).await?;
         }
         Commands::Prompt => {
             if env::var("ALL_PROXY").is_ok() || env::var("http_proxy").is_ok() {
@@ -284,8 +297,13 @@ async fn main() -> Result<()> {
             SettingsCommands::Show => {
                 settings::show_settings()?;
             }
-            SettingsCommands::Set { config_path } => {
-                settings::set_config_path(config_path)?;
+            SettingsCommands::Set { config_path, lang } => {
+                if let Some(cp) = config_path {
+                    settings::set_config_path(cp)?;
+                }
+                if let Some(l) = lang {
+                    settings::set_lang(l)?;
+                }
             }
         },
     }

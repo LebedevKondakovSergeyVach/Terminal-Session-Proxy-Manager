@@ -1,4 +1,4 @@
-use crate::config::AppConfig;
+use crate::config::{AppConfig, I18n};
 use anyhow::Result;
 use colored::Colorize;
 use futures::future::join_all;
@@ -6,7 +6,7 @@ use std::env;
 use std::time::{Duration, Instant};
 
 /// Probes configured ping targets in parallel and displays connection latency.
-pub async fn run_ping(config: &AppConfig, timeout_ms: u64) -> Result<()> {
+pub async fn run_ping(config: &AppConfig, i18n: &I18n, timeout_ms: u64) -> Result<()> {
     let proxy_env = env::var("ALL_PROXY")
         .or_else(|_| env::var("http_proxy"))
         .ok();
@@ -17,10 +17,7 @@ pub async fn run_ping(config: &AppConfig, timeout_ms: u64) -> Result<()> {
             .cyan()
             .bold()
     );
-    println!(
-        "   ⚡  {}",
-        "ЗАМЕР ЗАДЕРЖКИ (PING) СЕРВИСОВ ЧЕРЕЗ ПРОКСИ".white().bold()
-    );
+    println!("   ⚡  {}", i18n.t("ping_header").white().bold());
     println!(
         "{}",
         "=========================================================="
@@ -33,12 +30,14 @@ pub async fn run_ping(config: &AppConfig, timeout_ms: u64) -> Result<()> {
             .active_profile()
             .map(|pr| pr.name.as_str())
             .unwrap_or("Active");
-        println!("Активный сокет: {} ({})", p.yellow().bold(), name);
-    } else {
         println!(
-            "Режим: {}",
-            "🔴 ПРЯМОЕ СОЕДИНЕНИЕ (Без прокси)".red().bold()
+            "{} {} ({})",
+            i18n.t("active_socket"),
+            p.yellow().bold(),
+            name
         );
+    } else {
+        println!("{}", i18n.t("direct_mode").red().bold());
     }
     println!();
 
@@ -88,7 +87,7 @@ pub async fn run_ping(config: &AppConfig, timeout_ms: u64) -> Result<()> {
             println!(
                 "  • {:<18} — {}",
                 name.white().bold(),
-                "❌ Ошибка / Таймаут".red().bold()
+                i18n.t("error_timeout").red().bold()
             );
         }
     }

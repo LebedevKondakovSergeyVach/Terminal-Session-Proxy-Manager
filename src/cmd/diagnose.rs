@@ -1,4 +1,4 @@
-use crate::config::AppConfig;
+use crate::config::{AppConfig, I18n};
 use anyhow::Result;
 use colored::Colorize;
 use std::env;
@@ -6,17 +6,14 @@ use std::net::TcpStream;
 use std::time::Duration;
 
 /// Runs diagnostic tests on local sockets, session env vars, and HTTP endpoints.
-pub async fn run_diagnose(config: &AppConfig) -> Result<()> {
+pub async fn run_diagnose(config: &AppConfig, i18n: &I18n) -> Result<()> {
     println!(
         "{}",
         "=========================================================="
             .cyan()
             .bold()
     );
-    println!(
-        "      🔍 {}",
-        "РАСШИРЕННАЯ ДИАГНОСТИКА СЕТИ И ПРОКСИ".white().bold()
-    );
+    println!("      🔍 {}", i18n.t("diagnose_header").white().bold());
     println!(
         "{}",
         "=========================================================="
@@ -30,51 +27,50 @@ pub async fn run_diagnose(config: &AppConfig) -> Result<()> {
     let port = profile.map(|p| p.port).unwrap_or(2080);
 
     println!(
-        "Активный профиль : {} ({})",
+        "{} {} ({})",
+        i18n.t("profile_label"),
         name.yellow().bold(),
         config.active_profile
     );
-    println!("Активный хост/порт: {}:{}", host, port);
+    println!("{} {}:{}", i18n.t("active_host_port"), host, port);
     println!();
 
-    print!("1. Проверка локального сокета ({}:{}): ", host, port);
+    print!("{} ({}:{}): ", i18n.t("socket_check"), host, port);
     let socket_addr = format!("{}:{}", host, port);
     if let Ok(addr) = socket_addr.parse() {
         if TcpStream::connect_timeout(&addr, Duration::from_secs(2)).is_ok() {
-            println!("{}", "✅ Порт открыт (клиент активен)".green().bold());
+            println!("{}", i18n.t("port_open").green().bold());
         } else {
             println!(
                 "{}",
-                format!("❌ Порт закрыт! Проверьте клиент {}", name)
-                    .red()
-                    .bold()
+                format!("{} {}", i18n.t("port_closed"), name).red().bold()
             );
         }
     } else {
-        println!("{}", "❌ Некорректный адрес хоста/порта".red().bold());
+        println!("{}", i18n.t("invalid_address").red().bold());
     }
 
     println!();
-    println!("2. Переменные окружения текущей сессии:");
+    println!("{}", i18n.t("session_env_vars"));
     println!(
         "   • http_proxy  = {}",
-        env::var("http_proxy").unwrap_or_else(|_| "<не задан>".to_string())
+        env::var("http_proxy").unwrap_or_else(|_| "<none>".to_string())
     );
     println!(
         "   • https_proxy = {}",
-        env::var("https_proxy").unwrap_or_else(|_| "<не задан>".to_string())
+        env::var("https_proxy").unwrap_or_else(|_| "<none>".to_string())
     );
     println!(
         "   • ALL_PROXY   = {}",
-        env::var("ALL_PROXY").unwrap_or_else(|_| "<не задан>".to_string())
+        env::var("ALL_PROXY").unwrap_or_else(|_| "<none>".to_string())
     );
     println!(
         "   • GRADLE_OPTS = {}",
-        env::var("GRADLE_OPTS").unwrap_or_else(|_| "<не задан>".to_string())
+        env::var("GRADLE_OPTS").unwrap_or_else(|_| "<none>".to_string())
     );
 
     println!();
-    println!("3. Доступность критичных эндпоинтов (таймаут 3с):");
+    println!("{}", i18n.t("critical_endpoints"));
 
     let proxy_env = env::var("ALL_PROXY")
         .or_else(|_| env::var("http_proxy"))
@@ -90,13 +86,12 @@ pub async fn run_diagnose(config: &AppConfig) -> Result<()> {
     for ep in &config.diagnose_endpoints {
         print!("   • {} ({}): ", ep.name, ep.url);
         match client.get(&ep.url).send().await {
-            Ok(resp) => println!(
-                "{}",
-                format!("✅ Доступен (HTTP {})", resp.status().as_u16())
-                    .green()
-                    .bold()
-            ),
-            Err(_) => println!("{}", "❌ Недоступен (таймаут/блокировка)".red().bold()),
+            Ok(resp) => {
+                let code_str = resp.status().as_u16().to_string();
+                let msg = i18n.t("endpoint_accessible").replace("{}", &code_str);
+                println!("{}", msg.green().bold());
+            }
+            Err(_) => println!("{}", i18n.t("endpoint_unreachable").red().bold()),
         }
     }
 
