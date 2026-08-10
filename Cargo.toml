@@ -2,11 +2,16 @@
 name = "proxy-cli"
 version = "0.2.0"
 edition = "2021"
-authors = ["Antigravity Developer"]
+authors = ["LebedevSergeyVach <sergejlebedev31838@gmail.com>"]
 description = "Universal, configurable CLI proxy management toolkit in Rust"
+license = "AGPL-3.0"
+repository = "https://github.com/LebedevSergeyVach/Proxy-CLI-rs"
+readme = "README.md"
+keywords = ["proxy", "cli", "zsh", "bash", "socks5"]
 
 [dependencies]
 clap = { version = "4.4", features = ["derive", "env"] }
+clap_complete = "4.4"
 tokio = { version = "1.35", features = ["full"] }
 reqwest = { version = "0.11", features = ["json", "socks"] }
 serde = { version = "1.0", features = ["derive"] }
@@ -14,4 +19,5 @@ serde_json = "1.0"
 colored = "2.1"
 dirs = "5.0"
 anyhow = "1.0"
+thiserror = "1.0"
 futures = "0.3"

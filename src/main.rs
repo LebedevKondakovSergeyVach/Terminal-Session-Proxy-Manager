@@ -1,32 +1,27 @@
-mod config;
-mod diagnose;
-mod env_cmd;
-mod init;
-mod ping;
-mod status;
-
 use anyhow::Result;
 use clap::{Parser, Subcommand};
-use config::{AppConfig, AppSettings, Profile};
+use clap_complete::Shell;
 use colored::Colorize;
+use proxy_cli::cmd::*;
+use proxy_cli::config::AppConfig;
 use std::env;
 use std::process::Command;
 
 #[derive(Parser)]
 #[command(
     name = "proxy-cli",
-    author = "Antigravity Developer",
+    author = "LebedevSergeyVach",
     version = "0.2.0",
     about = "Universal, configurable CLI proxy management toolkit in Rust",
     long_about = None
 )]
-struct Cli {
+pub struct Cli {
     #[command(subcommand)]
-    command: Commands,
+    pub command: Commands,
 }
 
 #[derive(Subcommand)]
-enum Commands {
+pub enum Commands {
     /// Проверить статус сети, IPv4, IPv6 и геолокацию
     Status {
         /// Вывод информации в формате JSON
@@ -63,6 +58,12 @@ enum Commands {
         /// Тип оболочки: zsh или bash
         shell: String,
     },
+    /// Генерация файлов автодополнения (completions) для zsh, bash, fish, powershell
+    Completions {
+        /// Тип оболочки
+        #[arg(value_enum)]
+        shell: Shell,
+    },
     /// Управление файлом конфигурации config.json
     #[command(subcommand)]
     Config(ConfigCommands),
@@ -73,7 +74,7 @@ enum Commands {
 }
 
 #[derive(Subcommand)]
-enum ProfileCommands {
+pub enum ProfileCommands {
     /// Показать список всех доступных профилей
     List,
     /// Выбрать активный профиль по ключу (например: throne, v2ray)
@@ -106,7 +107,7 @@ enum ProfileCommands {
 }
 
 #[derive(Subcommand)]
-enum ConfigCommands {
+pub enum ConfigCommands {
     /// Показать точный путь к целевому файлу config.json
     Path,
     /// Вывести текущую конфигурацию JSON
@@ -114,7 +115,7 @@ enum ConfigCommands {
 }
 
 #[derive(Subcommand)]
-enum SettingsCommands {
+pub enum SettingsCommands {
     /// Показать путь к файлу settings.json
     Path,
     /// Показать текущие настройки settings.json
@@ -129,6 +130,11 @@ enum SettingsCommands {
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    // Respect NO_COLOR standard environment variable
+    if env::var("NO_COLOR").is_ok() {
+        colored::control::set_override(false);
+    }
+
     let cli = Cli::parse();
     let mut config = AppConfig::load();
 
@@ -137,69 +143,20 @@ async fn main() -> Result<()> {
             status::print_status(&config, json).await?;
         }
         Commands::Env { mode } => {
-            env_cmd::print_env_commands(&mode, &config);
+            proxy_cli::cmd::env::print_env_commands(&mode, &config);
         }
         Commands::Profile(profile_cmd) => match profile_cmd {
             ProfileCommands::List => {
-                println!("{}", "📋 Список профилей в config.json:".cyan().bold());
-                for (key, prof) in &config.profiles {
-                    let active_mark = if key == &config.active_profile {
-                        " (активный)".green().bold().to_string()
-                    } else {
-                        "".to_string()
-                    };
-                    println!(
-                        "  • {:<12} — {} ({}:{}){}",
-                        key.yellow().bold(),
-                        prof.name,
-                        prof.host,
-                        prof.port,
-                        active_mark
-                    );
-                }
+                profile::list_profiles(&config);
             }
             ProfileCommands::Use { key } => {
-                if config.profiles.contains_key(&key) {
-                    config.active_profile = key.clone();
-                    config.save()?;
-                    if let Some(p) = config.active_profile() {
-                        println!("⚙️ Переключено на профиль: {} ({}:{})", p.name.green().bold(), p.host, p.port);
-                    }
-                } else {
-                    eprintln!("{}", format!("❌ Профиль '{}' не найден в config.json!", key).red().bold());
-                }
+                profile::use_profile(&mut config, &key)?;
             }
             ProfileCommands::Set { key, name, port, host, protocol } => {
-                let mut prof = config.profiles.get(&key).cloned().unwrap_or_else(|| Profile {
-                    name: key.clone(),
-                    host: "127.0.0.1".to_string(),
-                    port: 2080,
-                    protocol: "socks5".to_string(),
-                });
-
-                if let Some(n) = name { prof.name = n; }
-                if let Some(p) = port { prof.port = p; }
-                if let Some(h) = host { prof.host = h; }
-                prof.protocol = protocol;
-
-                config.profiles.insert(key.clone(), prof.clone());
-                config.active_profile = key.clone();
-                config.save()?;
-
-                println!("⚙️ Профиль '{}' сохранен: {} ({}:{})", key, prof.name.green().bold(), prof.host, prof.port);
+                profile::set_profile(&mut config, key, name, port, host, protocol)?;
             }
             ProfileCommands::Remove { key } => {
-                if config.profiles.remove(&key).is_some() {
-                    if config.active_profile == key {
-                        if let Some((first_key, _)) = config.profiles.iter().next() {
-                            config.active_profile = first_key.clone();
-                        }
-                    }
-                    config.save()?;
-                    println!("🗑️ Профиль '{}' удален", key);
-                } else {
-                    eprintln!("{}", format!("❌ Профиль '{}' не найден!", key).red().bold());
-                }
+                profile::remove_profile(&mut config, &key)?;
             }
         },
         Commands::Ping { timeout } => {
@@ -250,6 +207,9 @@ async fn main() -> Result<()> {
         Commands::Init { shell } => {
             init::generate_shell_init(&shell);
         }
+        Commands::Completions { shell } => {
+            completions::generate_completions::<Cli>(shell)?;
+        }
         Commands::Config(config_cmd) => match config_cmd {
             ConfigCommands::Path => {
                 println!("📍 Файл активной конфигурации:");
@@ -261,18 +221,13 @@ async fn main() -> Result<()> {
         },
         Commands::Settings(settings_cmd) => match settings_cmd {
             SettingsCommands::Path => {
-                println!("📍 Файл настроек settings.json:");
-                println!("{}", AppSettings::get_settings_path().display());
+                settings::show_settings_path();
             }
             SettingsCommands::Show => {
-                let settings = AppSettings::load();
-                println!("{}", serde_json::to_string_pretty(&settings)?);
+                settings::show_settings()?;
             }
             SettingsCommands::Set { config_path } => {
-                let mut settings = AppSettings::load();
-                settings.config_path = Some(config_path.clone());
-                settings.save()?;
-                println!("⚙️ Установлен новый путь к конфигу в settings.json: {}", config_path.green().bold());
+                settings::set_config_path(config_path)?;
             }
         },
     }

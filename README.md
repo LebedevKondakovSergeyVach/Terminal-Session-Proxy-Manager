@@ -53,6 +53,7 @@ proxy use throne     # Переключить профиль на Throne
 proxy ping           # Параллельный замер задержки до сервисов
 proxy diagnose       # Расширенная диагностика TCP сокета и API
 proxy run -- <cmd>   # Выполнить команду через прокси
+proxy-cli completions zsh # Сгенерировать автодополнение для zsh
 ```
 
 ---

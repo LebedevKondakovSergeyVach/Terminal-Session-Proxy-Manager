@@ -19,7 +19,6 @@ pub async fn run_diagnose(config: &AppConfig) -> Result<()> {
     println!("Активный хост/порт: {}:{}", host, port);
     println!();
 
-    // 1. Check local socket
     print!("1. Проверка локального сокета ({}:{}): ", host, port);
     let socket_addr = format!("{}:{}", host, port);
     if let Ok(addr) = socket_addr.parse() {
@@ -32,7 +31,6 @@ pub async fn run_diagnose(config: &AppConfig) -> Result<()> {
         println!("{}", "❌ Некорректный адрес хоста/порта".red().bold());
     }
 
-    // 2. Check environment variables
     println!();
     println!("2. Переменные окружения текущей сессии:");
     println!("   • http_proxy  = {}", env::var("http_proxy").unwrap_or_else(|_| "<не задан>".to_string()));
@@ -40,7 +38,6 @@ pub async fn run_diagnose(config: &AppConfig) -> Result<()> {
     println!("   • ALL_PROXY   = {}", env::var("ALL_PROXY").unwrap_or_else(|_| "<не задан>".to_string()));
     println!("   • GRADLE_OPTS = {}", env::var("GRADLE_OPTS").unwrap_or_else(|_| "<не задан>".to_string()));
 
-    // 3. Check Diagnose Endpoints
     println!();
     println!("3. Доступность критичных эндпоинтов (таймаут 3с):");
 
