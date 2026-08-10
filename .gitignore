@@ -1,0 +1,9 @@
+# Rust build target
+/target
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# User local settings overrides
+settings.local.json
