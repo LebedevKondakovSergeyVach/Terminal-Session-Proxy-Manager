@@ -46,6 +46,12 @@ pub enum Commands {
     /// Автоматически выбрать самый быстрый прокси с минимальной задержкой
     Best,
 
+    /// Импортировать профили прокси из локального JSON файла или URL ссылки
+    Import {
+        /// Путь к файлу или URL ссылка подписки (например: configs/config.default.json)
+        source: String,
+    },
+
     /// Замер задержки (пинг) до сервисов из config.json
     Ping {
         /// Таймаут ожидания в миллисекундах (по умолчанию 4000)
@@ -110,6 +116,11 @@ pub enum ProfileCommands {
         #[arg(short = 't', long, default_value = "socks5")]
         protocol: String,
     },
+    /// Импортировать профили из файла или URL
+    Import {
+        /// Путь к файлу или URL ссылка
+        source: String,
+    },
     /// Удалить профиль по ключу
     Remove {
         /// Ключ профиля
@@ -168,6 +179,9 @@ async fn main() -> Result<()> {
         Commands::Best => {
             profile::select_best_profile(&mut config).await?;
         }
+        Commands::Import { source } => {
+            import_cmd::import_profiles(&mut config, &source).await?;
+        }
         Commands::Profile(profile_cmd) => match profile_cmd {
             ProfileCommands::List => {
                 profile::list_profiles(&config);
@@ -186,6 +200,9 @@ async fn main() -> Result<()> {
                 protocol,
             } => {
                 profile::set_profile(&mut config, key, name, port, host, protocol)?;
+            }
+            ProfileCommands::Import { source } => {
+                import_cmd::import_profiles(&mut config, &source).await?;
             }
             ProfileCommands::Remove { key } => {
                 profile::remove_profile(&mut config, &key)?;

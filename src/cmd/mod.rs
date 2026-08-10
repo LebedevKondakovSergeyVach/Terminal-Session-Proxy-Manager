@@ -1,6 +1,7 @@
 pub mod completions;
 pub mod diagnose;
 pub mod env;
+pub mod import_cmd;
 pub mod init;
 pub mod ping;
 pub mod profile;

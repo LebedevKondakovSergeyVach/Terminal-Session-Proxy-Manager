@@ -2,6 +2,18 @@
   "active_profile": "v2ray",
   "enabled": false,
   "profiles": {
+    "custom": {
+      "name": "Custom HTTP Proxy",
+      "host": "127.0.0.1",
+      "port": 8080,
+      "protocol": "http"
+    },
+    "default": {
+      "name": "Default Proxy",
+      "host": "127.0.0.1",
+      "port": 1080,
+      "protocol": "socks5"
+    },
     "throne": {
       "name": "Throne",
       "host": "127.0.0.1",
