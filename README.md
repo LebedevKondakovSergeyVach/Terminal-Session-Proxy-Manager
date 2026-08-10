@@ -1,7 +1,7 @@
 # ⚡ Proxy CLI (Universal Rust Proxy Toolkit)
 
 [![Rust](https://img.shields.io/badge/rust-1.70%2B-orange.svg)](https://www.rust-lang.org)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey.svg)](README.md)
 
 Универсальный, высокопроизводительный CLI-инструментарий на **Rust** для управления прокси-серверами, переключения профилей, диагностики сети и управления переменными окружения в **Zsh** и **Bash**.
@@ -90,4 +90,4 @@ proxy-cli-rs/
 
 ## 📄 Лицензия
 
-Проект распространяется под лицензией MIT.
+Проект распространяется под лицензией **GNU Affero General Public License v3.0 (AGPL-3.0)**. Смотрите файл [`LICENSE`](LICENSE) для получения полной информации.
