@@ -1,7 +1,7 @@
-use crate::config::AppConfig;
+use crate::config::{AppConfig, I18n};
 
 /// Prints shell environment export or unset statements for `eval`.
-pub fn print_env_commands(mode: &str, config: &AppConfig) {
+pub fn print_env_commands(mode: &str, config: &AppConfig, i18n: &I18n) {
     match mode {
         "on" => {
             if let (Some(http_url), Some(socks_url), Some(profile)) = (
@@ -20,10 +20,12 @@ pub fn print_env_commands(mode: &str, config: &AppConfig) {
                     "export JAVA_TOOL_OPTIONS=\"-Dhttp.proxyHost={} -Dhttp.proxyPort={} -Dhttps.proxyHost={} -Dhttps.proxyPort={}\";",
                     profile.host, profile.port, profile.host, profile.port
                 );
-                println!(
-                    "echo \"🚀 Прокси [{}] ВКЛЮЧЕН для текущей вкладки [{}:{}]\";",
-                    profile.name, profile.host, profile.port
-                );
+                let msg = i18n
+                    .t("env_on_msg")
+                    .replacen("{}", &profile.name, 1)
+                    .replacen("{}", &profile.host, 1)
+                    .replacen("{}", &profile.port.to_string(), 1);
+                println!("echo \"{}\";", msg);
             }
         }
         "off" => {
@@ -32,7 +34,7 @@ pub fn print_env_commands(mode: &str, config: &AppConfig) {
             println!("unset ALL_PROXY;");
             println!("unset GRADLE_OPTS;");
             println!("unset JAVA_TOOL_OPTIONS;");
-            println!("echo \"🛑 Прокси ВЫКЛЮЧЕН\";");
+            println!("echo \"{}\";", i18n.t("env_off_msg"));
         }
         _ => {}
     }

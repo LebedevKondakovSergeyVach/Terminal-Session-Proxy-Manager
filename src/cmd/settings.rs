@@ -3,8 +3,8 @@ use anyhow::Result;
 use colored::Colorize;
 
 /// Displays current filesystem path to `settings.json`.
-pub fn show_settings_path() {
-    println!("📍 Файл настроек settings.json:");
+pub fn show_settings_path(i18n: &I18n) {
+    println!("{}", i18n.t("settings_path_label"));
     println!("{}", AppSettings::get_settings_path().display());
 }
 
@@ -16,14 +16,11 @@ pub fn show_settings() -> Result<()> {
 }
 
 /// Updates target `config_path` inside `settings.json`.
-pub fn set_config_path(path: String) -> Result<()> {
+pub fn set_config_path(path: String, i18n: &I18n) -> Result<()> {
     let mut settings = AppSettings::load();
     settings.config_path = Some(path.clone());
     settings.save()?;
-    println!(
-        "⚙️ Установлен новый путь к конфигу в settings.json: {}",
-        path.green().bold()
-    );
+    println!("{} {}", i18n.t("config_path_set"), path.green().bold());
     Ok(())
 }
 

@@ -151,7 +151,7 @@ pub enum SettingsCommands {
     Path,
     /// Показать текущие настройки settings.json
     Show,
-    /// Задать путь к целевому config.json
+    /// Задать путь к целевому config.json или язык
     Set {
         /// Путь к конфигу (например: ./configs/config.throne-v2ray.json)
         #[arg(short, long)]
@@ -178,7 +178,7 @@ async fn main() -> Result<()> {
             status::print_status(&config, &i18n, json).await?;
         }
         Commands::Env { mode } => {
-            proxy_cli::cmd::env::print_env_commands(&mode, &config);
+            proxy_cli::cmd::env::print_env_commands(&mode, &config, &i18n);
         }
         Commands::Lang { code } => {
             settings::set_lang(code)?;
@@ -269,10 +269,7 @@ async fn main() -> Result<()> {
 
                 child.wait()?;
             } else {
-                eprintln!(
-                    "{}",
-                    "❌ Не удалось загрузить настройки прокси!".red().bold()
-                );
+                eprintln!("{}", i18n.t("proxy_load_failed").red().bold());
             }
         }
         Commands::Init { shell } => {
@@ -283,7 +280,7 @@ async fn main() -> Result<()> {
         }
         Commands::Config(config_cmd) => match config_cmd {
             ConfigCommands::Path => {
-                println!("📍 Файл активной конфигурации:");
+                println!("{}", i18n.t("config_active_path"));
                 println!("{}", AppConfig::get_config_path().display());
             }
             ConfigCommands::Show => {
@@ -292,14 +289,14 @@ async fn main() -> Result<()> {
         },
         Commands::Settings(settings_cmd) => match settings_cmd {
             SettingsCommands::Path => {
-                settings::show_settings_path();
+                settings::show_settings_path(&i18n);
             }
             SettingsCommands::Show => {
                 settings::show_settings()?;
             }
             SettingsCommands::Set { config_path, lang } => {
                 if let Some(cp) = config_path {
-                    settings::set_config_path(cp)?;
+                    settings::set_config_path(cp, &i18n)?;
                 }
                 if let Some(l) = lang {
                     settings::set_lang(l)?;
