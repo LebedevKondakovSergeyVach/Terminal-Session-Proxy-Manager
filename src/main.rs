@@ -1,5 +1,5 @@
 use anyhow::Result;
-use clap::{Parser, Subcommand};
+use clap::{CommandFactory, FromArgMatches, Parser, Subcommand};
 use clap_complete::Shell;
 use colored::Colorize;
 use proxy_cli::cmd::*;
@@ -22,141 +22,141 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Commands {
-    /// Проверить статус сети, IPv4, IPv6 и геолокацию
+    /// Check network status, IPv4, IPv6, and physical location
     Status {
-        /// Вывод информации в формате JSON
+        /// Output in JSON format
         #[arg(short, long)]
         json: bool,
     },
-    /// Сгенерировать команды экспорта переменных для shell (eval)
+    /// Generate environment variable export commands for shell (eval)
     Env {
-        /// Режим: on или off
+        /// Mode: on or off
         mode: String,
     },
-    /// Переключить язык приложения (ru, en)
+    /// Switch application interface language (ru, en)
     Lang {
-        /// Код языка: ru или en
+        /// Language code: ru or en
         code: String,
     },
-    /// Управление профилями прокси в config.json
+    /// Manage proxy profiles in config.json
     #[command(subcommand)]
     Profile(ProfileCommands),
 
-    /// Интерактивный выбор активного прокси-профиля
+    /// Interactive proxy profile selector
     Switch,
 
-    /// Измерить пинг и скорость всех прокси-профилей
+    /// Benchmark ping and availability of all profiles
     Benchmark,
 
-    /// Автоматически выбрать самый быстрый прокси с минимальной задержкой
+    /// Automatically select the fastest proxy with lowest latency
     Best,
 
-    /// Импортировать профили прокси из локального JSON файла или URL ссылки
+    /// Import proxy profiles from local JSON file or URL subscription
     Import {
-        /// Путь к файлу или URL ссылка подписки (например: configs/config.default.json)
+        /// File path or URL link
         source: String,
     },
 
-    /// Замер задержки (пинг) до сервисов из config.json
+    /// Probe latency to endpoints configured in config.json
     Ping {
-        /// Таймаут ожидания в миллисекундах (по умолчанию 4000)
+        /// Timeout in milliseconds (default 4000)
         #[arg(short, long, default_value_t = 4000)]
         timeout: u64,
     },
-    /// Расширенная диагностика локальных сокетов и эндпоинтов
+    /// Extended diagnostics for local sockets and HTTP endpoints
     Diagnose,
-    /// Индикатор прокси для строки приглашения Zsh Prompt
+    /// Proxy indicator for Zsh prompt segment
     Prompt,
-    /// Выполнить команду через прокси без изменения окружения текущей сессии
+    /// Run single command through proxy without modifying current shell
     Run {
-        /// Команда и аргументы для выполнения
+        /// Command and arguments
         #[arg(required = true, num_args = 1..)]
         cmd: Vec<String>,
     },
-    /// Генерация интерактивного скрипта инициализации для shell (zsh/bash)
+    /// Generate interactive shell initialization script (zsh/bash)
     Init {
-        /// Тип оболочки: zsh или bash
+        /// Shell type: zsh or bash
         shell: String,
     },
-    /// Генерация файлов автодополнения (completions) для zsh, bash, fish, powershell
+    /// Generate auto-completion scripts (zsh, bash, fish, powershell)
     Completions {
-        /// Тип оболочки
+        /// Shell type
         #[arg(value_enum)]
         shell: Shell,
     },
-    /// Управление файлом конфигурации config.json
+    /// Manage active config.json file
     #[command(subcommand)]
     Config(ConfigCommands),
 
-    /// Управление глобальными настройками (settings.json)
+    /// Manage global settings.json file
     #[command(subcommand)]
     Settings(SettingsCommands),
 }
 
 #[derive(Subcommand)]
 pub enum ProfileCommands {
-    /// Показать список всех доступных профилей
+    /// List all available profiles
     List,
-    /// Интерактивный выбор профиля из списка
+    /// Select profile interactively
     Select,
-    /// Выбрать активный профиль по ключу (например: throne, v2ray)
+    /// Choose active profile by key (e.g. throne, v2ray)
     Use {
-        /// Ключ профиля из config.json
+        /// Profile key
         key: String,
     },
-    /// Добавить или обновить профиль
+    /// Add or update profile
     Set {
-        /// Ключ профиля (например: throne, v2ray, custom)
+        /// Profile key
         key: String,
-        /// Отображаемое имя (например: Throne, v2rayN)
+        /// Display name
         #[arg(short, long)]
         name: Option<String>,
-        /// Номер порта (например: 2080, 10808)
+        /// Port number
         #[arg(short, long)]
         port: Option<u16>,
-        /// Хост (по умолчанию 127.0.0.1)
+        /// Host address
         #[arg(short, long)]
         host: Option<String>,
-        /// Протокол (socks5, http)
+        /// Protocol (socks5, http)
         #[arg(short = 't', long, default_value = "socks5")]
         protocol: String,
     },
-    /// Импортировать профили из файла или URL
+    /// Import profiles from file or URL
     Import {
-        /// Путь к файлу или URL ссылка
+        /// File path or URL
         source: String,
     },
-    /// Удалить профиль по ключу
+    /// Remove profile by key
     Remove {
-        /// Ключ профиля
+        /// Profile key
         key: String,
     },
-    /// Измерить скорость и задержку всех профилей
+    /// Benchmark speed of all profiles
     Benchmark,
-    /// Выбрать самый быстрый профиль
+    /// Choose fastest profile
     Best,
 }
 
 #[derive(Subcommand)]
 pub enum ConfigCommands {
-    /// Показать точный путь к целевому файлу config.json
+    /// Show path to active config.json file
     Path,
-    /// Вывести текущую конфигурацию JSON
+    /// Show current JSON configuration
     Show,
 }
 
 #[derive(Subcommand)]
 pub enum SettingsCommands {
-    /// Показать путь к файлу settings.json
+    /// Show path to settings.json file
     Path,
-    /// Показать текущие настройки settings.json
+    /// Show current settings.json contents
     Show,
-    /// Задать путь к целевому config.json или язык
+    /// Set config path or interface language
     Set {
-        /// Путь к конфигу (например: ./configs/config.throne-v2ray.json)
+        /// Config path
         #[arg(short, long)]
         config_path: Option<String>,
-        /// Язык интерфейса (ru, en)
+        /// Interface language (ru, en)
         #[arg(short, long)]
         lang: Option<String>,
     },
@@ -168,10 +168,41 @@ async fn main() -> Result<()> {
         colored::control::set_override(false);
     }
 
-    let cli = Cli::parse();
     let settings = AppSettings::load();
     let i18n = I18n::load(&settings.lang);
     let mut config = AppConfig::load();
+
+    let mut raw_cmd = Cli::command();
+    let about_str: &'static str = Box::leak(i18n.t("cmd_about").to_string().into_boxed_str());
+    raw_cmd = raw_cmd.about(about_str);
+
+    let sub_names = [
+        "status",
+        "env",
+        "lang",
+        "profile",
+        "switch",
+        "benchmark",
+        "best",
+        "import",
+        "ping",
+        "diagnose",
+        "prompt",
+        "run",
+        "init",
+        "completions",
+        "config",
+        "settings",
+    ];
+
+    for name in sub_names {
+        let key = format!("cmd_{}", name);
+        let about_sub: &'static str = Box::leak(i18n.t(&key).to_string().into_boxed_str());
+        raw_cmd = raw_cmd.mut_subcommand(name, |s| s.about(about_sub));
+    }
+
+    let matches = raw_cmd.get_matches();
+    let cli = Cli::from_arg_matches(&matches)?;
 
     match cli.command {
         Commands::Status { json } => {

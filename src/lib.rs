@@ -6,5 +6,5 @@ pub mod cmd;
 pub mod config;
 pub mod error;
 
-pub use config::{AppConfig, AppSettings, Profile};
+pub use config::{AppConfig, AppSettings, I18n, Profile};
 pub use error::ProxyError;
