@@ -1,62 +1,62 @@
-# 📦 Установка и Сборка (macOS & Linux)
+# 📦 Installation & Building (macOS & Linux)
 
-## 📋 Требования
+## 📋 Requirements
 - **Rust 1.70+** (`cargo`, `rustc`)
-- **Оболочка**: `zsh` или `bash`
+- **Shell**: `zsh` or `bash`
 
 ---
 
-## 🛠️ Сборка из исходников
+## 🛠️ Building from Source
 
 ```bash
-# 1. Клонирование
+# 1. Clone repository
 git clone https://github.com/LebedevSergeyVach/Proxy-CLI-rs.git
 cd Proxy-CLI-rs
 
-# 2. Релизная компиляция
+# 2. Compile release binary
 cargo build --release
 ```
 
 ---
 
-## 🍏 Установка на macOS
+## 🍏 Installation on macOS
 
 ```bash
-# Вариант A: Homebrew bin (Рекомендуется)
+# Option A: Homebrew bin (Recommended)
 cp target/release/proxy-cli /opt/homebrew/bin/
 
-# Вариант B: Cargo bin
+# Option B: Cargo bin
 cp target/release/proxy-cli ~/.cargo/bin/
 ```
 
-### Добавление в `~/.zshrc`:
+### Add to `~/.zshrc`:
 ```zsh
 eval "$(proxy-cli init zsh)"
 ```
 
 ---
 
-## 🐧 Установка на Linux (Ubuntu/Debian/Fedora/Arch)
+## 🐧 Installation on Linux (Ubuntu/Debian/Fedora/Arch)
 
 ```bash
-# Вариант A: Системный PATH (Для всех пользователей)
+# Option A: System PATH (For all users)
 sudo cp target/release/proxy-cli /usr/local/bin/
 
-# Вариант B: Пользовательский Cargo bin
+# Option B: User Cargo bin
 cp target/release/proxy-cli ~/.cargo/bin/
 ```
 
-### Добавление в `~/.bashrc` или `~/.zshrc`:
+### Add to `~/.bashrc` or `~/.zshrc`:
 ```bash
 eval "$(proxy-cli init bash)"
 ```
 
 ---
 
-## 🔍 Проверка работы
+## 🔍 Verification
 ```bash
 proxy-cli --version
-# proxy-cli 0.2.0
+# proxy-cli 1.1.1
 
 proxy status
 ```

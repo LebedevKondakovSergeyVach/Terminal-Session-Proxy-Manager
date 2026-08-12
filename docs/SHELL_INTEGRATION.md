@@ -1,10 +1,10 @@
-# 🐚 Интеграция с Оболочками
+# 🐚 Shell Integration
 
 ## Zsh (`~/.zshrc`)
 ```zsh
 eval "$(proxy-cli init zsh)"
 ```
-> Совместимо с Powerlevel10k Instant Prompt (не создает консольного вывода при старте).
+> Compatible with Powerlevel10k Instant Prompt (no unwanted output during terminal launch).
 
 ## Bash (`~/.bashrc`)
 ```bash
@@ -13,16 +13,16 @@ eval "$(proxy-cli init bash)"
 
 ---
 
-## Доступные функции
+## Available Shell Functions
 
-| Команда | Описание |
+| Command | Description |
 | :--- | :--- |
-| `proxy on` | Включить прокси для текущей сессии |
-| `proxy off` | Выключить прокси |
-| `proxy toggle` | Переключить состояние прокси |
-| `proxy status` | Проверить статус сети |
-| `proxy use <key>` | Сменить активный профиль |
-| `proxy ping` | Замер задержек до сервисов |
-| `proxy diagnose` | Диагностика сокета и API |
-| `proxy run -- <cmd>` | Выполнить команду через прокси |
-| `prompt_proxy_status` | Вывести статус для сегмента Prompt |
+| `proxy on` | Enable proxy for current shell session |
+| `proxy off` | Disable proxy for current shell session |
+| `proxy toggle` | Toggle proxy state (on/off) |
+| `proxy status` | Check network status |
+| `proxy use <key>` | Change active profile |
+| `proxy ping` | Measure latency to endpoints |
+| `proxy diagnose` | Socket & API diagnostics |
+| `proxy run -- <cmd>` | Execute single command through proxy |
+| `prompt_proxy_status` | Output proxy indicator for shell prompt segment |

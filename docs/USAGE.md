@@ -1,88 +1,88 @@
-# 📖 Справочник Команд
+# 📖 Command Reference
 
-## 1. Проверка статуса (`status`)
+## 1. Network Status (`status`)
 ```bash
-proxy status         # Вывод информации о сети
-proxy status --json  # Вывод в формате JSON
+proxy status         # Print network status & location
+proxy status --json  # Output status in JSON format
 ```
 
 ---
 
-## 2. Переключение языка (`lang`)
+## 2. Interface Language (`lang`)
 ```bash
-proxy lang en # Переключить на английский язык
-proxy lang ru # Переключить на русский язык
+proxy lang en # Switch UI language to English
+proxy lang ru # Switch UI language to Russian
 ```
 
 ---
 
-## 3. Управление прокси в Git (`git`)
+## 3. Git Proxy Integration (`git`)
 ```bash
-proxy git on     # Включить прокси для git clone / git push
-proxy git off    # Сбросить прокси в git config
-proxy git status # Показать текущие настройки git config
+proxy git on     # Set global proxy for git clone / git push
+proxy git off    # Unset global proxy in git config
+proxy git status # Show current git proxy settings
 ```
 
 ---
 
-## 4. Экспорт конфигураций (`export`)
+## 4. Configuration Export (`export`)
 ```bash
-proxy export docker  # Флаги --build-arg для Docker
-proxy export curl    # Флаги -x для cURL
-proxy export envfile # Содержимое .env файла
+proxy export docker  # Output --build-arg flags for Docker
+proxy export curl    # Output -x proxy flags for cURL
+proxy export envfile # Output .env file variables
 ```
 
 ---
 
-## 5. Замер скорости скачивания (`speedtest`)
+## 5. Bandwidth Speed Test (`speedtest`)
 ```bash
-proxy speedtest # Измерить реальную пропускную способность прокси в Мб/с
+proxy speedtest # Measure real download throughput in MB/s
 ```
 
 ---
 
-## 6. Мониторинг здоровья и авто-восстановление (`monitor`)
+## 6. Health Monitor & Auto-Heal (`monitor`)
 ```bash
-proxy monitor # Проверить соединение; при сбое автопереключить на резервный прокси
+proxy monitor # Probe socket health; auto-switch to fallback proxy on failure
 ```
 
 ---
 
-## 7. Управление профилями (`profile`)
+## 7. Profile Management (`profile`)
 ```bash
-proxy-cli profile list       # Список всех профилей
-proxy switch                 # Интерактивное меню выбора профиля стрелочками
-proxy use v2ray              # Переключить активный профиль
-proxy best                   # Автовыбор самого быстрого прокси
-proxy benchmark              # Измерение пинга и доступности профилей
-proxy import <file/url>      # Импорт профилей из JSON/URL
+proxy-cli profile list       # List all configured profiles
+proxy switch                 # Interactive arrow-key profile selector
+proxy use v2ray              # Switch active profile by key
+proxy best                   # Auto-select profile with lowest latency
+proxy benchmark              # Measure latency & availability of all profiles
+proxy import <file/url>      # Import profiles from local JSON file or URL
 ```
 
 ---
 
-## 8. Замер задержки (`ping`)
+## 8. Latency Probe (`ping`)
 ```bash
-proxy ping                 # Замер задержки до сервисов
-proxy-cli ping --timeout 2000 # Пинг с таймаутом 2000мс
+proxy ping                 # Probe ping latency to target endpoints
+proxy-cli ping --timeout 2000 # Probe with 2000ms timeout
 ```
 
 ---
 
-## 9. Диагностика (`diagnose`)
+## 9. Network Diagnostics (`diagnose`)
 ```bash
-proxy diagnose # Проверка TCP сокета, переменных окружения и API
+proxy diagnose # Detailed local socket, environment variables, & API check
 ```
 
 ---
 
-## 10. Выполнение разовых команд (`run`)
+## 10. Execute Command Through Proxy (`run`)
 ```bash
 proxy run -- curl https://api.openai.com
 ```
 
 ---
 
-## 11. Автодополнение (`completions`)
+## 11. Shell Autocompletions (`completions`)
 ```bash
 proxy-cli completions zsh > ~/.zsh/completions/_proxy-cli
 ```

@@ -1,0 +1,73 @@
+<p align="center">
+  <a href="README.md">English</a> | <b>Русский</b>
+</p>
+
+# ⚡ Proxy CLI
+
+[![Rust](https://img.shields.io/badge/rust-1.70%2B-orange.svg)](https://www.rust-lang.org)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey.svg)](README.md)
+
+Универсальная CLI-утилита на **Rust** для переключения прокси, контроля IP/локации, тестирования скорости и управления переменными окружения в **macOS** и **Linux** (Zsh / Bash).
+
+---
+
+## ⚡ Быстрый старт
+
+### 🍏 macOS
+```bash
+cargo build --release
+cp target/release/proxy-cli /opt/homebrew/bin/
+
+# Добавить в ~/.zshrc:
+eval "$(proxy-cli init zsh)"
+```
+
+### 🐧 Linux
+```bash
+cargo build --release
+sudo cp target/release/proxy-cli /usr/local/bin/
+
+# Добавить в ~/.bashrc (или ~/.zshrc):
+eval "$(proxy-cli init bash)"
+```
+
+---
+
+## 🚀 Команды
+
+| Команда | Описание |
+| :--- | :--- |
+| `proxy status` | Проверить статус прокси, IPv4, IPv6 и локацию |
+| `proxy status --json` | Вывести статус в формате JSON |
+| `proxy on` | Включить прокси для текущей сессии |
+| `proxy off` | Выключить прокси |
+| `proxy git <on/off/status>` | Управление глобальными настройками прокси в Git |
+| `proxy export <docker/curl/env>` | Экспорт конфигураций в форматы Docker, cURL, `.env` |
+| `proxy speedtest` | Замер реальной пропускной способности (Мб/с) |
+| `proxy monitor` | Проверка здоровья и авто-переключение при сбое (auto-heal) |
+| `proxy lang <ru/en>` | Переключить язык интерфейса (`ru`, `en`) |
+| `proxy use <profile>` | Переключить профиль (`throne`, `v2ray`) |
+| `proxy switch` | Интерактивное меню выбора профиля стрелочками |
+| `proxy benchmark` | Измерить пинг и доступность всех профилей |
+| `proxy best` | Автоматически выбрать самый быстрый прокси |
+| `proxy import <source>` | Импортировать профили из JSON файла или URL |
+| `proxy ping` | Параллельный пинг целевых сервисов |
+| `proxy diagnose` | Проверить локальный сокет и доступность API |
+| `proxy run -- <cmd>` | Выполнить команду через прокси |
+| `proxy-cli completions zsh` | Сгенерировать автодополнение |
+
+---
+
+## 📚 Документация
+
+- [📦 **Установка (macOS & Linux)**](docs/INSTALLATION.ru.md) — Подробная сборка, настройки PATH.
+- [🐚 **Интеграция с оболочками**](docs/SHELL_INTEGRATION.ru.md) — Zsh, Bash, Powerlevel10k.
+- [⚙️ **Конфигурация**](docs/CONFIGURATION.ru.md) — Схема `settings.json` и `config.json`.
+- [📖 **Справочник команд**](docs/USAGE.ru.md) — Описание всех подкоманд.
+
+---
+
+## 📄 Лицензия
+
+[GNU AGPLv3](LICENSE)

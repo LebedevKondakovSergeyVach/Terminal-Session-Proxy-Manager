@@ -1,21 +1,25 @@
+<p align="center">
+  <b>English</b> | <a href="README.ru.md">Русский</a>
+</p>
+
 # ⚡ Proxy CLI
 
 [![Rust](https://img.shields.io/badge/rust-1.70%2B-orange.svg)](https://www.rust-lang.org)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey.svg)](README.md)
 
-Универсальная CLI-утилита на **Rust** для переключения прокси, контроля IP/локации, тестирования скорости и управления переменными окружения в **macOS** и **Linux** (Zsh / Bash).
+Universal, high-performance CLI proxy management toolkit in **Rust** for session control, IP/location diagnostics, speed benchmarking, and environment variable management on **macOS** and **Linux** (Zsh / Bash).
 
 ---
 
-## ⚡ Быстрый старт
+## ⚡ Quick Start
 
 ### 🍏 macOS
 ```bash
 cargo build --release
 cp target/release/proxy-cli /opt/homebrew/bin/
 
-# Добавить в ~/.zshrc:
+# Add to ~/.zshrc:
 eval "$(proxy-cli init zsh)"
 ```
 
@@ -24,46 +28,46 @@ eval "$(proxy-cli init zsh)"
 cargo build --release
 sudo cp target/release/proxy-cli /usr/local/bin/
 
-# Добавить в ~/.bashrc (или ~/.zshrc):
+# Add to ~/.bashrc (or ~/.zshrc):
 eval "$(proxy-cli init bash)"
 ```
 
 ---
 
-## 🚀 Команды
+## 🚀 Commands
 
-| Команда | Описание |
+| Command | Description |
 | :--- | :--- |
-| `proxy status` | Проверить статус прокси, IPv4, IPv6 и локацию |
-| `proxy status --json` | Вывести статус в формате JSON |
-| `proxy on` | Включить прокси для текущей сессии |
-| `proxy off` | Выключить прокси |
-| `proxy git <on/off/status>` | Управление глобальными настройками прокси в Git |
-| `proxy export <docker/curl/env>` | Экспорт конфигураций в форматы Docker, cURL, `.env` |
-| `proxy speedtest` | Замер реальной пропускной способности (Мб/с) |
-| `proxy monitor` | Проверка здоровья и авто-переключение при сбое (auto-heal) |
-| `proxy lang <ru/en>` | Переключить язык интерфейса (`ru`, `en`) |
-| `proxy use <profile>` | Переключить профиль (`throne`, `v2ray`) |
-| `proxy switch` | Интерактивное меню выбора профиля стрелочками |
-| `proxy benchmark` | Измерить пинг и доступность всех профилей |
-| `proxy best` | Автоматически выбрать самый быстрый прокси |
-| `proxy import <source>` | Импортировать профили из JSON файла или URL |
-| `proxy ping` | Параллельный пинг целевых сервисов |
-| `proxy diagnose` | Проверить локальный сокет и доступность API |
-| `proxy run -- <cmd>` | Выполнить команду через прокси |
-| `proxy-cli completions zsh` | Сгенерировать автодополнение |
+| `proxy status` | Check proxy status, IPv4, IPv6, and physical location |
+| `proxy status --json` | Output network status in JSON format |
+| `proxy on` | Enable proxy for current shell session |
+| `proxy off` | Disable proxy for current shell session |
+| `proxy git <on/off/status>` | Manage global Git proxy configuration |
+| `proxy export <docker/curl/env>` | Export proxy settings for Docker, cURL, or `.env` |
+| `proxy speedtest` | Benchmark real download throughput in MB/s |
+| `proxy monitor` | Monitor health & auto-fallback on connection failure |
+| `proxy lang <ru/en>` | Switch interface language (`ru`, `en`) |
+| `proxy use <profile>` | Select active proxy profile (`throne`, `v2ray`) |
+| `proxy switch` | Interactive arrow-key profile selector |
+| `proxy benchmark` | Benchmark ping & availability of all profiles |
+| `proxy best` | Automatically select the fastest proxy with lowest ping |
+| `proxy import <source>` | Import proxy profiles from local JSON file or URL |
+| `proxy ping` | Probe latency to target endpoints |
+| `proxy diagnose` | Extended diagnostics for local sockets & HTTP APIs |
+| `proxy run -- <cmd>` | Execute a single command through proxy |
+| `proxy-cli completions zsh` | Generate auto-completion scripts |
 
 ---
 
-## 📚 Документация
+## 📚 Documentation
 
-- [📦 **Установка (macOS & Linux)**](docs/INSTALLATION.md) — Подробная сборка, настройки PATH.
-- [🐚 **Интеграция с оболочками**](docs/SHELL_INTEGRATION.md) — Zsh, Bash, Powerlevel10k.
-- [⚙️ **Конфигурация**](docs/CONFIGURATION.md) — Схема `settings.json` и `config.json`.
-- [📖 **Справочник команд**](docs/USAGE.md) — Описание всех подкоманд.
+- [📦 **Installation (macOS & Linux)**](docs/INSTALLATION.md) — Detailed build instructions & PATH setups.
+- [🐚 **Shell Integration**](docs/SHELL_INTEGRATION.md) — Zsh, Bash, and prompt integration.
+- [⚙️ **Configuration**](docs/CONFIGURATION.md) — `settings.json` and `config.json` schema.
+- [📖 **Command Reference**](docs/USAGE.md) — Full subcommands reference guide.
 
 ---
 
-## 📄 Лицензия
+## 📄 License
 
 [GNU AGPLv3](LICENSE)

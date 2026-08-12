@@ -1,22 +1,22 @@
-# ⚙️ Конфигурация
+# ⚙️ Configuration
 
 ## 1. `settings.json`
-Указывает путь к файлу конфигурации и предпочитаемый язык интерфейса. Ищется по путям `./settings.json` -> `./settings.local.json` -> `~/.config/proxy-cli/settings.json`.
+Specifies global application settings and language preference. Resolved in order: `~/.config/proxy-cli/settings.json` (or OS config dir) -> `./settings.json`.
 
 ```json
 {
-  "config_path": "./configs/config.throne-v2ray.json",
+  "config_path": null,
   "lang": "ru"
 }
 ```
 
-- `"config_path"`: Путь к целевому файлу конфигурации.
-- `"lang"`: Код языка интерфейса (`"ru"` или `"en"`).
+- `"config_path"`: Optional path to custom configuration file (`null` uses default global `config.json`).
+- `"lang"`: Interface language code (`"ru"` or `"en"`).
 
 ---
 
 ## 2. `config.json`
-Основной файл конфигурации с описанием профилей и эндпоинтов.
+Main configuration file containing profiles, targets, and endpoints.
 
 ```json
 {
@@ -51,12 +51,12 @@
 
 ---
 
-## 📋 Поля конфигурации
+## 📋 Configuration Fields Schema
 
-| Поле | Тип | Описание |
+| Field | Type | Description |
 | :--- | :--- | :--- |
-| `active_profile` | String | Ключ активного профиля из `profiles` |
-| `profiles` | Map | Объект настроек профилей |
-| `ping_targets` | Array | Список URL для `proxy ping` |
-| `diagnose_endpoints` | Array | Список URL для `proxy diagnose` |
-| `geo_apis` | Array | JSON API для определения IP/гео |
+| `active_profile` | String | Currently active key from `profiles` map |
+| `profiles` | Map | Map of key-value profile objects |
+| `ping_targets` | Array | Targets probed during `proxy ping` |
+| `diagnose_endpoints` | Array | Target URLs checked by `proxy diagnose` |
+| `geo_apis` | Array | IP / Location resolver JSON APIs |
