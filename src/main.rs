@@ -33,6 +33,22 @@ pub enum Commands {
         /// Mode: on or off
         mode: String,
     },
+    /// Manage global Git proxy settings (on, off, status)
+    Git {
+        /// Mode: on, off, or status
+        #[arg(default_value = "status")]
+        mode: String,
+    },
+    /// Export proxy configuration to Docker, cURL, or .env formats
+    Export {
+        /// Format: docker, curl, or envfile
+        #[arg(default_value = "envfile")]
+        format: String,
+    },
+    /// Benchmark real download bandwidth throughput in MB/s
+    Speedtest,
+    /// Monitor active proxy health and auto-fallback on failure
+    Monitor,
     /// Switch application interface language (ru, en)
     Lang {
         /// Language code: ru or en
@@ -179,6 +195,10 @@ async fn main() -> Result<()> {
     let sub_names = [
         "status",
         "env",
+        "git",
+        "export",
+        "speedtest",
+        "monitor",
         "lang",
         "profile",
         "switch",
@@ -210,6 +230,18 @@ async fn main() -> Result<()> {
         }
         Commands::Env { mode } => {
             proxy_cli::cmd::env::print_env_commands(&mode, &config, &i18n);
+        }
+        Commands::Git { mode } => {
+            git_cmd::handle_git_proxy(&mode, &config, &i18n)?;
+        }
+        Commands::Export { format } => {
+            export_cmd::export_config(&format, &config)?;
+        }
+        Commands::Speedtest => {
+            speedtest::run_speedtest(&config, &i18n).await?;
+        }
+        Commands::Monitor => {
+            monitor::run_monitor(&mut config, &i18n).await?;
         }
         Commands::Lang { code } => {
             settings::set_lang(code)?;

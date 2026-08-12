@@ -1,9 +1,13 @@
 pub mod completions;
 pub mod diagnose;
 pub mod env;
+pub mod export_cmd;
+pub mod git_cmd;
 pub mod import_cmd;
 pub mod init;
+pub mod monitor;
 pub mod ping;
 pub mod profile;
 pub mod settings;
+pub mod speedtest;
 pub mod status;
