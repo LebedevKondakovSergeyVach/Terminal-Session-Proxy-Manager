@@ -1,9 +1,9 @@
 use crate::config::{AppConfig, I18n, Profile};
 use anyhow::Result;
 use colored::Colorize;
+use dialoguer::{theme::ColorfulTheme, Select};
 use futures::future::join_all;
 use indicatif::{ProgressBar, ProgressStyle};
-use std::io::{self, Write};
 use std::time::{Duration, Instant};
 
 /// Displays all configured proxy profiles.
@@ -115,72 +115,45 @@ pub fn remove_profile(config: &mut AppConfig, i18n: &I18n, key: &str) -> Result<
     Ok(())
 }
 
-/// Interactive console profile selector.
+/// Interactive console profile selector using arrow keys.
 pub fn select_profile_interactive(config: &mut AppConfig, i18n: &I18n) -> Result<()> {
-    println!(
-        "{}",
-        "=========================================================="
-            .cyan()
-            .bold()
-    );
-    println!(
-        "      ⚡ {}",
-        i18n.t("interactive_switch_header").white().bold()
-    );
-    println!(
-        "{}",
-        "=========================================================="
-            .cyan()
-            .bold()
-    );
-
     let profile_keys: Vec<String> = config.profiles.keys().cloned().collect();
     if profile_keys.is_empty() {
         println!("{}", i18n.t("no_profiles").red());
         return Ok(());
     }
 
+    let mut items = Vec::new();
+    let mut default_idx = 0;
+
     for (idx, key) in profile_keys.iter().enumerate() {
         let prof = &config.profiles[key];
         let is_active = key == &config.active_profile;
+        if is_active {
+            default_idx = idx;
+        }
         let mark = if is_active {
             format!(" [{}]", i18n.t("active_tag"))
-                .green()
-                .bold()
-                .to_string()
         } else {
             "".to_string()
         };
-        println!(
-            "  [{}] {:<12} — {} ({}:{}){}",
-            (idx + 1).to_string().yellow().bold(),
-            key.bold(),
-            prof.name,
-            prof.host,
-            prof.port,
-            mark
-        );
-    }
-    println!(
-        "{}",
-        "=========================================================="
-            .cyan()
-            .bold()
-    );
-    print!("{} (1-{}): ", i18n.t("prompt_choice"), profile_keys.len());
-    io::stdout().flush()?;
-
-    let mut input = String::new();
-    io::stdin().read_line(&mut input)?;
-
-    if let Ok(choice) = input.trim().parse::<usize>() {
-        if choice >= 1 && choice <= profile_keys.len() {
-            let selected_key = &profile_keys[choice - 1];
-            return use_profile(config, i18n, selected_key);
-        }
+        items.push(format!(
+            "{:<12} — {} ({}:{}){}",
+            key, prof.name, prof.host, prof.port, mark
+        ));
     }
 
-    println!("{}", i18n.t("invalid_choice").red());
+    let selection = Select::with_theme(&ColorfulTheme::default())
+        .with_prompt(i18n.t("prompt_choice"))
+        .default(default_idx)
+        .items(&items)
+        .interact_opt()?;
+
+    if let Some(choice) = selection {
+        let selected_key = &profile_keys[choice];
+        use_profile(config, i18n, selected_key)?;
+    }
+
     Ok(())
 }
 
