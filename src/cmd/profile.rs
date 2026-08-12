@@ -147,11 +147,17 @@ pub fn select_profile_interactive(config: &mut AppConfig, i18n: &I18n) -> Result
         .with_prompt(i18n.t("prompt_choice"))
         .default(default_idx)
         .items(&items)
-        .interact_opt()?;
+        .interact_opt();
 
-    if let Some(choice) = selection {
-        let selected_key = &profile_keys[choice];
-        use_profile(config, i18n, selected_key)?;
+    match selection {
+        Ok(Some(choice)) => {
+            let selected_key = &profile_keys[choice];
+            use_profile(config, i18n, selected_key)?;
+        }
+        Ok(None) => {}
+        Err(_) => {
+            list_profiles(config, i18n);
+        }
     }
 
     Ok(())

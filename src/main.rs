@@ -11,7 +11,7 @@ use std::process::Command;
 #[command(
     name = "proxy-cli",
     author = "LebedevSergeyVach",
-    version = "1.0.0",
+    version = "1.1.0",
     about = "Universal, configurable CLI proxy management toolkit in Rust",
     long_about = None
 )]
@@ -330,9 +330,13 @@ async fn main() -> Result<()> {
                     )
                     .spawn()?;
 
-                child.wait()?;
+                let status = child.wait()?;
+                if !status.success() {
+                    std::process::exit(status.code().unwrap_or(1));
+                }
             } else {
                 eprintln!("{}", i18n.t("proxy_load_failed").red().bold());
+                std::process::exit(1);
             }
         }
         Commands::Init { shell } => {

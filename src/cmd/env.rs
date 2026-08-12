@@ -29,11 +29,7 @@ pub fn print_env_commands(mode: &str, config: &AppConfig, i18n: &I18n) {
             }
         }
         "off" => {
-            println!("unset http_proxy;");
-            println!("unset https_proxy;");
-            println!("unset ALL_PROXY;");
-            println!("unset GRADLE_OPTS;");
-            println!("unset JAVA_TOOL_OPTIONS;");
+            println!("unset http_proxy HTTP_PROXY https_proxy HTTPS_PROXY ALL_PROXY all_proxy GRADLE_OPTS JAVA_TOOL_OPTIONS;");
             println!("echo \"{}\";", i18n.t("env_off_msg"));
         }
         _ => {}
