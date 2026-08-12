@@ -7,11 +7,26 @@ use std::time::{Duration, Instant};
 
 /// Measures real download throughput (MB/s) through configured active proxy.
 pub async fn run_speedtest(_config: &AppConfig, _i18n: &I18n) -> Result<()> {
-    println!("{}", "==========================================================".cyan().bold());
-    println!("   🚀  {}", "BANDWIDTH THROUGHPUT SPEED TEST".white().bold());
-    println!("{}", "==========================================================".cyan().bold());
+    println!(
+        "{}",
+        "=========================================================="
+            .cyan()
+            .bold()
+    );
+    println!(
+        "   🚀  {}",
+        "BANDWIDTH THROUGHPUT SPEED TEST".white().bold()
+    );
+    println!(
+        "{}",
+        "=========================================================="
+            .cyan()
+            .bold()
+    );
 
-    let proxy_env = env::var("ALL_PROXY").or_else(|_| env::var("http_proxy")).ok();
+    let proxy_env = env::var("ALL_PROXY")
+        .or_else(|_| env::var("http_proxy"))
+        .ok();
     let test_url = "https://speed.cloudflare.com/__down?bytes=2097152";
 
     let pb = ProgressBar::new(2_097_152);
@@ -59,7 +74,9 @@ pub async fn run_speedtest(_config: &AppConfig, _i18n: &I18n) -> Result<()> {
 
         println!(
             "  • Payload Downloaded : {} MB",
-            format!("{:.2}", downloaded as f64 / 1_048_576.0).yellow().bold()
+            format!("{:.2}", downloaded as f64 / 1_048_576.0)
+                .yellow()
+                .bold()
         );
         println!(
             "  • Time Elapsed       : {} s",
@@ -74,6 +91,11 @@ pub async fn run_speedtest(_config: &AppConfig, _i18n: &I18n) -> Result<()> {
         println!("{}", "❌ Unable to complete speed test.".red().bold());
     }
 
-    println!("{}", "==========================================================".cyan().bold());
+    println!(
+        "{}",
+        "=========================================================="
+            .cyan()
+            .bold()
+    );
     Ok(())
 }
