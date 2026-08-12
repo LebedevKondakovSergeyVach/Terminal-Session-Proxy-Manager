@@ -11,7 +11,7 @@ use std::process::Command;
 #[command(
     name = "proxy-cli",
     author = "LebedevSergeyVach",
-    version = "0.2.0",
+    version = "1.0.0",
     about = "Universal, configurable CLI proxy management toolkit in Rust",
     long_about = None
 )]
