@@ -35,7 +35,7 @@ pub fn handle_git_proxy(mode: &str, config: &AppConfig, i18n: &I18n) -> Result<(
                 .status();
             println!("{}", "🛑 Git global proxy UNSET".yellow().bold());
         }
-        "status" | _ => {
+        _ => {
             let http = get_git_config("http.proxy");
             let https = get_git_config("https.proxy");
 
