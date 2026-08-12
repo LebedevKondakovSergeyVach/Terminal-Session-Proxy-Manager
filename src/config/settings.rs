@@ -20,7 +20,7 @@ fn default_lang() -> String {
 impl Default for AppSettings {
     fn default() -> Self {
         Self {
-            config_path: Some("./configs/config.throne-v2ray.json".to_string()),
+            config_path: None,
             lang: default_lang(),
         }
     }
@@ -29,20 +29,21 @@ impl Default for AppSettings {
 impl AppSettings {
     /// Resolves the filesystem path to `settings.json`.
     pub fn get_settings_path() -> PathBuf {
+        let global_path = dirs::config_dir()
+            .unwrap_or_else(|| PathBuf::from("."))
+            .join("proxy-cli")
+            .join("settings.json");
+
+        if global_path.exists() {
+            return global_path;
+        }
+
         let local_path = PathBuf::from("./settings.json");
         if local_path.exists() {
             return local_path;
         }
 
-        let local_override = PathBuf::from("./settings.local.json");
-        if local_override.exists() {
-            return local_override;
-        }
-
-        dirs::config_dir()
-            .unwrap_or_else(|| PathBuf::from("."))
-            .join("proxy-cli")
-            .join("settings.json")
+        global_path
     }
 
     /// Loads `settings.json` or returns default settings if absent.

@@ -130,15 +130,12 @@ impl AppConfig {
         if let Some(ref custom_path) = settings.config_path {
             if !custom_path.is_empty() {
                 let expanded = expand_tilde(custom_path);
-                if expanded.exists() {
+                if expanded.is_absolute() {
                     return expanded;
                 }
                 let settings_path = AppSettings::get_settings_path();
                 if let Some(parent) = settings_path.parent() {
-                    let rel = parent.join(custom_path);
-                    if rel.exists() {
-                        return rel;
-                    }
+                    return parent.join(custom_path);
                 }
                 return expanded;
             }
