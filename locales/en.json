@@ -74,5 +74,9 @@
   "proxy_load_failed": "❌ Failed to load proxy settings!",
   "lang_switched": "⚙️ Language switched to:",
   "env_on_msg": "🚀 Proxy [{}] ENABLED for current tab [{}:{}]",
-  "env_off_msg": "🛑 Proxy DISABLED"
+  "env_off_msg": "🛑 Proxy DISABLED",
+  "spinner_status": "Fetching network status and location...",
+  "spinner_ping": "Probing latency to services...",
+  "spinner_benchmark": "Benchmarking speed of all profiles...",
+  "spinner_import": "Downloading and parsing profiles..."
 }

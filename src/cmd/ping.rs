@@ -2,6 +2,7 @@ use crate::config::{AppConfig, I18n};
 use anyhow::Result;
 use colored::Colorize;
 use futures::future::join_all;
+use indicatif::{ProgressBar, ProgressStyle};
 use std::env;
 use std::time::{Duration, Instant};
 
@@ -41,6 +42,16 @@ pub async fn run_ping(config: &AppConfig, i18n: &I18n, timeout_ms: u64) -> Resul
     }
     println!();
 
+    let pb = ProgressBar::new_spinner();
+    pb.set_style(
+        ProgressStyle::default_spinner()
+            .tick_chars("⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏")
+            .template("{spinner:.cyan.bold} {msg}")
+            .unwrap_or_else(|_| ProgressStyle::default_spinner()),
+    );
+    pb.set_message(i18n.t("spinner_ping").to_string());
+    pb.enable_steady_tick(Duration::from_millis(80));
+
     let mut tasks = Vec::new();
     let timeout = Duration::from_millis(timeout_ms);
 
@@ -74,6 +85,7 @@ pub async fn run_ping(config: &AppConfig, i18n: &I18n, timeout_ms: u64) -> Resul
     }
 
     let results = join_all(tasks).await;
+    pb.finish_and_clear();
 
     for (name, status, elapsed) in results.into_iter().flatten() {
         if let Some(code) = status {

@@ -1,6 +1,7 @@
 use crate::config::{AppConfig, I18n, Profile};
 use anyhow::{anyhow, Result};
 use colored::Colorize;
+use indicatif::{ProgressBar, ProgressStyle};
 use std::collections::BTreeMap;
 use std::fs;
 use std::path::Path;
@@ -24,20 +25,40 @@ pub async fn import_profiles(config: &mut AppConfig, i18n: &I18n, source: &str) 
     println!("{} {}", i18n.t("import_source"), source.yellow());
     println!();
 
-    let content = if source.starts_with("http://") || source.starts_with("https://") {
-        let client = reqwest::Client::builder()
+    let pb = ProgressBar::new_spinner();
+    pb.set_style(
+        ProgressStyle::default_spinner()
+            .tick_chars("⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏")
+            .template("{spinner:.cyan.bold} {msg}")
+            .unwrap_or_else(|_| ProgressStyle::default_spinner()),
+    );
+    pb.set_message(i18n.t("spinner_import").to_string());
+    pb.enable_steady_tick(std::time::Duration::from_millis(80));
+
+    let content_res = if source.starts_with("http://") || source.starts_with("https://") {
+        let client_res = reqwest::Client::builder()
             .timeout(std::time::Duration::from_secs(10))
-            .build()?;
-        let resp = client.get(source).send().await?;
-        resp.text().await?
+            .build();
+        match client_res {
+            Ok(client) => match client.get(source).send().await {
+                Ok(resp) => resp.text().await.map_err(|e| anyhow!(e)),
+                Err(e) => Err(anyhow!(e)),
+            },
+            Err(e) => Err(anyhow!(e)),
+        }
     } else {
         let path = Path::new(source);
         if !path.exists() {
             let msg = i18n.t("import_file_not_found").replace("{}", source);
-            return Err(anyhow!(msg));
+            Err(anyhow!(msg))
+        } else {
+            fs::read_to_string(path).map_err(|e| anyhow!(e))
         }
-        fs::read_to_string(path)?
     };
+
+    pb.finish_and_clear();
+
+    let content = content_res?;
 
     let imported_profiles = parse_import_content(&content)?;
     if imported_profiles.is_empty() {

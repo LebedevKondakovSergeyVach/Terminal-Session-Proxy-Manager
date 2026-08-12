@@ -2,6 +2,7 @@ use crate::config::{AppConfig, I18n, Profile};
 use anyhow::Result;
 use colored::Colorize;
 use futures::future::join_all;
+use indicatif::{ProgressBar, ProgressStyle};
 use std::io::{self, Write};
 use std::time::{Duration, Instant};
 
@@ -184,7 +185,17 @@ pub fn select_profile_interactive(config: &mut AppConfig, i18n: &I18n) -> Result
 }
 
 /// Benchmarks all profiles against ping targets and returns (key, avg_ms, success_rate).
-pub async fn benchmark_profiles(config: &AppConfig) -> Vec<(String, u128, f64)> {
+pub async fn benchmark_profiles(config: &AppConfig, i18n: &I18n) -> Vec<(String, u128, f64)> {
+    let pb = ProgressBar::new_spinner();
+    pb.set_style(
+        ProgressStyle::default_spinner()
+            .tick_chars("⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏")
+            .template("{spinner:.cyan.bold} {msg}")
+            .unwrap_or_else(|_| ProgressStyle::default_spinner()),
+    );
+    pb.set_message(i18n.t("spinner_benchmark").to_string());
+    pb.enable_steady_tick(Duration::from_millis(80));
+
     let mut results = Vec::new();
     let timeout = Duration::from_millis(3000);
 
@@ -244,6 +255,7 @@ pub async fn benchmark_profiles(config: &AppConfig) -> Vec<(String, u128, f64)> 
         results.push((key.clone(), avg_ms, rate));
     }
 
+    pb.finish_and_clear();
     results.sort_by_key(|r| r.1);
     results
 }
@@ -263,10 +275,8 @@ pub async fn run_benchmark(config: &AppConfig, i18n: &I18n) -> Result<()> {
             .cyan()
             .bold()
     );
-    println!("{}", i18n.t("benchmark_running"));
-    println!();
 
-    let results = benchmark_profiles(config).await;
+    let results = benchmark_profiles(config, i18n).await;
 
     println!(
         "{:<14} {:<18} {:<12} {:<10}",
@@ -306,8 +316,7 @@ pub async fn run_benchmark(config: &AppConfig, i18n: &I18n) -> Result<()> {
 
 /// Finds the fastest profile and sets it as active.
 pub async fn select_best_profile(config: &mut AppConfig, i18n: &I18n) -> Result<()> {
-    println!("{}", i18n.t("best_searching"));
-    let results = benchmark_profiles(config).await;
+    let results = benchmark_profiles(config, i18n).await;
 
     if let Some((best_key, avg_ms, rate)) = results.first() {
         if *avg_ms < 9999 && *rate > 0.0 {

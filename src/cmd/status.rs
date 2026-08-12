@@ -1,6 +1,7 @@
 use crate::config::{AppConfig, I18n};
 use anyhow::Result;
 use colored::Colorize;
+use indicatif::{ProgressBar, ProgressStyle};
 use serde::{Deserialize, Serialize};
 use std::env;
 use std::time::Duration;
@@ -52,7 +53,22 @@ fn build_client(proxy_url: Option<&str>) -> reqwest::Client {
 }
 
 /// Resolves external IPv4, IPv6, and physical location from configured Geo APIs.
-pub async fn get_status_info(config: &AppConfig, i18n: &I18n) -> StatusInfo {
+pub async fn get_status_info(config: &AppConfig, i18n: &I18n, show_spinner: bool) -> StatusInfo {
+    let spinner = if show_spinner {
+        let pb = ProgressBar::new_spinner();
+        pb.set_style(
+            ProgressStyle::default_spinner()
+                .tick_chars("⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏")
+                .template("{spinner:.cyan.bold} {msg}")
+                .unwrap_or_else(|_| ProgressStyle::default_spinner()),
+        );
+        pb.set_message(i18n.t("spinner_status").to_string());
+        pb.enable_steady_tick(Duration::from_millis(80));
+        Some(pb)
+    } else {
+        None
+    };
+
     let proxy_env = env::var("ALL_PROXY")
         .or_else(|_| env::var("http_proxy"))
         .ok();
@@ -142,6 +158,10 @@ pub async fn get_status_info(config: &AppConfig, i18n: &I18n) -> StatusInfo {
         }
     }
 
+    if let Some(pb) = spinner {
+        pb.finish_and_clear();
+    }
+
     let profile = config.active_profile();
     let profile_key = config.active_profile.clone();
     let profile_name = profile
@@ -167,7 +187,7 @@ pub async fn get_status_info(config: &AppConfig, i18n: &I18n) -> StatusInfo {
 
 /// Formats and prints network status either as human-readable text or formatted JSON.
 pub async fn print_status(config: &AppConfig, i18n: &I18n, as_json: bool) -> Result<()> {
-    let info = get_status_info(config, i18n).await;
+    let info = get_status_info(config, i18n, !as_json).await;
 
     if as_json {
         println!("{}", serde_json::to_string_pretty(&info)?);
