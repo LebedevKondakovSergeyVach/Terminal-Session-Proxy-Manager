@@ -78,5 +78,6 @@
   "spinner_status": "Fetching network status and location...",
   "spinner_ping": "Probing latency to services...",
   "spinner_benchmark": "Benchmarking speed of all profiles...",
-  "spinner_import": "Downloading and parsing profiles..."
+  "spinner_import": "Downloading and parsing profiles...",
+  "spinner_diagnose": "Running network and socket diagnostics..."
 }

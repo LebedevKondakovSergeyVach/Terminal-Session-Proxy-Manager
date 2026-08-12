@@ -1,5 +1,9 @@
-/// Generates shell initialization code for `zsh` or `bash`.
-pub fn generate_shell_init(shell_type: &str) {
+use clap::CommandFactory;
+use clap_complete::{generate, Shell};
+
+/// Generates shell initialization code and completions for `zsh` or `bash`.
+pub fn generate_shell_init<C: CommandFactory>(shell_type: &str) {
+    let mut cmd = C::command();
     match shell_type {
         "zsh" => {
             println!(
@@ -38,6 +42,13 @@ proxy_run() {{ proxy-cli run -- "$@"; }}
 prompt_proxy_status() {{ proxy-cli prompt; }}
 "#
             );
+
+            let mut buf = Vec::new();
+            generate(Shell::Zsh, &mut cmd, "proxy-cli", &mut buf);
+            if let Ok(compl_str) = String::from_utf8(buf) {
+                println!("{}", compl_str);
+                println!("compdef _proxy-cli proxy 2>/dev/null || true");
+            }
         }
         "bash" => {
             println!(
@@ -75,6 +86,13 @@ proxy_switch() {{ proxy-cli switch "$@"; }}
 proxy_run() {{ proxy-cli run -- "$@"; }}
 "#
             );
+
+            let mut buf = Vec::new();
+            generate(Shell::Bash, &mut cmd, "proxy-cli", &mut buf);
+            if let Ok(compl_str) = String::from_utf8(buf) {
+                println!("{}", compl_str);
+                println!("complete -F _proxy-cli proxy 2>/dev/null || true");
+            }
         }
         _ => {
             eprintln!("Unsupported shell. Choose 'zsh' or 'bash'");

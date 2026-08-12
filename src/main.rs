@@ -304,7 +304,7 @@ async fn main() -> Result<()> {
             }
         }
         Commands::Init { shell } => {
-            init::generate_shell_init(&shell);
+            init::generate_shell_init::<Cli>(&shell);
         }
         Commands::Completions { shell } => {
             completions::generate_completions::<Cli>(shell)?;
