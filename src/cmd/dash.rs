@@ -437,7 +437,7 @@ fn run_app(
                             .fg(Color::Green)
                             .add_modifier(Modifier::BOLD),
                     ),
-                    Span::styled(" switch | ", Style::default().fg(Color::Gray)),
+                    Span::styled(" switch+use | ", Style::default().fg(Color::Gray)),
                     Span::styled(
                         "b",
                         Style::default()
@@ -660,6 +660,7 @@ fn run_app(
                                 }
                             }
                         }
+                        return Ok(DashAction::Quit);
                     }
                     _ => {}
                 }
