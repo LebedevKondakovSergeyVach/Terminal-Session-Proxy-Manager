@@ -39,6 +39,7 @@ proxy_diagnose() {{ proxy-cli diagnose "$@"; }}
 proxy_benchmark() {{ proxy-cli benchmark "$@"; }}
 proxy_best() {{ proxy-cli best "$@"; }}
 proxy_switch() {{ proxy-cli switch "$@"; }}
+proxy_dash() {{ proxy-cli dash "$@"; }}
 proxy_run() {{ proxy-cli run -- "$@"; }}
 prompt_proxy_status() {{ proxy-cli prompt; }}
 "#
@@ -84,6 +85,7 @@ proxy_diagnose() {{ proxy-cli diagnose "$@"; }}
 proxy_benchmark() {{ proxy-cli benchmark "$@"; }}
 proxy_best() {{ proxy-cli best "$@"; }}
 proxy_switch() {{ proxy-cli switch "$@"; }}
+proxy_dash() {{ proxy-cli dash "$@"; }}
 proxy_run() {{ proxy-cli run -- "$@"; }}
 "#
             );

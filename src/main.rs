@@ -90,7 +90,7 @@ async fn run() -> Result<()> {
             profile::select_profile_interactive(&mut config, &i18n)?;
         }
         Commands::Dash => {
-            dash::run_dashboard(&mut config, &i18n)?;
+            dash::run_dashboard(&mut config, &i18n).await?;
         }
         Commands::Benchmark => {
             profile::run_benchmark(&config, &i18n).await?;
