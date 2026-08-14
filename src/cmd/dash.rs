@@ -38,6 +38,8 @@ struct GeoResponse {
 enum DashAction {
     Quit,
     SelectBest,
+    Import,
+    EditConfig,
 }
 
 /// Runs the interactive TUI dashboard.
@@ -145,6 +147,25 @@ pub async fn run_dashboard(config: &mut AppConfig, _i18n: &I18n) -> Result<()> {
     match res {
         Ok(DashAction::SelectBest) => {
             crate::cmd::profile::select_best_profile(config, _i18n).await?;
+        }
+        Ok(DashAction::Import) => {
+            let url: String = dialoguer::Input::new()
+                .with_prompt("Enter Subscription URL/Path")
+                .interact_text()?;
+            crate::cmd::import_cmd::import_profiles(config, _i18n, &url).await?;
+        }
+        Ok(DashAction::EditConfig) => {
+            let editor = std::env::var("EDITOR").unwrap_or_else(|_| "nano".to_string());
+            let path = crate::config::AppConfig::get_config_path();
+            let mut child = std::process::Command::new(editor)
+                .arg(path)
+                .spawn()
+                .expect("Failed to start editor");
+            let _ = child.wait();
+
+            // Reload config if changed
+            *config = crate::config::AppConfig::load();
+            println!("Config reloaded successfully.");
         }
         Err(err) => {
             println!("{:?}", err);
@@ -312,7 +333,7 @@ fn run_app(
                         .fg(Color::Cyan)
                         .add_modifier(Modifier::BOLD),
                 ),
-                Span::styled(" to navigate | ", Style::default().fg(Color::Gray)),
+                Span::styled(" nav | ", Style::default().fg(Color::Gray)),
                 Span::styled(
                     "Enter",
                     Style::default()
@@ -326,7 +347,21 @@ fn run_app(
                         .fg(Color::Yellow)
                         .add_modifier(Modifier::BOLD),
                 ),
-                Span::styled(" auto-best | ", Style::default().fg(Color::Gray)),
+                Span::styled(" best | ", Style::default().fg(Color::Gray)),
+                Span::styled(
+                    "i",
+                    Style::default()
+                        .fg(Color::Blue)
+                        .add_modifier(Modifier::BOLD),
+                ),
+                Span::styled(" import | ", Style::default().fg(Color::Gray)),
+                Span::styled(
+                    "e",
+                    Style::default()
+                        .fg(Color::Magenta)
+                        .add_modifier(Modifier::BOLD),
+                ),
+                Span::styled(" edit config | ", Style::default().fg(Color::Gray)),
                 Span::styled(
                     "q",
                     Style::default().fg(Color::Red).add_modifier(Modifier::BOLD),
@@ -345,6 +380,12 @@ fn run_app(
                     }
                     KeyCode::Char('b') => {
                         return Ok(DashAction::SelectBest);
+                    }
+                    KeyCode::Char('i') => {
+                        return Ok(DashAction::Import);
+                    }
+                    KeyCode::Char('e') => {
+                        return Ok(DashAction::EditConfig);
                     }
                     KeyCode::Down | KeyCode::Char('j') => {
                         let i = match list_state.selected() {
