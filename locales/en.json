@@ -5,6 +5,7 @@
   "cmd_lang": "Switch application interface language (ru, en)",
   "cmd_profile": "Manage proxy profiles in config.json",
   "cmd_switch": "Interactive proxy profile selector",
+  "cmd_dash": "Interactive TUI Dashboard for monitoring and switching profiles",
   "cmd_benchmark": "Benchmark ping and availability of all profiles",
   "cmd_best": "Automatically select the fastest proxy with lowest latency",
   "cmd_import": "Import proxy profiles from local JSON file or URL subscription",

@@ -41,6 +41,7 @@ async fn run() -> Result<()> {
         "lang",
         "profile",
         "switch",
+        "dash",
         "benchmark",
         "best",
         "import",
@@ -87,6 +88,9 @@ async fn run() -> Result<()> {
         }
         Commands::Switch => {
             profile::select_profile_interactive(&mut config, &i18n)?;
+        }
+        Commands::Dash => {
+            dash::run_dashboard(&mut config, &i18n)?;
         }
         Commands::Benchmark => {
             profile::run_benchmark(&config, &i18n).await?;

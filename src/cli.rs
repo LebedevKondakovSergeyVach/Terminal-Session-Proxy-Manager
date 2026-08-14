@@ -60,6 +60,9 @@ pub enum Commands {
     /// Interactive proxy profile selector
     Switch,
 
+    /// Interactive TUI Dashboard for monitoring and switching profiles
+    Dash,
+
     /// Benchmark ping and availability of all profiles
     Benchmark,
 

@@ -1,5 +1,7 @@
 /// Generates shell completion scripts.
 pub mod completions;
+/// Interactive TUI dashboard.
+pub mod dash;
 /// Checks socket connectivity and diagnoses endpoints.
 pub mod diagnose;
 /// Manages shell environment variables (`http_proxy`, etc.).
