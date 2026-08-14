@@ -30,7 +30,7 @@ mod tests {
             "host": "127.0.0.1",
             "port": 8080
         });
-        
+
         let profile: Profile = serde_json::from_value(json_data).unwrap();
         assert_eq!(profile.name, "Test");
         assert_eq!(profile.host, "127.0.0.1");
@@ -46,7 +46,7 @@ mod tests {
             "port": 3128,
             "protocol": "http"
         });
-        
+
         let profile: Profile = serde_json::from_value(json_data).unwrap();
         assert_eq!(profile.protocol, "http");
     }

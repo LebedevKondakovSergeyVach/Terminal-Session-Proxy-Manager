@@ -210,17 +210,17 @@ mod tests {
     #[test]
     fn test_active_profile_resolution() {
         let mut config = AppConfig::default();
-        
+
         // Default is throne
         let profile = config.active_profile().unwrap();
         assert_eq!(profile.name, "Throne");
-        
+
         // Switch to v2ray
         config.active_profile = "v2ray".to_string();
         let profile2 = config.active_profile().unwrap();
         assert_eq!(profile2.name, "v2rayN");
         assert_eq!(profile2.port, 10808);
-        
+
         // Invalid profile
         config.active_profile = "nonexistent".to_string();
         assert!(config.active_profile().is_none());
