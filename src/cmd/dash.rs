@@ -432,12 +432,19 @@ fn run_app(
                     ),
                     Span::styled(" nav | ", Style::default().fg(Color::Gray)),
                     Span::styled(
+                        "Space",
+                        Style::default()
+                            .fg(Color::Cyan)
+                            .add_modifier(Modifier::BOLD),
+                    ),
+                    Span::styled(" switch | ", Style::default().fg(Color::Gray)),
+                    Span::styled(
                         "Enter",
                         Style::default()
                             .fg(Color::Green)
                             .add_modifier(Modifier::BOLD),
                     ),
-                    Span::styled(" switch+use | ", Style::default().fg(Color::Gray)),
+                    Span::styled(" use | ", Style::default().fg(Color::Gray)),
                     Span::styled(
                         "b",
                         Style::default()
@@ -634,6 +641,16 @@ fn run_app(
                                 s.benchmark_results = Some(results);
                                 s.is_benchmarking_all = false;
                             });
+                        }
+                    }
+                    KeyCode::Char(' ') if tab_index == 0 => {
+                        if let Some(i) = list_state.selected() {
+                            let selected_key = &profiles[i];
+                            config.active_profile = selected_key.clone();
+                            let _ = config.save();
+
+                            let mut s = state.lock().unwrap();
+                            s.active_profile_key = selected_key.clone();
                         }
                     }
                     KeyCode::Enter if tab_index == 0 => {
