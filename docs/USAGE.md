@@ -53,6 +53,7 @@ proxy monitor # Probe socket health; auto-switch to fallback proxy on failure
 proxy-cli profile list       # List all configured profiles
 proxy switch                 # Interactive arrow-key profile selector
 proxy use v2ray              # Switch active profile by key
+proxy dash                   # Launch interactive TUI Dashboard (monitor, benchmark, switch)
 proxy best                   # Auto-select profile with lowest latency
 proxy benchmark              # Measure latency & availability of all profiles
 proxy import <file/url>      # Import profiles from local JSON file or URL

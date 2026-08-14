@@ -57,6 +57,7 @@ eval "$(proxy-cli init bash)"
 | `proxy monitor` | Monitor health & auto-fallback on connection failure |
 | `proxy lang <ru/en>` | Switch interface language (`ru`, `en`) |
 | `proxy use <profile>` | Select active proxy profile (`throne`, `v2ray`) |
+| `proxy dash` | Launch interactive TUI Dashboard (monitor, benchmark, switch) |
 | `proxy switch` | Interactive arrow-key profile selector |
 | `proxy benchmark` | Benchmark ping & availability of all profiles |
 | `proxy best` | Automatically select the fastest proxy with lowest ping |

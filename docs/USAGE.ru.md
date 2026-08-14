@@ -53,6 +53,7 @@ proxy monitor # Проверить соединение; при сбое авт�
 proxy-cli profile list       # Список всех профилей
 proxy switch                 # Интерактивное меню выбора профиля стрелочками
 proxy use v2ray              # Переключить активный профиль
+proxy dash                   # Запустить интерактивный TUI Дашборд
 proxy best                   # Автовыбор самого быстрого прокси
 proxy benchmark              # Измерение пинга и доступности профилей
 proxy import <file/url>      # Импорт профилей из JSON/URL
