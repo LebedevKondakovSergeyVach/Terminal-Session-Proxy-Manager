@@ -61,7 +61,10 @@ impl AppSettings {
         default_settings
     }
 
-    /// Persists `settings.json` to the filesystem.
+    /// Saves the settings to the file system.
+    ///
+    /// # Errors
+    /// Returns an error if the parent directory cannot be created or the file cannot be written.
     pub fn save(&self) -> Result<()> {
         let path = Self::get_settings_path();
         if let Some(parent) = path.parent() {

@@ -36,7 +36,7 @@ impl I18n {
 
     /// Gets a localized string message by key.
     pub fn t<'a>(&'a self, key: &'a str) -> &'a str {
-        self.messages.get(key).map(|s| s.as_str()).unwrap_or(key)
+        self.messages.get(key).map_or(key, String::as_str)
     }
 
     /// Gets active language code.

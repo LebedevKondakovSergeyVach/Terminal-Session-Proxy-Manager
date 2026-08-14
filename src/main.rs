@@ -5,7 +5,10 @@ use anyhow::Result;
 use clap::{CommandFactory, FromArgMatches};
 use colored::Colorize;
 use proxy_cli::cli::{Cli, Commands, ConfigCommands, ProfileCommands, SettingsCommands};
-use proxy_cli::cmd::*;
+use proxy_cli::cmd::{
+    completions, dash, diagnose, env as env_cmd, export_cmd, git_cmd, import_cmd, init, monitor,
+    ping, profile, settings, speedtest, status,
+};
 use proxy_cli::config::{AppConfig, AppSettings, I18n};
 use std::env;
 use std::process::Command;
@@ -56,7 +59,7 @@ async fn run() -> Result<()> {
     ];
 
     for name in sub_names {
-        let key = format!("cmd_{}", name);
+        let key = format!("cmd_{name}");
         let about_sub: &'static str = Box::leak(i18n.t(&key).to_string().into_boxed_str());
         raw_cmd = raw_cmd.mut_subcommand(name, |s| s.about(about_sub));
     }

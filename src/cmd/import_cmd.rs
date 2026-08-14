@@ -150,3 +150,55 @@ fn parse_import_content(content: &str) -> Result<BTreeMap<String, Profile>> {
 
     Ok(map)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_import_full_config() {
+        let json = r#"{
+            "active_profile": "test",
+            "profiles": {
+                "test": {
+                    "name": "Test Profile",
+                    "host": "127.0.0.1",
+                    "port": 1080,
+                    "protocol": "socks5"
+                }
+            }
+        }"#;
+        let map = parse_import_content(json).unwrap();
+        assert_eq!(map.len(), 1);
+        assert_eq!(map.get("test").unwrap().port, 1080);
+    }
+
+    #[test]
+    fn test_parse_import_urls() {
+        let urls = "socks5://192.168.1.1:1080\nhttp://10.0.0.1:8080\n# comment\ninvalid_url";
+        let map = parse_import_content(urls).unwrap();
+        assert_eq!(map.len(), 2);
+        let p1 = map.get("socks5_1").unwrap();
+        assert_eq!(p1.host, "192.168.1.1");
+        assert_eq!(p1.port, 1080);
+        let p2 = map.get("http_2").unwrap();
+        assert_eq!(p2.host, "10.0.0.1");
+        assert_eq!(p2.port, 8080);
+    }
+
+    #[test]
+    fn test_parse_import_json_array() {
+        let json = r#"[
+            {
+                "name": "Array Item 1",
+                "host": "1.1.1.1",
+                "port": 1234,
+                "protocol": "http"
+            }
+        ]"#;
+        let map = parse_import_content(json).unwrap();
+        assert_eq!(map.len(), 1);
+        let p = map.get("import_1").unwrap();
+        assert_eq!(p.host, "1.1.1.1");
+    }
+}

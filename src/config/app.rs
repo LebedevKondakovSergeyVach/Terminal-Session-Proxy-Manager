@@ -26,6 +26,7 @@ pub struct DiagnoseEndpoint {
 
 /// Main application proxy configuration.
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(default)]
 pub struct AppConfig {
     /// Currently active profile key in `profiles` map.
     pub active_profile: String,
@@ -162,7 +163,10 @@ impl AppConfig {
         default_cfg
     }
 
-    /// Saves `config.json` to the filesystem.
+    /// Saves the current configuration to the config file.
+    ///
+    /// # Errors
+    /// Returns an error if the parent directory cannot be created or the file cannot be written.
     pub fn save(&self) -> Result<()> {
         let path = Self::get_config_path();
         if let Some(parent) = path.parent() {
