@@ -10,7 +10,7 @@ use ratatui::{
     layout::{Constraint, Direction, Layout},
     style::{Color, Modifier, Style},
     text::{Line, Span},
-    widgets::{Block, Borders, List, ListItem, ListState, Paragraph},
+    widgets::{Block, Borders, List, ListItem, ListState, Paragraph, Sparkline},
     Terminal,
 };
 use serde::Deserialize;
@@ -23,6 +23,7 @@ struct DashState {
     ip: String,
     location: String,
     ping_ms: Option<u128>,
+    ping_history: Vec<u64>,
     is_loading: bool,
     active_profile_key: String,
 }
@@ -32,6 +33,11 @@ struct GeoResponse {
     query: Option<String>,
     city: Option<String>,
     country: Option<String>,
+}
+
+enum DashAction {
+    Quit,
+    SelectBest,
 }
 
 /// Runs the interactive TUI dashboard.
@@ -46,6 +52,7 @@ pub async fn run_dashboard(config: &mut AppConfig, _i18n: &I18n) -> Result<()> {
         ip: "Loading...".to_string(),
         location: "Loading...".to_string(),
         ping_ms: None,
+        ping_history: Vec::new(),
         is_loading: true,
         active_profile_key: config.active_profile.clone(),
     }));
@@ -68,6 +75,7 @@ pub async fn run_dashboard(config: &mut AppConfig, _i18n: &I18n) -> Result<()> {
                 s.ip = "Loading...".to_string();
                 s.location = "Loading...".to_string();
                 s.ping_ms = None;
+                s.ping_history.clear();
                 last_key = current_key.clone();
             }
 
@@ -98,6 +106,12 @@ pub async fn run_dashboard(config: &mut AppConfig, _i18n: &I18n) -> Result<()> {
                                     country
                                 };
                                 s.ping_ms = Some(elapsed);
+
+                                s.ping_history.push(elapsed as u64);
+                                if s.ping_history.len() > 100 {
+                                    s.ping_history.remove(0);
+                                }
+
                                 s.is_loading = false;
                             }
                         }
@@ -107,6 +121,12 @@ pub async fn run_dashboard(config: &mut AppConfig, _i18n: &I18n) -> Result<()> {
                             s.ip = "Offline".to_string();
                             s.location = "Offline".to_string();
                             s.ping_ms = None;
+
+                            s.ping_history.push(0); // 0 implies timeout
+                            if s.ping_history.len() > 100 {
+                                s.ping_history.remove(0);
+                            }
+
                             s.is_loading = false;
                         }
                     }
@@ -122,8 +142,14 @@ pub async fn run_dashboard(config: &mut AppConfig, _i18n: &I18n) -> Result<()> {
     execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
     terminal.show_cursor()?;
 
-    if let Err(err) = res {
-        println!("{:?}", err);
+    match res {
+        Ok(DashAction::SelectBest) => {
+            crate::cmd::profile::select_best_profile(config, _i18n).await?;
+        }
+        Err(err) => {
+            println!("{:?}", err);
+        }
+        _ => {}
     }
 
     Ok(())
@@ -133,7 +159,7 @@ fn run_app(
     terminal: &mut Terminal<CrosstermBackend<io::Stdout>>,
     config: &mut AppConfig,
     state: Arc<Mutex<DashState>>,
-) -> io::Result<()> {
+) -> io::Result<DashAction> {
     let mut list_state = ListState::default();
 
     let mut profiles: Vec<_> = config.profiles.keys().cloned().collect();
@@ -155,13 +181,18 @@ fn run_app(
                 .constraints(
                     [
                         Constraint::Length(3),
-                        Constraint::Length(5),
+                        Constraint::Length(7),
                         Constraint::Min(5),
                         Constraint::Length(3),
                     ]
                     .as_ref(),
                 )
                 .split(f.area());
+
+            let middle_chunks = Layout::default()
+                .direction(Direction::Horizontal)
+                .constraints([Constraint::Percentage(40), Constraint::Percentage(60)])
+                .split(chunks[1]);
 
             // Header
             let header = Paragraph::new(Line::from(vec![
@@ -206,6 +237,7 @@ fn run_app(
             };
 
             let info_text = vec![
+                Line::from(vec![]),
                 Line::from(vec![
                     Span::styled(" External IP: ", Style::default().fg(Color::White)),
                     Span::styled(&current_state.ip, ip_style),
@@ -225,7 +257,18 @@ fn run_app(
                     .title(" Live Monitor ")
                     .borders(Borders::ALL),
             );
-            f.render_widget(info_panel, chunks[1]);
+            f.render_widget(info_panel, middle_chunks[0]);
+
+            // Sparkline Graph
+            let sparkline = Sparkline::default()
+                .block(
+                    Block::default()
+                        .title(" Ping History (ms) ")
+                        .borders(Borders::ALL),
+                )
+                .data(&current_state.ping_history)
+                .style(Style::default().fg(Color::Green));
+            f.render_widget(sparkline, middle_chunks[1]);
 
             // Profiles List
             let items: Vec<ListItem> = profiles
@@ -276,12 +319,19 @@ fn run_app(
                         .fg(Color::Green)
                         .add_modifier(Modifier::BOLD),
                 ),
-                Span::styled(" to switch | ", Style::default().fg(Color::Gray)),
+                Span::styled(" switch | ", Style::default().fg(Color::Gray)),
+                Span::styled(
+                    "b",
+                    Style::default()
+                        .fg(Color::Yellow)
+                        .add_modifier(Modifier::BOLD),
+                ),
+                Span::styled(" auto-best | ", Style::default().fg(Color::Gray)),
                 Span::styled(
                     "q",
                     Style::default().fg(Color::Red).add_modifier(Modifier::BOLD),
                 ),
-                Span::styled(" to quit", Style::default().fg(Color::Gray)),
+                Span::styled(" quit", Style::default().fg(Color::Gray)),
             ]))
             .block(Block::default().borders(Borders::ALL));
             f.render_widget(footer, chunks[3]);
@@ -291,7 +341,10 @@ fn run_app(
             if let Event::Key(key) = event::read()? {
                 match key.code {
                     KeyCode::Char('q') | KeyCode::Esc => {
-                        return Ok(());
+                        return Ok(DashAction::Quit);
+                    }
+                    KeyCode::Char('b') => {
+                        return Ok(DashAction::SelectBest);
                     }
                     KeyCode::Down | KeyCode::Char('j') => {
                         let i = match list_state.selected() {
