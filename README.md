@@ -1,14 +1,14 @@
 <p align="center">
-  <b>English</b> | <a href="README.ru.md">Русский</a>
+  🇬🇧 <b>English</b> | 🇷🇺 <a href="README.ru.md">Русский</a>
 </p>
 
-# ⚡ Proxy CLI
+# ⚡ Terminal Session Proxy Manager
 
 [![Rust](https://img.shields.io/badge/rust-1.70%2B-orange.svg)](https://www.rust-lang.org)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey.svg)](README.md)
 
-Universal, high-performance CLI proxy management toolkit in **Rust** for session control, IP/location diagnostics, speed benchmarking, and environment variable management on **macOS** and **Linux** (Zsh / Bash).
+Universal, high-performance terminal session proxy management toolkit in **Rust** for session control, IP/location diagnostics, speed benchmarking, and environment variable management on **macOS** and **Linux** (Zsh / Bash).
 
 ## ✨ Features
 
