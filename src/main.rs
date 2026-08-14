@@ -6,8 +6,8 @@ use clap::{CommandFactory, FromArgMatches};
 use colored::Colorize;
 use proxy_cli::cli::{Cli, Commands, ConfigCommands, ProfileCommands, SettingsCommands};
 use proxy_cli::cmd::{
-    completions, dash, diagnose, env as env_cmd, export_cmd, git_cmd, import_cmd, init, monitor,
-    ping, profile, settings, speedtest, status,
+    completions, dash, diagnose, export_cmd, git_cmd, import_cmd, init, monitor, ping, profile,
+    settings, speedtest, status,
 };
 use proxy_cli::config::{AppConfig, AppSettings, I18n};
 use std::env;
