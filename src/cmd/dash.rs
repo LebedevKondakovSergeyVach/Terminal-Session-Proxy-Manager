@@ -27,6 +27,8 @@ struct DashState {
     is_loading: bool,
     active_profile_key: String,
     is_local_listening: Option<bool>,
+    is_benchmarking_all: bool,
+    benchmark_results: Option<Vec<(String, u128)>>,
 }
 
 #[derive(Deserialize)]
@@ -59,6 +61,8 @@ pub async fn run_dashboard(config: &mut AppConfig, _i18n: &I18n) -> Result<()> {
         is_loading: true,
         active_profile_key: config.active_profile.clone(),
         is_local_listening: None,
+        is_benchmarking_all: false,
+        benchmark_results: None,
     }));
 
     let state_clone = state.clone();
@@ -214,6 +218,17 @@ fn run_app(
 
     loop {
         let current_state = { state.lock().unwrap().clone() };
+
+        // Sort dynamically if benchmark results exist
+        if let Some(ref results) = current_state.benchmark_results {
+            profiles.sort_by_key(|k| {
+                results
+                    .iter()
+                    .find(|(key, _)| key == k)
+                    .map(|(_, p)| *p)
+                    .unwrap_or(u128::MAX)
+            });
+        }
 
         terminal.draw(|f| {
             let chunks = Layout::default()
@@ -376,8 +391,14 @@ fn run_app(
                     })
                     .collect();
 
+                let title = if current_state.is_benchmarking_all {
+                    " Profiles [Benchmarking...] "
+                } else {
+                    " Profiles "
+                };
+
                 let list = List::new(items)
-                    .block(Block::default().title(" Profiles ").borders(Borders::ALL))
+                    .block(Block::default().title(title).borders(Borders::ALL))
                     .highlight_style(
                         Style::default()
                             .bg(Color::DarkGray)
@@ -437,7 +458,14 @@ fn run_app(
                             .fg(Color::Magenta)
                             .add_modifier(Modifier::BOLD),
                     ),
-                    Span::styled(" edit | ", Style::default().fg(Color::Gray)),
+                    Span::styled(" | ", Style::default().fg(Color::Gray)),
+                    Span::styled(
+                        "s",
+                        Style::default()
+                            .fg(Color::LightGreen)
+                            .add_modifier(Modifier::BOLD),
+                    ),
+                    Span::styled(" sort | ", Style::default().fg(Color::Gray)),
                     Span::styled(
                         "1/2",
                         Style::default()
@@ -543,6 +571,71 @@ fn run_app(
                             config_scroll = config_scroll.saturating_sub(1);
                         }
                     }
+                    KeyCode::Char('s') if tab_index == 0 => {
+                        let mut s = state.lock().unwrap();
+                        if !s.is_benchmarking_all {
+                            s.is_benchmarking_all = true;
+                            s.benchmark_results = None;
+                            let state_clone = state.clone();
+                            let config_clone = config.clone();
+
+                            tokio::spawn(async move {
+                                let mut results = Vec::new();
+                                let timeout = Duration::from_millis(3000);
+
+                                for (key, prof) in &config_clone.profiles {
+                                    let proxy_url =
+                                        format!("{}://{}:{}", prof.protocol, prof.host, prof.port);
+                                    let mut tasks = Vec::new();
+
+                                    for ep in &config_clone.ping_targets {
+                                        let p_url = proxy_url.clone();
+                                        let target_url = ep.url.clone();
+
+                                        tasks.push(tokio::spawn(async move {
+                                            let mut builder = reqwest::Client::builder()
+                                                .timeout(timeout)
+                                                .connect_timeout(timeout);
+                                            if let Ok(proxy) = reqwest::Proxy::all(&p_url) {
+                                                builder = builder.proxy(proxy);
+                                            }
+                                            let client = match builder.build() {
+                                                Ok(c) => c,
+                                                Err(_) => return None,
+                                            };
+                                            let start = Instant::now();
+                                            if client.get(&target_url).send().await.is_ok() {
+                                                Some(start.elapsed().as_millis())
+                                            } else {
+                                                None
+                                            }
+                                        }));
+                                    }
+
+                                    let task_results = futures::future::join_all(tasks).await;
+                                    let mut total_ms = 0u128;
+                                    let mut success_count = 0usize;
+
+                                    for ms in task_results.into_iter().flatten().flatten() {
+                                        total_ms += ms;
+                                        success_count += 1;
+                                    }
+
+                                    let avg_ms = if success_count > 0 {
+                                        total_ms / (success_count as u128)
+                                    } else {
+                                        u128::MAX // timeout
+                                    };
+
+                                    results.push((key.clone(), avg_ms));
+                                }
+
+                                let mut s = state_clone.lock().unwrap();
+                                s.benchmark_results = Some(results);
+                                s.is_benchmarking_all = false;
+                            });
+                        }
+                    }
                     KeyCode::Enter if tab_index == 0 => {
                         if let Some(i) = list_state.selected() {
                             let selected_key = &profiles[i];
@@ -551,11 +644,41 @@ fn run_app(
 
                             let mut s = state.lock().unwrap();
                             s.active_profile_key = selected_key.clone();
+
+                            // Export to proxy-cli-eval so parent shell can eval it
+                            if let Some(prof) = config.profiles.get(selected_key) {
+                                if let Some(mut path) = dirs::home_dir() {
+                                    path.push(".proxy-cli-eval");
+                                    if let Ok(mut f) = std::fs::File::create(path) {
+                                        use std::io::Write;
+                                        let url = format!(
+                                            "{}://{}:{}",
+                                            prof.protocol, prof.host, prof.port
+                                        );
+                                        let _ = write!(f, "export HTTP_PROXY={0}; export HTTPS_PROXY={0}; export ALL_PROXY={0};", url);
+                                    }
+                                }
+                            }
                         }
                     }
                     _ => {}
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_dash_state_default() {
+        let state = DashState::default();
+        assert_eq!(state.ip, "");
+        assert_eq!(state.location, "");
+        assert_eq!(state.ping_ms, None);
+        assert!(!state.is_benchmarking_all);
+        assert!(state.benchmark_results.is_none());
     }
 }
