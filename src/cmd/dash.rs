@@ -26,6 +26,7 @@ struct DashState {
     ping_history: Vec<u64>,
     is_loading: bool,
     active_profile_key: String,
+    is_local_listening: Option<bool>,
 }
 
 #[derive(Deserialize)]
@@ -57,6 +58,7 @@ pub async fn run_dashboard(config: &mut AppConfig, _i18n: &I18n) -> Result<()> {
         ping_history: Vec::new(),
         is_loading: true,
         active_profile_key: config.active_profile.clone(),
+        is_local_listening: None,
     }));
 
     let state_clone = state.clone();
@@ -78,11 +80,26 @@ pub async fn run_dashboard(config: &mut AppConfig, _i18n: &I18n) -> Result<()> {
                 s.location = "Loading...".to_string();
                 s.ping_ms = None;
                 s.ping_history.clear();
+                s.is_local_listening = None;
                 last_key = current_key.clone();
             }
 
             let profile = config_clone.profiles.get(&current_key);
             if let Some(prof) = profile {
+                let local_addr = format!("127.0.0.1:{}", prof.port);
+                let listening = if let Ok(addr) = local_addr.parse() {
+                    std::net::TcpStream::connect_timeout(&addr, Duration::from_millis(100)).is_ok()
+                } else {
+                    false
+                };
+
+                {
+                    let mut s = state_clone.lock().unwrap();
+                    if s.active_profile_key == current_key {
+                        s.is_local_listening = Some(listening);
+                    }
+                }
+
                 let proxy_url = format!("{}://{}:{}", prof.protocol, prof.host, prof.port);
                 let mut builder = reqwest::Client::builder()
                     .timeout(Duration::from_secs(3))
@@ -257,6 +274,20 @@ fn run_app(
                     .add_modifier(Modifier::BOLD)
             };
 
+            let port_str = match current_state.is_local_listening {
+                Some(true) => Span::styled(
+                    "Active 🟢",
+                    Style::default()
+                        .fg(Color::Green)
+                        .add_modifier(Modifier::BOLD),
+                ),
+                Some(false) => Span::styled(
+                    "Dead 🔴 (Backend not running)",
+                    Style::default().fg(Color::Red).add_modifier(Modifier::BOLD),
+                ),
+                None => Span::styled("Checking...", Style::default().fg(Color::DarkGray)),
+            };
+
             let info_text = vec![
                 Line::from(vec![]),
                 Line::from(vec![
@@ -270,6 +301,10 @@ fn run_app(
                 Line::from(vec![
                     Span::styled(" Latency:     ", Style::default().fg(Color::White)),
                     ping_str,
+                ]),
+                Line::from(vec![
+                    Span::styled(" Local Port:  ", Style::default().fg(Color::White)),
+                    port_str,
                 ]),
             ];
 
