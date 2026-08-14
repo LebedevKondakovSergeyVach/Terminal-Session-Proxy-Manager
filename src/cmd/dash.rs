@@ -28,10 +28,7 @@ pub fn run_dashboard(config: &mut AppConfig, _i18n: &I18n) -> Result<()> {
 
     // Restore terminal
     disable_raw_mode()?;
-    execute!(
-        terminal.backend_mut(),
-        LeaveAlternateScreen
-    )?;
+    execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
     terminal.show_cursor()?;
 
     if let Err(err) = res {
@@ -41,15 +38,21 @@ pub fn run_dashboard(config: &mut AppConfig, _i18n: &I18n) -> Result<()> {
     Ok(())
 }
 
-fn run_app(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>, config: &mut AppConfig) -> io::Result<()> {
+fn run_app(
+    terminal: &mut Terminal<CrosstermBackend<io::Stdout>>,
+    config: &mut AppConfig,
+) -> io::Result<()> {
     let mut list_state = ListState::default();
-    
+
     // Sort profiles to have a deterministic order
     let mut profiles: Vec<_> = config.profiles.keys().cloned().collect();
     profiles.sort();
 
     // Find active index
-    let active_idx = profiles.iter().position(|k| k == &config.active_profile).unwrap_or(0);
+    let active_idx = profiles
+        .iter()
+        .position(|k| k == &config.active_profile)
+        .unwrap_or(0);
     list_state.select(Some(active_idx));
 
     loop {
@@ -69,7 +72,12 @@ fn run_app(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>, config: &mut A
 
             // Header
             let header = Paragraph::new(Line::from(vec![
-                Span::styled("⚡ Terminal Session Proxy Manager ", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
+                Span::styled(
+                    "⚡ Terminal Session Proxy Manager ",
+                    Style::default()
+                        .fg(Color::Yellow)
+                        .add_modifier(Modifier::BOLD),
+                ),
                 Span::styled("- Dashboard", Style::default().fg(Color::White)),
             ]))
             .block(Block::default().borders(Borders::ALL));
@@ -80,10 +88,15 @@ fn run_app(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>, config: &mut A
                 .iter()
                 .map(|key| {
                     let profile = config.profiles.get(key).unwrap();
-                    let content = format!(" {} | {}:{} ({})", profile.name, profile.host, profile.port, profile.protocol);
-                    
+                    let content = format!(
+                        " {} | {}:{} ({})",
+                        profile.name, profile.host, profile.port, profile.protocol
+                    );
+
                     let style = if key == &config.active_profile {
-                        Style::default().fg(Color::Green).add_modifier(Modifier::BOLD)
+                        Style::default()
+                            .fg(Color::Green)
+                            .add_modifier(Modifier::BOLD)
                     } else {
                         Style::default().fg(Color::White)
                     };
@@ -106,11 +119,24 @@ fn run_app(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>, config: &mut A
             // Footer
             let footer = Paragraph::new(Line::from(vec![
                 Span::styled(" Use ", Style::default().fg(Color::Gray)),
-                Span::styled("↑↓", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
+                Span::styled(
+                    "↑↓",
+                    Style::default()
+                        .fg(Color::Cyan)
+                        .add_modifier(Modifier::BOLD),
+                ),
                 Span::styled(" to navigate | ", Style::default().fg(Color::Gray)),
-                Span::styled("Enter", Style::default().fg(Color::Green).add_modifier(Modifier::BOLD)),
+                Span::styled(
+                    "Enter",
+                    Style::default()
+                        .fg(Color::Green)
+                        .add_modifier(Modifier::BOLD),
+                ),
                 Span::styled(" to switch | ", Style::default().fg(Color::Gray)),
-                Span::styled("q", Style::default().fg(Color::Red).add_modifier(Modifier::BOLD)),
+                Span::styled(
+                    "q",
+                    Style::default().fg(Color::Red).add_modifier(Modifier::BOLD),
+                ),
                 Span::styled(" to quit", Style::default().fg(Color::Gray)),
             ]))
             .block(Block::default().borders(Borders::ALL));
