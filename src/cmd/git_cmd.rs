@@ -1,12 +1,13 @@
+use crate::cli::GitMode;
 use crate::config::{AppConfig, I18n};
 use anyhow::Result;
 use colored::Colorize;
 use std::process::Command;
 
 /// Manages global Git proxy settings (`http.proxy` and `https.proxy`).
-pub fn handle_git_proxy(mode: &str, config: &AppConfig, i18n: &I18n) -> Result<()> {
-    match mode.to_lowercase().as_str() {
-        "on" => {
+pub fn handle_git_proxy(mode: &GitMode, config: &AppConfig, i18n: &I18n) -> Result<()> {
+    match mode {
+        GitMode::On => {
             if let (Some(socks_url), Some(profile)) =
                 (config.get_socks_url(), config.active_profile())
             {
@@ -26,7 +27,7 @@ pub fn handle_git_proxy(mode: &str, config: &AppConfig, i18n: &I18n) -> Result<(
                 eprintln!("{}", i18n.t("proxy_load_failed").red().bold());
             }
         }
-        "off" => {
+        GitMode::Off => {
             let _ = Command::new("git")
                 .args(["config", "--global", "--unset", "http.proxy"])
                 .status();
@@ -35,7 +36,7 @@ pub fn handle_git_proxy(mode: &str, config: &AppConfig, i18n: &I18n) -> Result<(
                 .status();
             println!("{}", "🛑 Git global proxy UNSET".yellow().bold());
         }
-        _ => {
+        GitMode::Status => {
             let http = get_git_config("http.proxy");
             let https = get_git_config("https.proxy");
 

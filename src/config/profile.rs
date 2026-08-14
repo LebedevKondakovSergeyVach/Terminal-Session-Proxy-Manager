@@ -17,3 +17,37 @@ pub struct Profile {
     #[serde(default = "default_protocol")]
     pub protocol: String,
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn test_profile_deserialization_default_protocol() {
+        let json_data = json!({
+            "name": "Test",
+            "host": "127.0.0.1",
+            "port": 8080
+        });
+        
+        let profile: Profile = serde_json::from_value(json_data).unwrap();
+        assert_eq!(profile.name, "Test");
+        assert_eq!(profile.host, "127.0.0.1");
+        assert_eq!(profile.port, 8080);
+        assert_eq!(profile.protocol, "socks5");
+    }
+
+    #[test]
+    fn test_profile_deserialization_custom_protocol() {
+        let json_data = json!({
+            "name": "Test HTTP",
+            "host": "192.168.1.1",
+            "port": 3128,
+            "protocol": "http"
+        });
+        
+        let profile: Profile = serde_json::from_value(json_data).unwrap();
+        assert_eq!(profile.protocol, "http");
+    }
+}

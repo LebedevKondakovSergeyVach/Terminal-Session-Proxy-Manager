@@ -1,185 +1,24 @@
+#![warn(missing_docs)]
+//! Proxy CLI main binary
+
 use anyhow::Result;
-use clap::{CommandFactory, FromArgMatches, Parser, Subcommand};
-use clap_complete::Shell;
+use clap::{CommandFactory, FromArgMatches};
 use colored::Colorize;
+use proxy_cli::cli::{Cli, Commands, ConfigCommands, ProfileCommands, SettingsCommands};
 use proxy_cli::cmd::*;
 use proxy_cli::config::{AppConfig, AppSettings, I18n};
 use std::env;
 use std::process::Command;
 
-#[derive(Parser)]
-#[command(
-    name = "proxy-cli",
-    author = "LebedevSergeyVach",
-    version = "1.1.1",
-    about = "Universal, configurable CLI proxy management toolkit in Rust",
-    long_about = None
-)]
-pub struct Cli {
-    #[command(subcommand)]
-    pub command: Commands,
-}
-
-#[derive(Subcommand)]
-pub enum Commands {
-    /// Check network status, IPv4, IPv6, and physical location
-    Status {
-        /// Output in JSON format
-        #[arg(short, long)]
-        json: bool,
-    },
-    /// Generate environment variable export commands for shell (eval)
-    Env {
-        /// Mode: on or off
-        mode: String,
-    },
-    /// Manage global Git proxy settings (on, off, status)
-    Git {
-        /// Mode: on, off, or status
-        #[arg(default_value = "status")]
-        mode: String,
-    },
-    /// Export proxy configuration to Docker, cURL, or .env formats
-    Export {
-        /// Format: docker, curl, or envfile
-        #[arg(default_value = "envfile")]
-        format: String,
-    },
-    /// Benchmark real download bandwidth throughput in MB/s
-    Speedtest,
-    /// Monitor active proxy health and auto-fallback on failure
-    Monitor,
-    /// Switch application interface language (ru, en)
-    Lang {
-        /// Language code: ru or en
-        code: String,
-    },
-    /// Manage proxy profiles in config.json
-    #[command(subcommand)]
-    Profile(ProfileCommands),
-
-    /// Interactive proxy profile selector
-    Switch,
-
-    /// Benchmark ping and availability of all profiles
-    Benchmark,
-
-    /// Automatically select the fastest proxy with lowest latency
-    Best,
-
-    /// Import proxy profiles from local JSON file or URL subscription
-    Import {
-        /// File path or URL link
-        source: String,
-    },
-
-    /// Probe latency to endpoints configured in config.json
-    Ping {
-        /// Timeout in milliseconds (default 4000)
-        #[arg(short, long, default_value_t = 4000)]
-        timeout: u64,
-    },
-    /// Extended diagnostics for local sockets and HTTP endpoints
-    Diagnose,
-    /// Proxy indicator for Zsh prompt segment
-    Prompt,
-    /// Run single command through proxy without modifying current shell
-    Run {
-        /// Command and arguments
-        #[arg(required = true, num_args = 1..)]
-        cmd: Vec<String>,
-    },
-    /// Generate interactive shell initialization script (zsh/bash)
-    Init {
-        /// Shell type: zsh or bash
-        shell: String,
-    },
-    /// Generate auto-completion scripts (zsh, bash, fish, powershell)
-    Completions {
-        /// Shell type
-        #[arg(value_enum)]
-        shell: Shell,
-    },
-    /// Manage active config.json file
-    #[command(subcommand)]
-    Config(ConfigCommands),
-
-    /// Manage global settings.json file
-    #[command(subcommand)]
-    Settings(SettingsCommands),
-}
-
-#[derive(Subcommand)]
-pub enum ProfileCommands {
-    /// List all available profiles
-    List,
-    /// Select profile interactively
-    Select,
-    /// Choose active profile by key (e.g. throne, v2ray)
-    Use {
-        /// Profile key
-        key: String,
-    },
-    /// Add or update profile
-    Set {
-        /// Profile key
-        key: String,
-        /// Display name
-        #[arg(short, long)]
-        name: Option<String>,
-        /// Port number
-        #[arg(short, long)]
-        port: Option<u16>,
-        /// Host address
-        #[arg(short, long)]
-        host: Option<String>,
-        /// Protocol (socks5, http)
-        #[arg(short = 't', long, default_value = "socks5")]
-        protocol: String,
-    },
-    /// Import profiles from file or URL
-    Import {
-        /// File path or URL
-        source: String,
-    },
-    /// Remove profile by key
-    Remove {
-        /// Profile key
-        key: String,
-    },
-    /// Benchmark speed of all profiles
-    Benchmark,
-    /// Choose fastest profile
-    Best,
-}
-
-#[derive(Subcommand)]
-pub enum ConfigCommands {
-    /// Show path to active config.json file
-    Path,
-    /// Show current JSON configuration
-    Show,
-}
-
-#[derive(Subcommand)]
-pub enum SettingsCommands {
-    /// Show path to settings.json file
-    Path,
-    /// Show current settings.json contents
-    Show,
-    /// Set config path or interface language
-    Set {
-        /// Config path
-        #[arg(short, long)]
-        config_path: Option<String>,
-        /// Interface language (ru, en)
-        #[arg(short, long)]
-        lang: Option<String>,
-    },
-}
-
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() {
+    if let Err(err) = run().await {
+        eprintln!("{} {:?}", "Error:".red().bold(), err);
+        std::process::exit(1);
+    }
+}
+
+async fn run() -> Result<()> {
     if env::var("NO_COLOR").is_ok() {
         colored::control::set_override(false);
     }
@@ -244,7 +83,7 @@ async fn main() -> Result<()> {
             monitor::run_monitor(&mut config, &i18n).await?;
         }
         Commands::Lang { code } => {
-            settings::set_lang(code)?;
+            settings::set_lang(&code)?;
         }
         Commands::Switch => {
             profile::select_profile_interactive(&mut config, &i18n)?;
@@ -366,7 +205,11 @@ async fn main() -> Result<()> {
                     settings::set_config_path(cp, &i18n)?;
                 }
                 if let Some(l) = lang {
-                    settings::set_lang(l)?;
+                    let lang_code = match l.to_lowercase().as_str() {
+                        "en" | "english" => proxy_cli::cli::LangCode::En,
+                        _ => proxy_cli::cli::LangCode::Ru,
+                    };
+                    settings::set_lang(&lang_code)?;
                 }
             }
         },

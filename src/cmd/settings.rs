@@ -1,3 +1,4 @@
+use crate::cli::LangCode;
 use crate::config::{AppSettings, I18n};
 use anyhow::Result;
 use colored::Colorize;
@@ -25,11 +26,11 @@ pub fn set_config_path(path: String, i18n: &I18n) -> Result<()> {
 }
 
 /// Updates target `lang` inside `settings.json`.
-pub fn set_lang(lang: String) -> Result<()> {
+pub fn set_lang(lang: &LangCode) -> Result<()> {
     let mut settings = AppSettings::load();
-    let code = match lang.to_lowercase().as_str() {
-        "en" | "english" => "en",
-        _ => "ru",
+    let code = match lang {
+        LangCode::En => "en",
+        LangCode::Ru => "ru",
     };
     settings.lang = code.to_string();
     settings.save()?;

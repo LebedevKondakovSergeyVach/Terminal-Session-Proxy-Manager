@@ -1,11 +1,12 @@
+use crate::cli::ShellType;
 use clap::CommandFactory;
 use clap_complete::{generate, Shell};
 
 /// Generates shell initialization code and completions for `zsh` or `bash`.
-pub fn generate_shell_init<C: CommandFactory>(shell_type: &str) {
+pub fn generate_shell_init<C: CommandFactory>(shell_type: &ShellType) {
     let mut cmd = C::command();
     match shell_type {
-        "zsh" => {
+        ShellType::Zsh => {
             println!(
                 r#"# proxy-cli Zsh Integration
 proxy() {{
@@ -50,7 +51,7 @@ prompt_proxy_status() {{ proxy-cli prompt; }}
                 println!("compdef _proxy-cli proxy 2>/dev/null || true");
             }
         }
-        "bash" => {
+        ShellType::Bash => {
             println!(
                 r#"# proxy-cli Bash Integration
 proxy() {{
@@ -93,9 +94,6 @@ proxy_run() {{ proxy-cli run -- "$@"; }}
                 println!("{}", compl_str);
                 println!("complete -F _proxy-cli proxy 2>/dev/null || true");
             }
-        }
-        _ => {
-            eprintln!("Unsupported shell. Choose 'zsh' or 'bash'");
         }
     }
 }

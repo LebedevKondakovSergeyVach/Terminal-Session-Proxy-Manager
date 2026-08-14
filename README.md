@@ -10,6 +10,15 @@
 
 Universal, high-performance CLI proxy management toolkit in **Rust** for session control, IP/location diagnostics, speed benchmarking, and environment variable management on **macOS** and **Linux** (Zsh / Bash).
 
+## ✨ Features
+
+- **Blazing Fast**: Written in pure Rust, offering exceptional performance with minimal overhead.
+- **Interactive TTY**: Select profiles interactively using `dialoguer`.
+- **Auto-healing**: Real-time proxy monitoring with automatic failover to the fastest available node.
+- **Diagnostics**: Built-in ping and speedtest functionality to measure actual bandwidth.
+- **Universal Export**: One-command export for Docker, cURL, Git, and environment variables.
+- **Localization**: Full bilingual support (English and Russian).
+
 ---
 
 ## ⚡ Quick Start

@@ -192,3 +192,44 @@ impl AppConfig {
             .map(|p| format!("http://{}:{}", p.host, p.port))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_default_app_config() {
+        let config = AppConfig::default();
+        assert_eq!(config.active_profile, "throne");
+        assert!(!config.enabled);
+        assert!(config.profiles.contains_key("throne"));
+        assert!(config.profiles.contains_key("v2ray"));
+        assert!(!config.ping_targets.is_empty());
+    }
+
+    #[test]
+    fn test_active_profile_resolution() {
+        let mut config = AppConfig::default();
+        
+        // Default is throne
+        let profile = config.active_profile().unwrap();
+        assert_eq!(profile.name, "Throne");
+        
+        // Switch to v2ray
+        config.active_profile = "v2ray".to_string();
+        let profile2 = config.active_profile().unwrap();
+        assert_eq!(profile2.name, "v2rayN");
+        assert_eq!(profile2.port, 10808);
+        
+        // Invalid profile
+        config.active_profile = "nonexistent".to_string();
+        assert!(config.active_profile().is_none());
+    }
+
+    #[test]
+    fn test_url_generation() {
+        let config = AppConfig::default();
+        assert_eq!(config.get_socks_url().unwrap(), "socks5://127.0.0.1:2080");
+        assert_eq!(config.get_http_url().unwrap(), "http://127.0.0.1:2080");
+    }
+}

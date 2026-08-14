@@ -1,9 +1,10 @@
+use crate::cli::EnvMode;
 use crate::config::{AppConfig, I18n};
 
 /// Prints shell environment export or unset statements for `eval`.
-pub fn print_env_commands(mode: &str, config: &AppConfig, i18n: &I18n) {
+pub fn print_env_commands(mode: &EnvMode, config: &AppConfig, i18n: &I18n) {
     match mode {
-        "on" => {
+        EnvMode::On => {
             if let (Some(http_url), Some(socks_url), Some(profile)) = (
                 config.get_http_url(),
                 config.get_socks_url(),
@@ -28,10 +29,9 @@ pub fn print_env_commands(mode: &str, config: &AppConfig, i18n: &I18n) {
                 println!("echo \"{}\";", msg);
             }
         }
-        "off" => {
+        EnvMode::Off => {
             println!("unset http_proxy HTTP_PROXY https_proxy HTTPS_PROXY ALL_PROXY all_proxy GRADLE_OPTS JAVA_TOOL_OPTIONS;");
             println!("echo \"{}\";", i18n.t("env_off_msg"));
         }
-        _ => {}
     }
 }
