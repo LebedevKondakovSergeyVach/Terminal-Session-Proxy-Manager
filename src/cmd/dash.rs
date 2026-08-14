@@ -458,14 +458,14 @@ fn run_app(
                             .fg(Color::Magenta)
                             .add_modifier(Modifier::BOLD),
                     ),
-                    Span::styled(" | ", Style::default().fg(Color::Gray)),
+                    Span::styled(" edit | ", Style::default().fg(Color::Gray)),
                     Span::styled(
                         "s",
                         Style::default()
                             .fg(Color::LightGreen)
                             .add_modifier(Modifier::BOLD),
                     ),
-                    Span::styled(" sort | ", Style::default().fg(Color::Gray)),
+                    Span::styled(" bench+sort | ", Style::default().fg(Color::Gray)),
                     Span::styled(
                         "1/2",
                         Style::default()
