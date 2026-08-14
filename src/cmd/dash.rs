@@ -209,6 +209,9 @@ fn run_app(
         .unwrap_or(0);
     list_state.select(Some(active_idx));
 
+    let mut tab_index = 0; // 0 = Profiles, 1 = Config
+    let mut config_scroll: u16 = 0;
+
     loop {
         let current_state = { state.lock().unwrap().clone() };
 
@@ -218,19 +221,18 @@ fn run_app(
                 .margin(1)
                 .constraints(
                     [
-                        Constraint::Length(3),
-                        Constraint::Length(7),
-                        Constraint::Min(5),
-                        Constraint::Length(3),
+                        Constraint::Length(3), // Header & Tabs
+                        Constraint::Min(5),    // Main Content
+                        Constraint::Length(3), // Footer
                     ]
                     .as_ref(),
                 )
                 .split(f.area());
 
-            let middle_chunks = Layout::default()
+            let header_chunks = Layout::default()
                 .direction(Direction::Horizontal)
-                .constraints([Constraint::Percentage(40), Constraint::Percentage(60)])
-                .split(chunks[1]);
+                .constraints([Constraint::Percentage(60), Constraint::Percentage(40)])
+                .split(chunks[0]);
 
             // Header
             let header = Paragraph::new(Line::from(vec![
@@ -243,168 +245,247 @@ fn run_app(
                 Span::styled("- Dashboard", Style::default().fg(Color::White)),
             ]))
             .block(Block::default().borders(Borders::ALL));
-            f.render_widget(header, chunks[0]);
+            f.render_widget(header, header_chunks[0]);
 
-            // Live Info Panel
-            let ping_str = match current_state.ping_ms {
-                Some(ms) if ms < 200 => Span::styled(
-                    format!("{}ms", ms),
-                    Style::default()
-                        .fg(Color::Green)
-                        .add_modifier(Modifier::BOLD),
-                ),
-                Some(ms) if ms < 500 => Span::styled(
-                    format!("{}ms", ms),
-                    Style::default()
-                        .fg(Color::Yellow)
-                        .add_modifier(Modifier::BOLD),
-                ),
-                Some(ms) => Span::styled(
-                    format!("{}ms", ms),
-                    Style::default().fg(Color::Red).add_modifier(Modifier::BOLD),
-                ),
-                None => Span::styled("Offline/Timeout", Style::default().fg(Color::Red)),
-            };
-
-            let ip_style = if current_state.is_loading {
-                Style::default().fg(Color::DarkGray)
-            } else {
-                Style::default()
-                    .fg(Color::Cyan)
-                    .add_modifier(Modifier::BOLD)
-            };
-
-            let port_str = match current_state.is_local_listening {
-                Some(true) => Span::styled(
-                    "Active 🟢",
-                    Style::default()
-                        .fg(Color::Green)
-                        .add_modifier(Modifier::BOLD),
-                ),
-                Some(false) => Span::styled(
-                    "Dead 🔴 (Backend not running)",
-                    Style::default().fg(Color::Red).add_modifier(Modifier::BOLD),
-                ),
-                None => Span::styled("Checking...", Style::default().fg(Color::DarkGray)),
-            };
-
-            let info_text = vec![
-                Line::from(vec![]),
-                Line::from(vec![
-                    Span::styled(" External IP: ", Style::default().fg(Color::White)),
-                    Span::styled(&current_state.ip, ip_style),
-                ]),
-                Line::from(vec![
-                    Span::styled(" Location:    ", Style::default().fg(Color::White)),
-                    Span::styled(&current_state.location, ip_style),
-                ]),
-                Line::from(vec![
-                    Span::styled(" Latency:     ", Style::default().fg(Color::White)),
-                    ping_str,
-                ]),
-                Line::from(vec![
-                    Span::styled(" Local Port:  ", Style::default().fg(Color::White)),
-                    port_str,
-                ]),
-            ];
-
-            let info_panel = Paragraph::new(info_text).block(
-                Block::default()
-                    .title(" Live Monitor ")
-                    .borders(Borders::ALL),
-            );
-            f.render_widget(info_panel, middle_chunks[0]);
-
-            // Sparkline Graph
-            let sparkline = Sparkline::default()
-                .block(
-                    Block::default()
-                        .title(" Ping History (ms) ")
-                        .borders(Borders::ALL),
-                )
-                .data(&current_state.ping_history)
-                .style(Style::default().fg(Color::Green));
-            f.render_widget(sparkline, middle_chunks[1]);
-
-            // Profiles List
-            let items: Vec<ListItem> = profiles
-                .iter()
-                .map(|key| {
-                    let profile = config.profiles.get(key).unwrap();
-                    let content = format!(
-                        " {} | {}:{} ({})",
-                        profile.name, profile.host, profile.port, profile.protocol
-                    );
-
-                    let style = if key == &config.active_profile {
-                        Style::default()
-                            .fg(Color::Green)
-                            .add_modifier(Modifier::BOLD)
-                    } else {
-                        Style::default().fg(Color::White)
-                    };
-
-                    ListItem::new(Line::from(Span::styled(content, style)))
-                })
+            // Tabs
+            let titles: Vec<Line> = vec![" [1] Profiles ", " [2] Config JSON "]
+                .into_iter()
+                .map(Line::from)
                 .collect();
-
-            let list = List::new(items)
-                .block(Block::default().title(" Profiles ").borders(Borders::ALL))
+            let tabs = ratatui::widgets::Tabs::new(titles)
+                .block(Block::default().borders(Borders::ALL))
+                .select(tab_index)
                 .highlight_style(
-                    Style::default()
-                        .bg(Color::DarkGray)
-                        .add_modifier(Modifier::BOLD),
-                )
-                .highlight_symbol(">> ");
-
-            f.render_stateful_widget(list, chunks[2], &mut list_state);
-
-            // Footer
-            let footer = Paragraph::new(Line::from(vec![
-                Span::styled(" Use ", Style::default().fg(Color::Gray)),
-                Span::styled(
-                    "↑↓",
                     Style::default()
                         .fg(Color::Cyan)
                         .add_modifier(Modifier::BOLD),
-                ),
-                Span::styled(" nav | ", Style::default().fg(Color::Gray)),
-                Span::styled(
-                    "Enter",
+                );
+            f.render_widget(tabs, header_chunks[1]);
+
+            if tab_index == 0 {
+                let main_chunks = Layout::default()
+                    .direction(Direction::Vertical)
+                    .constraints([Constraint::Length(7), Constraint::Min(5)])
+                    .split(chunks[1]);
+
+                let middle_chunks = Layout::default()
+                    .direction(Direction::Horizontal)
+                    .constraints([Constraint::Percentage(40), Constraint::Percentage(60)])
+                    .split(main_chunks[0]);
+
+                // Live Info Panel
+                let ping_str = match current_state.ping_ms {
+                    Some(ms) if ms < 200 => Span::styled(
+                        format!("{}ms", ms),
+                        Style::default()
+                            .fg(Color::Green)
+                            .add_modifier(Modifier::BOLD),
+                    ),
+                    Some(ms) if ms < 500 => Span::styled(
+                        format!("{}ms", ms),
+                        Style::default()
+                            .fg(Color::Yellow)
+                            .add_modifier(Modifier::BOLD),
+                    ),
+                    Some(ms) => Span::styled(
+                        format!("{}ms", ms),
+                        Style::default().fg(Color::Red).add_modifier(Modifier::BOLD),
+                    ),
+                    None => Span::styled("Offline/Timeout", Style::default().fg(Color::Red)),
+                };
+
+                let ip_style = if current_state.is_loading {
+                    Style::default().fg(Color::DarkGray)
+                } else {
                     Style::default()
-                        .fg(Color::Green)
-                        .add_modifier(Modifier::BOLD),
-                ),
-                Span::styled(" switch | ", Style::default().fg(Color::Gray)),
-                Span::styled(
-                    "b",
-                    Style::default()
-                        .fg(Color::Yellow)
-                        .add_modifier(Modifier::BOLD),
-                ),
-                Span::styled(" best | ", Style::default().fg(Color::Gray)),
-                Span::styled(
-                    "i",
-                    Style::default()
-                        .fg(Color::Blue)
-                        .add_modifier(Modifier::BOLD),
-                ),
-                Span::styled(" import | ", Style::default().fg(Color::Gray)),
-                Span::styled(
-                    "e",
-                    Style::default()
-                        .fg(Color::Magenta)
-                        .add_modifier(Modifier::BOLD),
-                ),
-                Span::styled(" edit config | ", Style::default().fg(Color::Gray)),
-                Span::styled(
-                    "q",
-                    Style::default().fg(Color::Red).add_modifier(Modifier::BOLD),
-                ),
-                Span::styled(" quit", Style::default().fg(Color::Gray)),
-            ]))
-            .block(Block::default().borders(Borders::ALL));
-            f.render_widget(footer, chunks[3]);
+                        .fg(Color::Cyan)
+                        .add_modifier(Modifier::BOLD)
+                };
+
+                let port_str = match current_state.is_local_listening {
+                    Some(true) => Span::styled(
+                        "Active 🟢",
+                        Style::default()
+                            .fg(Color::Green)
+                            .add_modifier(Modifier::BOLD),
+                    ),
+                    Some(false) => Span::styled(
+                        "Dead 🔴 (Backend not running)",
+                        Style::default().fg(Color::Red).add_modifier(Modifier::BOLD),
+                    ),
+                    None => Span::styled("Checking...", Style::default().fg(Color::DarkGray)),
+                };
+
+                let info_text = vec![
+                    Line::from(vec![]),
+                    Line::from(vec![
+                        Span::styled(" External IP: ", Style::default().fg(Color::White)),
+                        Span::styled(&current_state.ip, ip_style),
+                    ]),
+                    Line::from(vec![
+                        Span::styled(" Location:    ", Style::default().fg(Color::White)),
+                        Span::styled(&current_state.location, ip_style),
+                    ]),
+                    Line::from(vec![
+                        Span::styled(" Latency:     ", Style::default().fg(Color::White)),
+                        ping_str,
+                    ]),
+                    Line::from(vec![
+                        Span::styled(" Local Port:  ", Style::default().fg(Color::White)),
+                        port_str,
+                    ]),
+                ];
+
+                let info_panel = Paragraph::new(info_text).block(
+                    Block::default()
+                        .title(" Live Monitor ")
+                        .borders(Borders::ALL),
+                );
+                f.render_widget(info_panel, middle_chunks[0]);
+
+                // Sparkline Graph
+                let sparkline = Sparkline::default()
+                    .block(
+                        Block::default()
+                            .title(" Ping History (ms) ")
+                            .borders(Borders::ALL),
+                    )
+                    .data(&current_state.ping_history)
+                    .style(Style::default().fg(Color::Green));
+                f.render_widget(sparkline, middle_chunks[1]);
+
+                // Profiles List
+                let items: Vec<ListItem> = profiles
+                    .iter()
+                    .map(|key| {
+                        let profile = config.profiles.get(key).unwrap();
+                        let content = format!(
+                            " {} | {}:{} ({})",
+                            profile.name, profile.host, profile.port, profile.protocol
+                        );
+
+                        let style = if key == &config.active_profile {
+                            Style::default()
+                                .fg(Color::Green)
+                                .add_modifier(Modifier::BOLD)
+                        } else {
+                            Style::default().fg(Color::White)
+                        };
+
+                        ListItem::new(Line::from(Span::styled(content, style)))
+                    })
+                    .collect();
+
+                let list = List::new(items)
+                    .block(Block::default().title(" Profiles ").borders(Borders::ALL))
+                    .highlight_style(
+                        Style::default()
+                            .bg(Color::DarkGray)
+                            .add_modifier(Modifier::BOLD),
+                    )
+                    .highlight_symbol(">> ");
+
+                f.render_stateful_widget(list, main_chunks[1], &mut list_state);
+            } else {
+                // Config Tab
+                let config_json = serde_json::to_string_pretty(config).unwrap_or_default();
+                let paragraph = Paragraph::new(config_json)
+                    .block(
+                        Block::default()
+                            .title(" Config JSON ")
+                            .borders(Borders::ALL),
+                    )
+                    .scroll((config_scroll, 0));
+                f.render_widget(paragraph, chunks[1]);
+            }
+
+            // Footer
+            let footer_text = if tab_index == 0 {
+                vec![
+                    Span::styled(" Use ", Style::default().fg(Color::Gray)),
+                    Span::styled(
+                        "↑↓",
+                        Style::default()
+                            .fg(Color::Cyan)
+                            .add_modifier(Modifier::BOLD),
+                    ),
+                    Span::styled(" nav | ", Style::default().fg(Color::Gray)),
+                    Span::styled(
+                        "Enter",
+                        Style::default()
+                            .fg(Color::Green)
+                            .add_modifier(Modifier::BOLD),
+                    ),
+                    Span::styled(" switch | ", Style::default().fg(Color::Gray)),
+                    Span::styled(
+                        "b",
+                        Style::default()
+                            .fg(Color::Yellow)
+                            .add_modifier(Modifier::BOLD),
+                    ),
+                    Span::styled(" best | ", Style::default().fg(Color::Gray)),
+                    Span::styled(
+                        "i",
+                        Style::default()
+                            .fg(Color::Blue)
+                            .add_modifier(Modifier::BOLD),
+                    ),
+                    Span::styled(" import | ", Style::default().fg(Color::Gray)),
+                    Span::styled(
+                        "e",
+                        Style::default()
+                            .fg(Color::Magenta)
+                            .add_modifier(Modifier::BOLD),
+                    ),
+                    Span::styled(" edit | ", Style::default().fg(Color::Gray)),
+                    Span::styled(
+                        "1/2",
+                        Style::default()
+                            .fg(Color::Cyan)
+                            .add_modifier(Modifier::BOLD),
+                    ),
+                    Span::styled(" tabs | ", Style::default().fg(Color::Gray)),
+                    Span::styled(
+                        "q",
+                        Style::default().fg(Color::Red).add_modifier(Modifier::BOLD),
+                    ),
+                    Span::styled(" quit", Style::default().fg(Color::Gray)),
+                ]
+            } else {
+                vec![
+                    Span::styled(" Use ", Style::default().fg(Color::Gray)),
+                    Span::styled(
+                        "↑↓",
+                        Style::default()
+                            .fg(Color::Cyan)
+                            .add_modifier(Modifier::BOLD),
+                    ),
+                    Span::styled(" scroll | ", Style::default().fg(Color::Gray)),
+                    Span::styled(
+                        "1/2",
+                        Style::default()
+                            .fg(Color::Cyan)
+                            .add_modifier(Modifier::BOLD),
+                    ),
+                    Span::styled(" tabs | ", Style::default().fg(Color::Gray)),
+                    Span::styled(
+                        "e",
+                        Style::default()
+                            .fg(Color::Magenta)
+                            .add_modifier(Modifier::BOLD),
+                    ),
+                    Span::styled(" edit config | ", Style::default().fg(Color::Gray)),
+                    Span::styled(
+                        "q",
+                        Style::default().fg(Color::Red).add_modifier(Modifier::BOLD),
+                    ),
+                    Span::styled(" quit", Style::default().fg(Color::Gray)),
+                ]
+            };
+
+            let footer = Paragraph::new(Line::from(footer_text))
+                .block(Block::default().borders(Borders::ALL));
+            f.render_widget(footer, chunks[2]);
         })?;
 
         if event::poll(Duration::from_millis(250))? {
@@ -413,42 +494,56 @@ fn run_app(
                     KeyCode::Char('q') | KeyCode::Esc => {
                         return Ok(DashAction::Quit);
                     }
-                    KeyCode::Char('b') => {
+                    KeyCode::Char('1') => {
+                        tab_index = 0;
+                    }
+                    KeyCode::Char('2') => {
+                        tab_index = 1;
+                    }
+                    KeyCode::Char('b') if tab_index == 0 => {
                         return Ok(DashAction::SelectBest);
                     }
-                    KeyCode::Char('i') => {
+                    KeyCode::Char('i') if tab_index == 0 => {
                         return Ok(DashAction::Import);
                     }
                     KeyCode::Char('e') => {
                         return Ok(DashAction::EditConfig);
                     }
                     KeyCode::Down | KeyCode::Char('j') => {
-                        let i = match list_state.selected() {
-                            Some(i) => {
-                                if i >= profiles.len() - 1 {
-                                    0
-                                } else {
-                                    i + 1
+                        if tab_index == 0 {
+                            let i = match list_state.selected() {
+                                Some(i) => {
+                                    if i >= profiles.len() - 1 {
+                                        0
+                                    } else {
+                                        i + 1
+                                    }
                                 }
-                            }
-                            None => 0,
-                        };
-                        list_state.select(Some(i));
+                                None => 0,
+                            };
+                            list_state.select(Some(i));
+                        } else {
+                            config_scroll = config_scroll.saturating_add(1);
+                        }
                     }
                     KeyCode::Up | KeyCode::Char('k') => {
-                        let i = match list_state.selected() {
-                            Some(i) => {
-                                if i == 0 {
-                                    profiles.len() - 1
-                                } else {
-                                    i - 1
+                        if tab_index == 0 {
+                            let i = match list_state.selected() {
+                                Some(i) => {
+                                    if i == 0 {
+                                        profiles.len() - 1
+                                    } else {
+                                        i - 1
+                                    }
                                 }
-                            }
-                            None => 0,
-                        };
-                        list_state.select(Some(i));
+                                None => 0,
+                            };
+                            list_state.select(Some(i));
+                        } else {
+                            config_scroll = config_scroll.saturating_sub(1);
+                        }
                     }
-                    KeyCode::Enter => {
+                    KeyCode::Enter if tab_index == 0 => {
                         if let Some(i) = list_state.selected() {
                             let selected_key = &profiles[i];
                             config.active_profile = selected_key.clone();
