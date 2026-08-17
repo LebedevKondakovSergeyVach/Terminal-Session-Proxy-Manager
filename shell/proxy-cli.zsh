@@ -12,13 +12,17 @@ proxy() {
         else
             proxy-cli "$@"
             if [ -f "$HOME/.proxy-cli-eval" ]; then
-                echo "[DEBUG-SHELL] Found $HOME/.proxy-cli-eval. Content:"
-                cat "$HOME/.proxy-cli-eval"
-                echo
+                if [ -f "$HOME/.proxy-cli-debug-enabled" ]; then
+                    echo "[DEBUG-SHELL] Found $HOME/.proxy-cli-eval. Content:"
+                    cat "$HOME/.proxy-cli-eval"
+                    echo
+                fi
                 eval "$(cat "$HOME/.proxy-cli-eval")"
                 rm -f "$HOME/.proxy-cli-eval"
             else
-                echo "[DEBUG-SHELL] $HOME/.proxy-cli-eval not found after proxy-cli exit."
+                if [ -f "$HOME/.proxy-cli-debug-enabled" ]; then
+                    echo "[DEBUG-SHELL] $HOME/.proxy-cli-eval not found after proxy-cli exit."
+                fi
             fi
         fi
     else

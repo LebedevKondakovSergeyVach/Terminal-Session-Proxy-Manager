@@ -25,13 +25,17 @@ proxy() {{
         else
             proxy-cli "$@"
             if [ -f "$HOME/.proxy-cli-eval" ]; then
-                echo "[DEBUG-SHELL] Found $HOME/.proxy-cli-eval. Content:"
-                cat "$HOME/.proxy-cli-eval"
-                echo
+                if [ -f "$HOME/.proxy-cli-debug-enabled" ]; then
+                    echo "[DEBUG-SHELL] Found $HOME/.proxy-cli-eval. Content:"
+                    cat "$HOME/.proxy-cli-eval"
+                    echo
+                fi
                 eval "$(cat "$HOME/.proxy-cli-eval")"
                 rm -f "$HOME/.proxy-cli-eval"
             else
-                echo "[DEBUG-SHELL] $HOME/.proxy-cli-eval not found after proxy-cli exit."
+                if [ -f "$HOME/.proxy-cli-debug-enabled" ]; then
+                    echo "[DEBUG-SHELL] $HOME/.proxy-cli-eval not found after proxy-cli exit."
+                fi
             fi
         fi
     else
@@ -51,13 +55,17 @@ proxy_switch() {{ proxy-cli switch "$@"; }}
 proxy_dash() {{ 
     proxy-cli dash "$@"
     if [ -f "$HOME/.proxy-cli-eval" ]; then
-        echo "[DEBUG-SHELL] proxy_dash: Found $HOME/.proxy-cli-eval. Content:"
-        cat "$HOME/.proxy-cli-eval"
-        echo
+        if [ -f "$HOME/.proxy-cli-debug-enabled" ]; then
+            echo "[DEBUG-SHELL] proxy_dash: Found $HOME/.proxy-cli-eval. Content:"
+            cat "$HOME/.proxy-cli-eval"
+            echo
+        fi
         eval "$(cat "$HOME/.proxy-cli-eval")"
         rm -f "$HOME/.proxy-cli-eval"
     else
-        echo "[DEBUG-SHELL] proxy_dash: $HOME/.proxy-cli-eval not found."
+        if [ -f "$HOME/.proxy-cli-debug-enabled" ]; then
+            echo "[DEBUG-SHELL] proxy_dash: $HOME/.proxy-cli-eval not found."
+        fi
     fi
 }}
 proxy_run() {{ proxy-cli run -- "$@"; }}
@@ -91,13 +99,17 @@ proxy() {{
         else
             proxy-cli "$@"
             if [ -f "$HOME/.proxy-cli-eval" ]; then
-                echo "[DEBUG-SHELL] Found $HOME/.proxy-cli-eval. Content:"
-                cat "$HOME/.proxy-cli-eval"
-                echo
+                if [ -f "$HOME/.proxy-cli-debug-enabled" ]; then
+                    echo "[DEBUG-SHELL] Found $HOME/.proxy-cli-eval. Content:"
+                    cat "$HOME/.proxy-cli-eval"
+                    echo
+                fi
                 eval "$(cat "$HOME/.proxy-cli-eval")"
                 rm -f "$HOME/.proxy-cli-eval"
             else
-                echo "[DEBUG-SHELL] $HOME/.proxy-cli-eval not found after proxy-cli exit."
+                if [ -f "$HOME/.proxy-cli-debug-enabled" ]; then
+                    echo "[DEBUG-SHELL] $HOME/.proxy-cli-eval not found after proxy-cli exit."
+                fi
             fi
         fi
     else
@@ -117,13 +129,17 @@ proxy_switch() {{ proxy-cli switch "$@"; }}
 proxy_dash() {{ 
     proxy-cli dash "$@"
     if [ -f "$HOME/.proxy-cli-eval" ]; then
-        echo "[DEBUG-SHELL] proxy_dash: Found $HOME/.proxy-cli-eval. Content:"
-        cat "$HOME/.proxy-cli-eval"
-        echo
+        if [ -f "$HOME/.proxy-cli-debug-enabled" ]; then
+            echo "[DEBUG-SHELL] proxy_dash: Found $HOME/.proxy-cli-eval. Content:"
+            cat "$HOME/.proxy-cli-eval"
+            echo
+        fi
         eval "$(cat "$HOME/.proxy-cli-eval")"
         rm -f "$HOME/.proxy-cli-eval"
     else
-        echo "[DEBUG-SHELL] proxy_dash: $HOME/.proxy-cli-eval not found."
+        if [ -f "$HOME/.proxy-cli-debug-enabled" ]; then
+            echo "[DEBUG-SHELL] proxy_dash: $HOME/.proxy-cli-eval not found."
+        fi
     fi
 }}
 proxy_run() {{ proxy-cli run -- "$@"; }}

@@ -57,6 +57,13 @@ pub enum Commands {
     #[command(subcommand)]
     Profile(ProfileCommands),
 
+    /// Manage debug logging state (on, off)
+    Debug {
+        /// Mode: on or off
+        #[arg(value_enum)]
+        mode: EnvMode,
+    },
+
     /// Interactive proxy profile selector
     Switch,
 

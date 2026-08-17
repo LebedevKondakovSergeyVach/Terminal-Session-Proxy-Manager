@@ -56,6 +56,7 @@ async fn run() -> Result<()> {
         "completions",
         "config",
         "settings",
+        "debug",
     ];
 
     for name in sub_names {
@@ -73,6 +74,21 @@ async fn run() -> Result<()> {
         }
         Commands::Env { mode } => {
             proxy_cli::cmd::env::print_env_commands(&mode, &config, &i18n);
+        }
+        Commands::Debug { mode } => {
+            if let Some(mut path) = dirs::home_dir() {
+                path.push(".proxy-cli-debug-enabled");
+                match mode {
+                    proxy_cli::cli::EnvMode::On => {
+                        let _ = std::fs::File::create(path);
+                        println!("{} Debug logging enabled", "✓".green());
+                    }
+                    proxy_cli::cli::EnvMode::Off => {
+                        let _ = std::fs::remove_file(path);
+                        println!("{} Debug logging disabled", "✓".green());
+                    }
+                }
+            }
         }
         Commands::Git { mode } => {
             git_cmd::handle_git_proxy(&mode, &config, &i18n)?;

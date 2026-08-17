@@ -668,11 +668,20 @@ fn run_app(
                                     use std::io::Write;
                                     let mut log_path = path.clone();
                                     log_path.push(".proxy-cli-debug.log");
-                                    let mut log_f = std::fs::OpenOptions::new()
-                                        .create(true)
-                                        .append(true)
-                                        .open(&log_path)
-                                        .ok();
+                                    
+                                    let mut debug_enabled_path = path.clone();
+                                    debug_enabled_path.push(".proxy-cli-debug-enabled");
+                                    let is_debug = debug_enabled_path.exists();
+
+                                    let mut log_f = if is_debug {
+                                        std::fs::OpenOptions::new()
+                                            .create(true)
+                                            .append(true)
+                                            .open(&log_path)
+                                            .ok()
+                                    } else {
+                                        None
+                                    };
                                     
                                     if let Some(ref mut l) = log_f {
                                         let _ = writeln!(l, "[dash] Processing Enter. Selected profile: {}", selected_key);
@@ -681,7 +690,6 @@ fn run_app(
                                     path.push(".proxy-cli-eval");
                                     match std::fs::File::create(&path) {
                                         Ok(mut f) => {
-                                            use std::io::Write;
                                             let url = format!(
                                                 "{}://{}:{}",
                                                 prof.protocol, prof.host, prof.port
