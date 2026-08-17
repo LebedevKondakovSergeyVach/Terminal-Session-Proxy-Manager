@@ -5,7 +5,7 @@ edition = "2021"
 authors = ["LebedevSergeyVach <sergejlebedev31838@gmail.com>"]
 description = "Universal, configurable CLI proxy management toolkit in Rust"
 license = "AGPL-3.0"
-repository = "https://github.com/LebedevSergeyVach/Proxy-CLI-rs"
+repository = "https://github.com/LebedevSergeyVach/Terminal-Session-Proxy-Manager"
 readme = "README.md"
 keywords = ["proxy", "cli", "zsh", "bash", "socks5"]
 

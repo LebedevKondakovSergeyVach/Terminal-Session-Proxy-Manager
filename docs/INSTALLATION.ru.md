@@ -10,8 +10,8 @@
 
 ```bash
 # 1. Клонирование
-git clone https://github.com/LebedevSergeyVach/Proxy-CLI-rs.git
-cd Proxy-CLI-rs
+git clone https://github.com/LebedevSergeyVach/Terminal-Session-Proxy-Manager.git
+cd Terminal-Session-Proxy-Manager
 
 # 2. Релизная компиляция
 cargo build --release
