@@ -4,14 +4,16 @@
 use anyhow::Result;
 use clap::{CommandFactory, FromArgMatches};
 use colored::Colorize;
-use terminal_session_proxy_manager::cli::{Cli, Commands, ConfigCommands, ProfileCommands, SettingsCommands};
+use std::env;
+use std::process::Command;
+use terminal_session_proxy_manager::cli::{
+    Cli, Commands, ConfigCommands, ProfileCommands, SettingsCommands,
+};
 use terminal_session_proxy_manager::cmd::{
     completions, dash, diagnose, export_cmd, git_cmd, import_cmd, init, monitor, ping, profile,
     settings, speedtest, status,
 };
 use terminal_session_proxy_manager::config::{AppConfig, AppSettings, I18n};
-use std::env;
-use std::process::Command;
 
 #[tokio::main]
 async fn main() {

@@ -74,7 +74,12 @@ prompt_proxy_status() {{ terminal-session-proxy-manager prompt; }}
             );
 
             let mut buf = Vec::new();
-            generate(Shell::Zsh, &mut cmd, "terminal-session-proxy-manager", &mut buf);
+            generate(
+                Shell::Zsh,
+                &mut cmd,
+                "terminal-session-proxy-manager",
+                &mut buf,
+            );
             if let Ok(compl_str) = String::from_utf8(buf) {
                 println!("{}", compl_str);
                 println!("compdef _terminal-session-proxy-manager proxy 2>/dev/null || true");
@@ -147,7 +152,12 @@ proxy_run() {{ terminal-session-proxy-manager run -- "$@"; }}
             );
 
             let mut buf = Vec::new();
-            generate(Shell::Bash, &mut cmd, "terminal-session-proxy-manager", &mut buf);
+            generate(
+                Shell::Bash,
+                &mut cmd,
+                "terminal-session-proxy-manager",
+                &mut buf,
+            );
             if let Ok(compl_str) = String::from_utf8(buf) {
                 println!("{}", compl_str);
                 println!("complete -F _terminal-session-proxy-manager proxy 2>/dev/null || true");

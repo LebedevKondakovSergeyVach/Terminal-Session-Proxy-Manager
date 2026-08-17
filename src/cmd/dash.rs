@@ -670,7 +670,8 @@ fn run_app(
                                     log_path.push(".terminal-session-proxy-manager-debug.log");
 
                                     let mut debug_enabled_path = path.clone();
-                                    debug_enabled_path.push(".terminal-session-proxy-manager-debug-enabled");
+                                    debug_enabled_path
+                                        .push(".terminal-session-proxy-manager-debug-enabled");
                                     let is_debug = debug_enabled_path.exists();
 
                                     let mut log_f = if is_debug {
