@@ -11,6 +11,10 @@ proxy() {
             [ -n "$ALL_PROXY" ] && eval "$(proxy-cli env on)"
         else
             proxy-cli "$@"
+            if [ -f "$HOME/.proxy-cli-eval" ]; then
+                eval "$(cat "$HOME/.proxy-cli-eval")"
+                rm -f "$HOME/.proxy-cli-eval"
+            fi
         fi
     else
         echo "❌ proxy-cli бинарник не найден в PATH"

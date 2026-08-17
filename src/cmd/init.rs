@@ -24,6 +24,10 @@ proxy() {{
             [ -n "$ALL_PROXY" ] && eval "$(proxy-cli env on)"
         else
             proxy-cli "$@"
+            if [ -f "$HOME/.proxy-cli-eval" ]; then
+                eval "$(cat "$HOME/.proxy-cli-eval")"
+                rm -f "$HOME/.proxy-cli-eval"
+            fi
         fi
     else
         echo "❌ proxy-cli binary not found in PATH"
@@ -39,7 +43,13 @@ proxy_diagnose() {{ proxy-cli diagnose "$@"; }}
 proxy_benchmark() {{ proxy-cli benchmark "$@"; }}
 proxy_best() {{ proxy-cli best "$@"; }}
 proxy_switch() {{ proxy-cli switch "$@"; }}
-proxy_dash() {{ proxy-cli dash "$@"; }}
+proxy_dash() {{ 
+    proxy-cli dash "$@"
+    if [ -f "$HOME/.proxy-cli-eval" ]; then
+        eval "$(cat "$HOME/.proxy-cli-eval")"
+        rm -f "$HOME/.proxy-cli-eval"
+    fi
+}}
 proxy_run() {{ proxy-cli run -- "$@"; }}
 prompt_proxy_status() {{ proxy-cli prompt; }}
 "#
@@ -70,6 +80,10 @@ proxy() {{
             [ -n "$ALL_PROXY" ] && eval "$(proxy-cli env on)"
         else
             proxy-cli "$@"
+            if [ -f "$HOME/.proxy-cli-eval" ]; then
+                eval "$(cat "$HOME/.proxy-cli-eval")"
+                rm -f "$HOME/.proxy-cli-eval"
+            fi
         fi
     else
         echo "❌ proxy-cli binary not found in PATH"
