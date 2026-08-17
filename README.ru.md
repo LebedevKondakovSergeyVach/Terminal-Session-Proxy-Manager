@@ -23,23 +23,35 @@
 
 ## ⚡ Быстрый старт
 
-### 🍏 macOS
-```bash
-cargo build --release
-cp target/release/proxy-cli /opt/homebrew/bin/
+### 📦 Установка
 
-# Добавить в ~/.zshrc:
+Установка напрямую через Cargo (рекомендуется):
+```bash
+cargo install --git https://github.com/LebedevSergeyVach/Terminal-Session-Proxy-Manager.git proxy-cli
+```
+
+Или локальная сборка из исходников:
+```bash
+git clone https://github.com/LebedevSergeyVach/Terminal-Session-Proxy-Manager.git
+cd Terminal-Session-Proxy-Manager
+cargo install --path .
+```
+
+### 🐚 Интеграция с оболочкой
+
+Чтобы команды `proxy` могли напрямую управлять вашей текущей сессией терминала, добавьте скрипт инициализации в конфигурационный файл вашей оболочки:
+
+**Для Zsh** (`~/.zshrc`):
+```bash
 eval "$(proxy-cli init zsh)"
 ```
 
-### 🐧 Linux
+**Для Bash** (`~/.bashrc`):
 ```bash
-cargo build --release
-sudo cp target/release/proxy-cli /usr/local/bin/
-
-# Добавить в ~/.bashrc (или ~/.zshrc):
 eval "$(proxy-cli init bash)"
 ```
+
+*После добавления обязательно перезапустите терминал или выполните `source ~/.zshrc`.*
 
 ---
 

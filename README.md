@@ -23,23 +23,35 @@ Universal, high-performance terminal session proxy management toolkit in **Rust*
 
 ## ⚡ Quick Start
 
-### 🍏 macOS
-```bash
-cargo build --release
-cp target/release/proxy-cli /opt/homebrew/bin/
+### 📦 Installation
 
-# Add to ~/.zshrc:
+Install directly via Cargo:
+```bash
+cargo install --git https://github.com/LebedevSergeyVach/Terminal-Session-Proxy-Manager.git proxy-cli
+```
+
+Or build locally from source:
+```bash
+git clone https://github.com/LebedevSergeyVach/Terminal-Session-Proxy-Manager.git
+cd Terminal-Session-Proxy-Manager
+cargo install --path .
+```
+
+### 🐚 Shell Integration
+
+To enable `proxy` commands to control your current shell session, add the init script to your configuration:
+
+**For Zsh** (`~/.zshrc`):
+```bash
 eval "$(proxy-cli init zsh)"
 ```
 
-### 🐧 Linux
+**For Bash** (`~/.bashrc`):
 ```bash
-cargo build --release
-sudo cp target/release/proxy-cli /usr/local/bin/
-
-# Add to ~/.bashrc (or ~/.zshrc):
 eval "$(proxy-cli init bash)"
 ```
+
+*Restart your terminal or run `source ~/.zshrc` to apply the changes.*
 
 ---
 
