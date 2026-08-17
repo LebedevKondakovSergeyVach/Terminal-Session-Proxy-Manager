@@ -22,7 +22,7 @@ Universal, high-performance terminal session proxy management toolkit in **Rust*
 - **Universal Export**: One-command export for Docker, cURL, Git, and environment variables.
 - **Localization**: Full bilingual support (English and Russian).
 
-![Interactive Dashboard](assets/proxy_dash.png)
+![Interactive Dashboard](assets/proxy_dashboard.png)
 
 ---
 
