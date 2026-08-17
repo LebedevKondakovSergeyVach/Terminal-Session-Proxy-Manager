@@ -70,3 +70,12 @@ jobs:
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update Homebrew formula
+        uses: mislav/bump-homebrew-formula-action@v3
+        with:
+          formula-name: terminal-session-proxy-manager
+          homebrew-tap: LebedevSergeyVach/homebrew-tap
+          download-url: https://github.com/LebedevSergeyVach/Terminal-Session-Proxy-Manager/releases/download/${{ github.ref_name }}/terminal-session-proxy-manager-macos-x86_64.tar.gz
+        env:
+          COMMITTER_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
