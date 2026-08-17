@@ -7,7 +7,7 @@
 [![Rust](https://img.shields.io/badge/rust-1.70%2B-orange.svg)](https://www.rust-lang.org)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey.svg)](README.md)
-![Views](https://api.visitorbadge.io/api/visitors?path=LebedevSergeyVach.Terminal-Session-Proxy-Manager&label=ПРОСМОТРЫ&labelColor=%23555555&countColor=%230e75b6)
+![Просмотры](https://komarev.com/ghpvc/?username=LebedevSergeyVach-Terminal-Session-Proxy-Manager&label=просмотры&color=blue&style=flat)
 
 Универсальный менеджер прокси-сессий для терминала на **Rust** для переключения прокси, контроля IP/локации, тестирования скорости и управления переменными окружения в **macOS** и **Linux** (Zsh / Bash).
 
