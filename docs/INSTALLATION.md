@@ -8,14 +8,6 @@ The easiest way to install is via Homebrew using our custom tap:
 brew install LebedevSergeyVach/tap/terminal-session-proxy-manager
 ```
 
-## 🐧 Arch Linux (AUR)
-
-If you are using Arch Linux, you can install the package directly from the AUR using your favorite helper (e.g., `yay` or `paru`):
-
-```bash
-yay -S terminal-session-proxy-manager
-```
-
 ## 🦀 Via Cargo (Any OS)
 
 If you have Rust installed, you can install the binary directly from GitHub:

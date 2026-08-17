@@ -8,14 +8,6 @@
 brew install LebedevSergeyVach/tap/terminal-session-proxy-manager
 ```
 
-## 🐧 Arch Linux (AUR)
-
-Если вы используете Arch Linux, пакет можно установить напрямую из AUR через ваш любимый помощник (например, `yay` или `paru`):
-
-```bash
-yay -S terminal-session-proxy-manager
-```
-
 ## 🦀 Через Cargo (Любая ОС)
 
 Если у вас установлен Rust, вы можете установить бинарный файл напрямую с GitHub:
