@@ -25,12 +25,22 @@
 
 ### 📦 Установка
 
-Установка напрямую через Cargo (рекомендуется):
+**macOS / Linux (через Homebrew):**
+```bash
+brew install LebedevSergeyVach/tap/terminal-session-proxy-manager
+```
+
+**Arch Linux (через AUR):**
+```bash
+yay -S terminal-session-proxy-manager
+```
+
+**Через Cargo:**
 ```bash
 cargo install --git https://github.com/LebedevSergeyVach/Terminal-Session-Proxy-Manager.git terminal-session-proxy-manager
 ```
 
-Или локальная сборка из исходников:
+Или собрать локально из исходников:
 ```bash
 git clone https://github.com/LebedevSergeyVach/Terminal-Session-Proxy-Manager.git
 cd Terminal-Session-Proxy-Manager

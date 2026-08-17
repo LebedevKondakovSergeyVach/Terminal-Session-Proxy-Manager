@@ -25,7 +25,17 @@ Universal, high-performance terminal session proxy management toolkit in **Rust*
 
 ### 📦 Installation
 
-Install directly via Cargo:
+**macOS / Linux (via Homebrew):**
+```bash
+brew install LebedevSergeyVach/tap/terminal-session-proxy-manager
+```
+
+**Arch Linux (via AUR):**
+```bash
+yay -S terminal-session-proxy-manager
+```
+
+**Via Cargo:**
 ```bash
 cargo install --git https://github.com/LebedevSergeyVach/Terminal-Session-Proxy-Manager.git terminal-session-proxy-manager
 ```

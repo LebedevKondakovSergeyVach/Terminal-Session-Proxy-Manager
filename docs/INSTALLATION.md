@@ -1,12 +1,34 @@
-# 📦 Installation & Building (macOS & Linux)
+# 📦 Installation (macOS & Linux)
 
-## 📋 Requirements
-- **Rust 1.70+** (`cargo`, `rustc`)
-- **Shell**: `zsh` or `bash`
+## 🍏 macOS / Linux (Homebrew)
+
+The easiest way to install is via Homebrew using our custom tap:
+
+```bash
+brew install LebedevSergeyVach/tap/terminal-session-proxy-manager
+```
+
+## 🐧 Arch Linux (AUR)
+
+If you are using Arch Linux, you can install the package directly from the AUR using your favorite helper (e.g., `yay` or `paru`):
+
+```bash
+yay -S terminal-session-proxy-manager
+```
+
+## 🦀 Via Cargo (Any OS)
+
+If you have Rust installed, you can install the binary directly from GitHub:
+
+```bash
+cargo install --git https://github.com/LebedevSergeyVach/Terminal-Session-Proxy-Manager.git terminal-session-proxy-manager
+```
 
 ---
 
 ## 🛠️ Building from Source
+
+If you prefer to compile the application locally:
 
 ```bash
 # 1. Clone repository
@@ -15,43 +37,27 @@ cd Terminal-Session-Proxy-Manager
 
 # 2. Compile release binary
 cargo build --release
+```bash
+cargo install --path .
 ```
 
 ---
 
-## 🍏 Installation on macOS
+## 🐚 Shell Integration (Required)
 
+No matter how you installed the application, you must add the initialization script to your shell configuration file to enable the interactive `proxy` command.
+
+**For Zsh** (Add to `~/.zshrc`):
 ```bash
-# Option A: Homebrew bin (Recommended)
-cp target/release/terminal-session-proxy-manager /opt/homebrew/bin/
-
-# Option B: Cargo bin
-cp target/release/terminal-session-proxy-manager ~/.cargo/bin/
-```
-
-### Add to `~/.zshrc`:
-```zsh
 eval "$(terminal-session-proxy-manager init zsh)"
 ```
 
----
-
-## 🐧 Installation on Linux (Ubuntu/Debian/Fedora/Arch)
-
-```bash
-# Option A: System PATH (For all users)
-sudo cp target/release/terminal-session-proxy-manager /usr/local/bin/
-
-# Option B: User Cargo bin
-cp target/release/terminal-session-proxy-manager ~/.cargo/bin/
-```
-
-### Add to `~/.bashrc` or `~/.zshrc`:
+**For Bash** (Add to `~/.bashrc`):
 ```bash
 eval "$(terminal-session-proxy-manager init bash)"
 ```
 
----
+*Don't forget to restart your terminal or run `source ~/.zshrc` to apply the changes!*
 
 ## 🔍 Verification
 ```bash

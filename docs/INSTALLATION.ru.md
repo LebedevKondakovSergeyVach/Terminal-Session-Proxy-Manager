@@ -1,12 +1,34 @@
-# 📦 Установка и Сборка (macOS & Linux)
+# 📦 Установка (macOS & Linux)
 
-## 📋 Требования
-- **Rust 1.70+** (`cargo`, `rustc`)
-- **Оболочка**: `zsh` или `bash`
+## 🍏 macOS / Linux (Homebrew)
+
+Самый простой способ установки через наш собственный репозиторий (tap):
+
+```bash
+brew install LebedevSergeyVach/tap/terminal-session-proxy-manager
+```
+
+## 🐧 Arch Linux (AUR)
+
+Если вы используете Arch Linux, пакет можно установить напрямую из AUR через ваш любимый помощник (например, `yay` или `paru`):
+
+```bash
+yay -S terminal-session-proxy-manager
+```
+
+## 🦀 Через Cargo (Любая ОС)
+
+Если у вас установлен Rust, вы можете установить бинарный файл напрямую с GitHub:
+
+```bash
+cargo install --git https://github.com/LebedevSergeyVach/Terminal-Session-Proxy-Manager.git terminal-session-proxy-manager
+```
 
 ---
 
 ## 🛠️ Сборка из исходников
+
+Если вы предпочитаете скомпилировать программу локально:
 
 ```bash
 # 1. Клонирование
@@ -15,43 +37,27 @@ cd Terminal-Session-Proxy-Manager
 
 # 2. Релизная компиляция
 cargo build --release
+```bash
+cargo install --path .
 ```
 
 ---
 
-## 🍏 Установка на macOS
+## 🐚 Интеграция с оболочкой (Обязательно)
 
+Независимо от того, как вы установили программу, вам необходимо добавить скрипт инициализации в конфигурационный файл вашей оболочки, чтобы работала интерактивная команда `proxy`.
+
+**Для Zsh** (Добавьте в `~/.zshrc`):
 ```bash
-# Вариант A: Homebrew bin (Рекомендуется)
-cp target/release/terminal-session-proxy-manager /opt/homebrew/bin/
-
-# Вариант B: Cargo bin
-cp target/release/terminal-session-proxy-manager ~/.cargo/bin/
-```
-
-### Добавление в `~/.zshrc`:
-```zsh
 eval "$(terminal-session-proxy-manager init zsh)"
 ```
 
----
-
-## 🐧 Установка на Linux (Ubuntu/Debian/Fedora/Arch)
-
-```bash
-# Вариант A: Системный PATH (Для всех пользователей)
-sudo cp target/release/terminal-session-proxy-manager /usr/local/bin/
-
-# Вариант B: Пользовательский Cargo bin
-cp target/release/terminal-session-proxy-manager ~/.cargo/bin/
-```
-
-### Добавление в `~/.bashrc` или `~/.zshrc`:
+**Для Bash** (Добавьте в `~/.bashrc`):
 ```bash
 eval "$(terminal-session-proxy-manager init bash)"
 ```
 
----
+*Не забудьте перезапустить терминал или выполнить `source ~/.zshrc` для применения изменений!*
 
 ## 🔍 Проверка работы
 ```bash
