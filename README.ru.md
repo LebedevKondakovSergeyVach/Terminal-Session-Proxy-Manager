@@ -27,7 +27,7 @@
 
 Установка напрямую через Cargo (рекомендуется):
 ```bash
-cargo install --git https://github.com/LebedevSergeyVach/Terminal-Session-Proxy-Manager.git proxy-cli
+cargo install --git https://github.com/LebedevSergeyVach/Terminal-Session-Proxy-Manager.git terminal-session-proxy-manager
 ```
 
 Или локальная сборка из исходников:
@@ -43,12 +43,12 @@ cargo install --path .
 
 **Для Zsh** (`~/.zshrc`):
 ```bash
-eval "$(proxy-cli init zsh)"
+eval "$(terminal-session-proxy-manager init zsh)"
 ```
 
 **Для Bash** (`~/.bashrc`):
 ```bash
-eval "$(proxy-cli init bash)"
+eval "$(terminal-session-proxy-manager init bash)"
 ```
 
 *После добавления обязательно перезапустите терминал или выполните `source ~/.zshrc`.*
@@ -77,7 +77,7 @@ eval "$(proxy-cli init bash)"
 | `proxy ping` | Параллельный пинг целевых сервисов |
 | `proxy diagnose` | Проверить локальный сокет и доступность API |
 | `proxy run -- <cmd>` | Выполнить команду через прокси |
-| `proxy-cli completions zsh` | Сгенерировать автодополнение |
+| `terminal-session-proxy-manager completions zsh` | Сгенерировать автодополнение |
 
 ---
 

@@ -1,7 +1,7 @@
 # ⚙️ Конфигурация
 
 ## 1. `settings.json`
-Указывает глобальные настройки приложения и предпочитаемый язык интерфейса. Ищется по пути: `~/.config/proxy-cli/settings.json` -> `./settings.json`.
+Указывает глобальные настройки приложения и предпочитаемый язык интерфейса. Ищется по пути: `~/.config/terminal-session-proxy-manager/settings.json` -> `./settings.json`.
 
 ```json
 {

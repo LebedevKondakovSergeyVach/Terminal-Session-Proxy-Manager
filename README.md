@@ -27,7 +27,7 @@ Universal, high-performance terminal session proxy management toolkit in **Rust*
 
 Install directly via Cargo:
 ```bash
-cargo install --git https://github.com/LebedevSergeyVach/Terminal-Session-Proxy-Manager.git proxy-cli
+cargo install --git https://github.com/LebedevSergeyVach/Terminal-Session-Proxy-Manager.git terminal-session-proxy-manager
 ```
 
 Or build locally from source:
@@ -43,12 +43,12 @@ To enable `proxy` commands to control your current shell session, add the init s
 
 **For Zsh** (`~/.zshrc`):
 ```bash
-eval "$(proxy-cli init zsh)"
+eval "$(terminal-session-proxy-manager init zsh)"
 ```
 
 **For Bash** (`~/.bashrc`):
 ```bash
-eval "$(proxy-cli init bash)"
+eval "$(terminal-session-proxy-manager init bash)"
 ```
 
 *Restart your terminal or run `source ~/.zshrc` to apply the changes.*
@@ -77,7 +77,7 @@ eval "$(proxy-cli init bash)"
 | `proxy ping` | Probe latency to target endpoints |
 | `proxy diagnose` | Extended diagnostics for local sockets & HTTP APIs |
 | `proxy run -- <cmd>` | Execute a single command through proxy |
-| `proxy-cli completions zsh` | Generate auto-completion scripts |
+| `terminal-session-proxy-manager completions zsh` | Generate auto-completion scripts |
 
 ---
 

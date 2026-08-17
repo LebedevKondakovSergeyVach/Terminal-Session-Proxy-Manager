@@ -8,149 +8,149 @@ pub fn generate_shell_init<C: CommandFactory>(shell_type: &ShellType) {
     match shell_type {
         ShellType::Zsh => {
             println!(
-                r#"# proxy-cli Zsh Integration
+                r#"# terminal-session-proxy-manager Zsh Integration
 proxy() {{
-    if command -v proxy-cli >/dev/null 2>&1; then
+    if command -v terminal-session-proxy-manager >/dev/null 2>&1; then
         if [[ "$1" == "on" || "$1" == "off" ]]; then
-            eval "$(proxy-cli env "$1")"
+            eval "$(terminal-session-proxy-manager env "$1")"
         elif [[ "$1" == "use" ]]; then
-            proxy-cli profile use "$2"
-            [ -n "$ALL_PROXY" ] && eval "$(proxy-cli env on)"
+            terminal-session-proxy-manager profile use "$2"
+            [ -n "$ALL_PROXY" ] && eval "$(terminal-session-proxy-manager env on)"
         elif [[ "$1" == "switch" ]]; then
-            proxy-cli profile select
-            [ -n "$ALL_PROXY" ] && eval "$(proxy-cli env on)"
+            terminal-session-proxy-manager profile select
+            [ -n "$ALL_PROXY" ] && eval "$(terminal-session-proxy-manager env on)"
         elif [[ "$1" == "best" ]]; then
-            proxy-cli profile best
-            [ -n "$ALL_PROXY" ] && eval "$(proxy-cli env on)"
+            terminal-session-proxy-manager profile best
+            [ -n "$ALL_PROXY" ] && eval "$(terminal-session-proxy-manager env on)"
         else
-            proxy-cli "$@"
-            if [ -f "$HOME/.proxy-cli-eval" ]; then
-                if [ -f "$HOME/.proxy-cli-debug-enabled" ]; then
-                    echo "[DEBUG-SHELL] Found $HOME/.proxy-cli-eval. Content:"
-                    cat "$HOME/.proxy-cli-eval"
+            terminal-session-proxy-manager "$@"
+            if [ -f "$HOME/.terminal-session-proxy-manager-eval" ]; then
+                if [ -f "$HOME/.terminal-session-proxy-manager-debug-enabled" ]; then
+                    echo "[DEBUG-SHELL] Found $HOME/.terminal-session-proxy-manager-eval. Content:"
+                    cat "$HOME/.terminal-session-proxy-manager-eval"
                     echo
                 fi
-                eval "$(cat "$HOME/.proxy-cli-eval")"
-                rm -f "$HOME/.proxy-cli-eval"
+                eval "$(cat "$HOME/.terminal-session-proxy-manager-eval")"
+                rm -f "$HOME/.terminal-session-proxy-manager-eval"
             else
-                if [ -f "$HOME/.proxy-cli-debug-enabled" ]; then
-                    echo "[DEBUG-SHELL] $HOME/.proxy-cli-eval not found after proxy-cli exit."
+                if [ -f "$HOME/.terminal-session-proxy-manager-debug-enabled" ]; then
+                    echo "[DEBUG-SHELL] $HOME/.terminal-session-proxy-manager-eval not found after terminal-session-proxy-manager exit."
                 fi
             fi
         fi
     else
-        echo "❌ proxy-cli binary not found in PATH"
+        echo "❌ terminal-session-proxy-manager binary not found in PATH"
     fi
 }}
 
-proxy_on() {{ eval "$(proxy-cli env on)"; }}
-proxy_off() {{ eval "$(proxy-cli env off)"; }}
+proxy_on() {{ eval "$(terminal-session-proxy-manager env on)"; }}
+proxy_off() {{ eval "$(terminal-session-proxy-manager env off)"; }}
 proxy_toggle() {{ if [ -n "$ALL_PROXY" ]; then proxy_off; else proxy_on; fi; }}
-proxy_status() {{ proxy-cli status "$@"; }}
-proxy_ping() {{ proxy-cli ping "$@"; }}
-proxy_diagnose() {{ proxy-cli diagnose "$@"; }}
-proxy_benchmark() {{ proxy-cli benchmark "$@"; }}
-proxy_best() {{ proxy-cli best "$@"; }}
-proxy_switch() {{ proxy-cli switch "$@"; }}
+proxy_status() {{ terminal-session-proxy-manager status "$@"; }}
+proxy_ping() {{ terminal-session-proxy-manager ping "$@"; }}
+proxy_diagnose() {{ terminal-session-proxy-manager diagnose "$@"; }}
+proxy_benchmark() {{ terminal-session-proxy-manager benchmark "$@"; }}
+proxy_best() {{ terminal-session-proxy-manager best "$@"; }}
+proxy_switch() {{ terminal-session-proxy-manager switch "$@"; }}
 proxy_dash() {{ 
-    proxy-cli dash "$@"
-    if [ -f "$HOME/.proxy-cli-eval" ]; then
-        if [ -f "$HOME/.proxy-cli-debug-enabled" ]; then
-            echo "[DEBUG-SHELL] proxy_dash: Found $HOME/.proxy-cli-eval. Content:"
-            cat "$HOME/.proxy-cli-eval"
+    terminal-session-proxy-manager dash "$@"
+    if [ -f "$HOME/.terminal-session-proxy-manager-eval" ]; then
+        if [ -f "$HOME/.terminal-session-proxy-manager-debug-enabled" ]; then
+            echo "[DEBUG-SHELL] proxy_dash: Found $HOME/.terminal-session-proxy-manager-eval. Content:"
+            cat "$HOME/.terminal-session-proxy-manager-eval"
             echo
         fi
-        eval "$(cat "$HOME/.proxy-cli-eval")"
-        rm -f "$HOME/.proxy-cli-eval"
+        eval "$(cat "$HOME/.terminal-session-proxy-manager-eval")"
+        rm -f "$HOME/.terminal-session-proxy-manager-eval"
     else
-        if [ -f "$HOME/.proxy-cli-debug-enabled" ]; then
-            echo "[DEBUG-SHELL] proxy_dash: $HOME/.proxy-cli-eval not found."
+        if [ -f "$HOME/.terminal-session-proxy-manager-debug-enabled" ]; then
+            echo "[DEBUG-SHELL] proxy_dash: $HOME/.terminal-session-proxy-manager-eval not found."
         fi
     fi
 }}
-proxy_run() {{ proxy-cli run -- "$@"; }}
-prompt_proxy_status() {{ proxy-cli prompt; }}
+proxy_run() {{ terminal-session-proxy-manager run -- "$@"; }}
+prompt_proxy_status() {{ terminal-session-proxy-manager prompt; }}
 "#
             );
 
             let mut buf = Vec::new();
-            generate(Shell::Zsh, &mut cmd, "proxy-cli", &mut buf);
+            generate(Shell::Zsh, &mut cmd, "terminal-session-proxy-manager", &mut buf);
             if let Ok(compl_str) = String::from_utf8(buf) {
                 println!("{}", compl_str);
-                println!("compdef _proxy-cli proxy 2>/dev/null || true");
+                println!("compdef _terminal-session-proxy-manager proxy 2>/dev/null || true");
             }
         }
         ShellType::Bash => {
             println!(
-                r#"# proxy-cli Bash Integration
+                r#"# terminal-session-proxy-manager Bash Integration
 proxy() {{
-    if command -v proxy-cli >/dev/null 2>&1; then
+    if command -v terminal-session-proxy-manager >/dev/null 2>&1; then
         if [ "$1" = "on" ] || [ "$1" = "off" ]; then
-            eval "$(proxy-cli env "$1")"
+            eval "$(terminal-session-proxy-manager env "$1")"
         elif [ "$1" = "use" ]; then
-            proxy-cli profile use "$2"
-            [ -n "$ALL_PROXY" ] && eval "$(proxy-cli env on)"
+            terminal-session-proxy-manager profile use "$2"
+            [ -n "$ALL_PROXY" ] && eval "$(terminal-session-proxy-manager env on)"
         elif [ "$1" = "switch" ]; then
-            proxy-cli profile select
-            [ -n "$ALL_PROXY" ] && eval "$(proxy-cli env on)"
+            terminal-session-proxy-manager profile select
+            [ -n "$ALL_PROXY" ] && eval "$(terminal-session-proxy-manager env on)"
         elif [ "$1" = "best" ]; then
-            proxy-cli profile best
-            [ -n "$ALL_PROXY" ] && eval "$(proxy-cli env on)"
+            terminal-session-proxy-manager profile best
+            [ -n "$ALL_PROXY" ] && eval "$(terminal-session-proxy-manager env on)"
         else
-            proxy-cli "$@"
-            if [ -f "$HOME/.proxy-cli-eval" ]; then
-                if [ -f "$HOME/.proxy-cli-debug-enabled" ]; then
-                    echo "[DEBUG-SHELL] Found $HOME/.proxy-cli-eval. Content:"
-                    cat "$HOME/.proxy-cli-eval"
+            terminal-session-proxy-manager "$@"
+            if [ -f "$HOME/.terminal-session-proxy-manager-eval" ]; then
+                if [ -f "$HOME/.terminal-session-proxy-manager-debug-enabled" ]; then
+                    echo "[DEBUG-SHELL] Found $HOME/.terminal-session-proxy-manager-eval. Content:"
+                    cat "$HOME/.terminal-session-proxy-manager-eval"
                     echo
                 fi
-                eval "$(cat "$HOME/.proxy-cli-eval")"
-                rm -f "$HOME/.proxy-cli-eval"
+                eval "$(cat "$HOME/.terminal-session-proxy-manager-eval")"
+                rm -f "$HOME/.terminal-session-proxy-manager-eval"
             else
-                if [ -f "$HOME/.proxy-cli-debug-enabled" ]; then
-                    echo "[DEBUG-SHELL] $HOME/.proxy-cli-eval not found after proxy-cli exit."
+                if [ -f "$HOME/.terminal-session-proxy-manager-debug-enabled" ]; then
+                    echo "[DEBUG-SHELL] $HOME/.terminal-session-proxy-manager-eval not found after terminal-session-proxy-manager exit."
                 fi
             fi
         fi
     else
-        echo "❌ proxy-cli binary not found in PATH"
+        echo "❌ terminal-session-proxy-manager binary not found in PATH"
     fi
 }}
 
-proxy_on() {{ eval "$(proxy-cli env on)"; }}
-proxy_off() {{ eval "$(proxy-cli env off)"; }}
+proxy_on() {{ eval "$(terminal-session-proxy-manager env on)"; }}
+proxy_off() {{ eval "$(terminal-session-proxy-manager env off)"; }}
 proxy_toggle() {{ if [ -n "$ALL_PROXY" ]; then proxy_off; else proxy_on; fi; }}
-proxy_status() {{ proxy-cli status "$@"; }}
-proxy_ping() {{ proxy-cli ping "$@"; }}
-proxy_diagnose() {{ proxy-cli diagnose "$@"; }}
-proxy_benchmark() {{ proxy-cli benchmark "$@"; }}
-proxy_best() {{ proxy-cli best "$@"; }}
-proxy_switch() {{ proxy-cli switch "$@"; }}
+proxy_status() {{ terminal-session-proxy-manager status "$@"; }}
+proxy_ping() {{ terminal-session-proxy-manager ping "$@"; }}
+proxy_diagnose() {{ terminal-session-proxy-manager diagnose "$@"; }}
+proxy_benchmark() {{ terminal-session-proxy-manager benchmark "$@"; }}
+proxy_best() {{ terminal-session-proxy-manager best "$@"; }}
+proxy_switch() {{ terminal-session-proxy-manager switch "$@"; }}
 proxy_dash() {{ 
-    proxy-cli dash "$@"
-    if [ -f "$HOME/.proxy-cli-eval" ]; then
-        if [ -f "$HOME/.proxy-cli-debug-enabled" ]; then
-            echo "[DEBUG-SHELL] proxy_dash: Found $HOME/.proxy-cli-eval. Content:"
-            cat "$HOME/.proxy-cli-eval"
+    terminal-session-proxy-manager dash "$@"
+    if [ -f "$HOME/.terminal-session-proxy-manager-eval" ]; then
+        if [ -f "$HOME/.terminal-session-proxy-manager-debug-enabled" ]; then
+            echo "[DEBUG-SHELL] proxy_dash: Found $HOME/.terminal-session-proxy-manager-eval. Content:"
+            cat "$HOME/.terminal-session-proxy-manager-eval"
             echo
         fi
-        eval "$(cat "$HOME/.proxy-cli-eval")"
-        rm -f "$HOME/.proxy-cli-eval"
+        eval "$(cat "$HOME/.terminal-session-proxy-manager-eval")"
+        rm -f "$HOME/.terminal-session-proxy-manager-eval"
     else
-        if [ -f "$HOME/.proxy-cli-debug-enabled" ]; then
-            echo "[DEBUG-SHELL] proxy_dash: $HOME/.proxy-cli-eval not found."
+        if [ -f "$HOME/.terminal-session-proxy-manager-debug-enabled" ]; then
+            echo "[DEBUG-SHELL] proxy_dash: $HOME/.terminal-session-proxy-manager-eval not found."
         fi
     fi
 }}
-proxy_run() {{ proxy-cli run -- "$@"; }}
+proxy_run() {{ terminal-session-proxy-manager run -- "$@"; }}
 "#
             );
 
             let mut buf = Vec::new();
-            generate(Shell::Bash, &mut cmd, "proxy-cli", &mut buf);
+            generate(Shell::Bash, &mut cmd, "terminal-session-proxy-manager", &mut buf);
             if let Ok(compl_str) = String::from_utf8(buf) {
                 println!("{}", compl_str);
-                println!("complete -F _proxy-cli proxy 2>/dev/null || true");
+                println!("complete -F _terminal-session-proxy-manager proxy 2>/dev/null || true");
             }
         }
     }

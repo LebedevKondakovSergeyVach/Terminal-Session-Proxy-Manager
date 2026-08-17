@@ -31,7 +31,7 @@ impl AppSettings {
     pub fn get_settings_path() -> PathBuf {
         let global_path = dirs::config_dir()
             .unwrap_or_else(|| PathBuf::from("."))
-            .join("proxy-cli")
+            .join("terminal-session-proxy-manager")
             .join("settings.json");
 
         if global_path.exists() {

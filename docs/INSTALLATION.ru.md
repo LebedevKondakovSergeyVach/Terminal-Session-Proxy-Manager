@@ -23,15 +23,15 @@ cargo build --release
 
 ```bash
 # Вариант A: Homebrew bin (Рекомендуется)
-cp target/release/proxy-cli /opt/homebrew/bin/
+cp target/release/terminal-session-proxy-manager /opt/homebrew/bin/
 
 # Вариант B: Cargo bin
-cp target/release/proxy-cli ~/.cargo/bin/
+cp target/release/terminal-session-proxy-manager ~/.cargo/bin/
 ```
 
 ### Добавление в `~/.zshrc`:
 ```zsh
-eval "$(proxy-cli init zsh)"
+eval "$(terminal-session-proxy-manager init zsh)"
 ```
 
 ---
@@ -40,23 +40,23 @@ eval "$(proxy-cli init zsh)"
 
 ```bash
 # Вариант A: Системный PATH (Для всех пользователей)
-sudo cp target/release/proxy-cli /usr/local/bin/
+sudo cp target/release/terminal-session-proxy-manager /usr/local/bin/
 
 # Вариант B: Пользовательский Cargo bin
-cp target/release/proxy-cli ~/.cargo/bin/
+cp target/release/terminal-session-proxy-manager ~/.cargo/bin/
 ```
 
 ### Добавление в `~/.bashrc` или `~/.zshrc`:
 ```bash
-eval "$(proxy-cli init bash)"
+eval "$(terminal-session-proxy-manager init bash)"
 ```
 
 ---
 
 ## 🔍 Проверка работы
 ```bash
-proxy-cli --version
-# proxy-cli 1.1.1
+terminal-session-proxy-manager --version
+# terminal-session-proxy-manager 1.1.1
 
 proxy status
 ```

@@ -50,7 +50,7 @@ proxy monitor # Проверить соединение; при сбое авт�
 
 ## 7. Управление профилями (`profile`)
 ```bash
-proxy-cli profile list       # Список всех профилей
+terminal-session-proxy-manager profile list       # Список всех профилей
 proxy switch                 # Интерактивное меню выбора профиля стрелочками
 proxy use v2ray              # Переключить активный профиль
 proxy dash                   # Запустить интерактивный TUI Дашборд
@@ -64,7 +64,7 @@ proxy import <file/url>      # Импорт профилей из JSON/URL
 ## 8. Замер задержки (`ping`)
 ```bash
 proxy ping                 # Замер задержки до сервисов
-proxy-cli ping --timeout 2000 # Пинг с таймаутом 2000мс
+terminal-session-proxy-manager ping --timeout 2000 # Пинг с таймаутом 2000мс
 ```
 
 ---
@@ -85,5 +85,5 @@ proxy run -- curl https://api.openai.com
 
 ## 11. Автодополнение (`completions`)
 ```bash
-proxy-cli completions zsh > ~/.zsh/completions/_proxy-cli
+terminal-session-proxy-manager completions zsh > ~/.zsh/completions/_terminal-session-proxy-manager
 ```

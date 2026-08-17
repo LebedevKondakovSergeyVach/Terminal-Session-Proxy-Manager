@@ -2,13 +2,13 @@
 
 ## Zsh (`~/.zshrc`)
 ```zsh
-eval "$(proxy-cli init zsh)"
+eval "$(terminal-session-proxy-manager init zsh)"
 ```
 > Совместимо с Powerlevel10k Instant Prompt (не создает консольного вывода при старте).
 
 ## Bash (`~/.bashrc`)
 ```bash
-eval "$(proxy-cli init bash)"
+eval "$(terminal-session-proxy-manager init bash)"
 ```
 
 ---

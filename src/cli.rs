@@ -4,7 +4,7 @@ use clap_complete::Shell;
 /// Top-level CLI configuration.
 #[derive(Parser)]
 #[command(
-    name = "proxy-cli",
+    name = "terminal-session-proxy-manager",
     author = "LebedevSergeyVach",
     version = env!("CARGO_PKG_VERSION"),
     about = "Universal, configurable CLI proxy management toolkit in Rust",

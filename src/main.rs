@@ -4,12 +4,12 @@
 use anyhow::Result;
 use clap::{CommandFactory, FromArgMatches};
 use colored::Colorize;
-use proxy_cli::cli::{Cli, Commands, ConfigCommands, ProfileCommands, SettingsCommands};
-use proxy_cli::cmd::{
+use terminal_session_proxy_manager::cli::{Cli, Commands, ConfigCommands, ProfileCommands, SettingsCommands};
+use terminal_session_proxy_manager::cmd::{
     completions, dash, diagnose, export_cmd, git_cmd, import_cmd, init, monitor, ping, profile,
     settings, speedtest, status,
 };
-use proxy_cli::config::{AppConfig, AppSettings, I18n};
+use terminal_session_proxy_manager::config::{AppConfig, AppSettings, I18n};
 use std::env;
 use std::process::Command;
 
@@ -73,17 +73,17 @@ async fn run() -> Result<()> {
             status::print_status(&config, &i18n, json).await?;
         }
         Commands::Env { mode } => {
-            proxy_cli::cmd::env::print_env_commands(&mode, &config, &i18n);
+            terminal_session_proxy_manager::cmd::env::print_env_commands(&mode, &config, &i18n);
         }
         Commands::Debug { mode } => {
             if let Some(mut path) = dirs::home_dir() {
-                path.push(".proxy-cli-debug-enabled");
+                path.push(".terminal-session-proxy-manager-debug-enabled");
                 match mode {
-                    proxy_cli::cli::EnvMode::On => {
+                    terminal_session_proxy_manager::cli::EnvMode::On => {
                         let _ = std::fs::File::create(path);
                         println!("{} Debug logging enabled", "✓".green());
                     }
-                    proxy_cli::cli::EnvMode::Off => {
+                    terminal_session_proxy_manager::cli::EnvMode::Off => {
                         let _ = std::fs::remove_file(path);
                         println!("{} Debug logging disabled", "✓".green());
                     }
@@ -229,8 +229,8 @@ async fn run() -> Result<()> {
                 }
                 if let Some(l) = lang {
                     let lang_code = match l.to_lowercase().as_str() {
-                        "en" | "english" => proxy_cli::cli::LangCode::En,
-                        _ => proxy_cli::cli::LangCode::Ru,
+                        "en" | "english" => terminal_session_proxy_manager::cli::LangCode::En,
+                        _ => terminal_session_proxy_manager::cli::LangCode::Ru,
                     };
                     settings::set_lang(&lang_code)?;
                 }

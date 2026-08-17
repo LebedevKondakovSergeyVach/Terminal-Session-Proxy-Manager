@@ -144,7 +144,7 @@ impl AppConfig {
 
         dirs::config_dir()
             .unwrap_or_else(|| PathBuf::from("."))
-            .join("proxy-cli")
+            .join("terminal-session-proxy-manager")
             .join("config.json")
     }
 

@@ -1,5 +1,5 @@
 [package]
-name = "proxy-cli"
+name = "terminal-session-proxy-manager"
 version = "2.0.0"
 edition = "2021"
 authors = ["LebedevSergeyVach <sergejlebedev31838@gmail.com>"]

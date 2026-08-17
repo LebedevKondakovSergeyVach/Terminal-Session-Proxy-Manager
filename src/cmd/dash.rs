@@ -662,15 +662,15 @@ fn run_app(
                             let mut s = state.lock().unwrap();
                             s.active_profile_key = selected_key.clone();
 
-                            // Export to proxy-cli-eval so parent shell can eval it
+                            // Export to terminal-session-proxy-manager-eval so parent shell can eval it
                             if let Some(prof) = config.profiles.get(selected_key) {
                                 if let Some(mut path) = dirs::home_dir() {
                                     use std::io::Write;
                                     let mut log_path = path.clone();
-                                    log_path.push(".proxy-cli-debug.log");
+                                    log_path.push(".terminal-session-proxy-manager-debug.log");
 
                                     let mut debug_enabled_path = path.clone();
-                                    debug_enabled_path.push(".proxy-cli-debug-enabled");
+                                    debug_enabled_path.push(".terminal-session-proxy-manager-debug-enabled");
                                     let is_debug = debug_enabled_path.exists();
 
                                     let mut log_f = if is_debug {
@@ -691,7 +691,7 @@ fn run_app(
                                         );
                                     }
 
-                                    path.push(".proxy-cli-eval");
+                                    path.push(".terminal-session-proxy-manager-eval");
                                     match std::fs::File::create(&path) {
                                         Ok(mut f) => {
                                             let url = format!(

@@ -50,7 +50,7 @@ proxy monitor # Probe socket health; auto-switch to fallback proxy on failure
 
 ## 7. Profile Management (`profile`)
 ```bash
-proxy-cli profile list       # List all configured profiles
+terminal-session-proxy-manager profile list       # List all configured profiles
 proxy switch                 # Interactive arrow-key profile selector
 proxy use v2ray              # Switch active profile by key
 proxy dash                   # Launch interactive TUI Dashboard (monitor, benchmark, switch)
@@ -64,7 +64,7 @@ proxy import <file/url>      # Import profiles from local JSON file or URL
 ## 8. Latency Probe (`ping`)
 ```bash
 proxy ping                 # Probe ping latency to target endpoints
-proxy-cli ping --timeout 2000 # Probe with 2000ms timeout
+terminal-session-proxy-manager ping --timeout 2000 # Probe with 2000ms timeout
 ```
 
 ---
@@ -85,5 +85,5 @@ proxy run -- curl https://api.openai.com
 
 ## 11. Shell Autocompletions (`completions`)
 ```bash
-proxy-cli completions zsh > ~/.zsh/completions/_proxy-cli
+terminal-session-proxy-manager completions zsh > ~/.zsh/completions/_terminal-session-proxy-manager
 ```

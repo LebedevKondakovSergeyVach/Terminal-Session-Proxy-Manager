@@ -1,7 +1,7 @@
 # ⚙️ Configuration
 
 ## 1. `settings.json`
-Specifies global application settings and language preference. Resolved in order: `~/.config/proxy-cli/settings.json` (or OS config dir) -> `./settings.json`.
+Specifies global application settings and language preference. Resolved in order: `~/.config/terminal-session-proxy-manager/settings.json` (or OS config dir) -> `./settings.json`.
 
 ```json
 {
