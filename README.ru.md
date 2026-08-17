@@ -4,6 +4,8 @@
 
 # ⚡ Terminal Session Proxy Manager
 
+![Terminal Session Proxy Manager Banner](assets/banner.jpg)
+
 [![Rust](https://img.shields.io/badge/rust-1.70%2B-orange.svg)](https://www.rust-lang.org)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey.svg)](README.md)
@@ -19,6 +21,8 @@
 - **Диагностика**: Встроенные утилиты для проверки пинга и реальной скорости скачивания.
 - **Универсальный экспорт**: Команды для быстрой настройки Docker, cURL, Git и `.env` файлов.
 - **Двуязычность**: Полная поддержка английского и русского языков.
+
+![Interactive Dashboard](assets/proxy_dash.png)
 
 ---
 
