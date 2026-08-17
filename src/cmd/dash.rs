@@ -665,14 +665,43 @@ fn run_app(
                             // Export to proxy-cli-eval so parent shell can eval it
                             if let Some(prof) = config.profiles.get(selected_key) {
                                 if let Some(mut path) = dirs::home_dir() {
+                                    use std::io::Write;
+                                    let mut log_path = path.clone();
+                                    log_path.push(".proxy-cli-debug.log");
+                                    let mut log_f = std::fs::OpenOptions::new()
+                                        .create(true)
+                                        .append(true)
+                                        .open(&log_path)
+                                        .ok();
+                                    
+                                    if let Some(ref mut l) = log_f {
+                                        let _ = writeln!(l, "[dash] Processing Enter. Selected profile: {}", selected_key);
+                                    }
+
                                     path.push(".proxy-cli-eval");
-                                    if let Ok(mut f) = std::fs::File::create(path) {
-                                        use std::io::Write;
-                                        let url = format!(
-                                            "{}://{}:{}",
-                                            prof.protocol, prof.host, prof.port
-                                        );
-                                        let _ = write!(f, "export HTTP_PROXY={0}; export HTTPS_PROXY={0}; export ALL_PROXY={0};", url);
+                                    match std::fs::File::create(&path) {
+                                        Ok(mut f) => {
+                                            use std::io::Write;
+                                            let url = format!(
+                                                "{}://{}:{}",
+                                                prof.protocol, prof.host, prof.port
+                                            );
+                                            let content = format!("export HTTP_PROXY={0}; export HTTPS_PROXY={0}; export ALL_PROXY={0};", url);
+                                            if let Err(e) = write!(f, "{}", content) {
+                                                if let Some(ref mut l) = log_f {
+                                                    let _ = writeln!(l, "[dash] Failed to write eval file: {}", e);
+                                                }
+                                            } else {
+                                                if let Some(ref mut l) = log_f {
+                                                    let _ = writeln!(l, "[dash] Successfully wrote eval file to {:?} with content: {}", path, content);
+                                                }
+                                            }
+                                        }
+                                        Err(e) => {
+                                            if let Some(ref mut l) = log_f {
+                                                let _ = writeln!(l, "[dash] Failed to create eval file: {}", e);
+                                            }
+                                        }
                                     }
                                 }
                             }
