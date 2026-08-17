@@ -668,7 +668,7 @@ fn run_app(
                                     use std::io::Write;
                                     let mut log_path = path.clone();
                                     log_path.push(".proxy-cli-debug.log");
-                                    
+
                                     let mut debug_enabled_path = path.clone();
                                     debug_enabled_path.push(".proxy-cli-debug-enabled");
                                     let is_debug = debug_enabled_path.exists();
@@ -682,9 +682,13 @@ fn run_app(
                                     } else {
                                         None
                                     };
-                                    
+
                                     if let Some(ref mut l) = log_f {
-                                        let _ = writeln!(l, "[dash] Processing Enter. Selected profile: {}", selected_key);
+                                        let _ = writeln!(
+                                            l,
+                                            "[dash] Processing Enter. Selected profile: {}",
+                                            selected_key
+                                        );
                                     }
 
                                     path.push(".proxy-cli-eval");
@@ -697,7 +701,11 @@ fn run_app(
                                             let content = format!("export HTTP_PROXY={0}; export HTTPS_PROXY={0}; export ALL_PROXY={0};", url);
                                             if let Err(e) = write!(f, "{}", content) {
                                                 if let Some(ref mut l) = log_f {
-                                                    let _ = writeln!(l, "[dash] Failed to write eval file: {}", e);
+                                                    let _ = writeln!(
+                                                        l,
+                                                        "[dash] Failed to write eval file: {}",
+                                                        e
+                                                    );
                                                 }
                                             } else {
                                                 if let Some(ref mut l) = log_f {
@@ -707,7 +715,11 @@ fn run_app(
                                         }
                                         Err(e) => {
                                             if let Some(ref mut l) = log_f {
-                                                let _ = writeln!(l, "[dash] Failed to create eval file: {}", e);
+                                                let _ = writeln!(
+                                                    l,
+                                                    "[dash] Failed to create eval file: {}",
+                                                    e
+                                                );
                                             }
                                         }
                                     }
