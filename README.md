@@ -7,7 +7,7 @@
 [![Rust](https://img.shields.io/badge/rust-1.70%2B-orange.svg)](https://www.rust-lang.org)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey.svg)](README.md)
-[![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2FLebedevSergeyVach%2FTerminal-Session-Proxy-Manager&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=views&edge_flat=false)](https://hits.seeyoufarm.com)
+![Views](https://api.visitorbadge.io/api/visitors?path=LebedevSergeyVach.Terminal-Session-Proxy-Manager&label=VIEWS&labelColor=%23555555&countColor=%230e75b6)
 
 Universal, high-performance terminal session proxy management toolkit in **Rust** for session control, IP/location diagnostics, speed benchmarking, and environment variable management on **macOS** and **Linux** (Zsh / Bash).
 
