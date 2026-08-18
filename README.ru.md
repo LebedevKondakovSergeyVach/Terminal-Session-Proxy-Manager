@@ -22,7 +22,7 @@
 - **Универсальный экспорт**: Команды для быстрой настройки Docker, cURL, Git и `.env` файлов.
 - **Двуязычность**: Полная поддержка английского и русского языков.
 
-![Interactive Dashboard](assets/proxy_dashboard.png)
+![Interactive Dashboard](assets/proxy_dashboard_final.png)
 
 ---
 
