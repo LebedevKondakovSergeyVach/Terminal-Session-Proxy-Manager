@@ -5,7 +5,7 @@
 Самый простой способ установки через наш собственный репозиторий (tap):
 
 ```bash
-brew install LebedevSergeyVach/tap/terminal-session-proxy-manager
+brew install LebedevKondakovSergeyVach/tap/terminal-session-proxy-manager
 ```
 
 ## 🦀 Через Cargo (Любая ОС)
@@ -13,7 +13,7 @@ brew install LebedevSergeyVach/tap/terminal-session-proxy-manager
 Если у вас установлен Rust, вы можете установить бинарный файл напрямую с GitHub:
 
 ```bash
-cargo install --git https://github.com/LebedevSergeyVach/Terminal-Session-Proxy-Manager.git terminal-session-proxy-manager
+cargo install --git https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager.git terminal-session-proxy-manager
 ```
 
 ---
@@ -24,7 +24,7 @@ cargo install --git https://github.com/LebedevSergeyVach/Terminal-Session-Proxy-
 
 ```bash
 # 1. Клонирование
-git clone https://github.com/LebedevSergeyVach/Terminal-Session-Proxy-Manager.git
+git clone https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager.git
 cd Terminal-Session-Proxy-Manager
 
 # 2. Релизная компиляция

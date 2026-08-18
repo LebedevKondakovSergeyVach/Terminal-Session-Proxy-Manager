@@ -5,7 +5,7 @@ use clap_complete::Shell;
 #[derive(Parser)]
 #[command(
     name = "terminal-session-proxy-manager",
-    author = "LebedevSergeyVach",
+    author = "LebedevKondakovSergeyVach",
     version = env!("CARGO_PKG_VERSION"),
     about = "Universal, configurable CLI proxy management toolkit in Rust",
     long_about = None

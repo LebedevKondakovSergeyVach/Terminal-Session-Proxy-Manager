@@ -32,17 +32,17 @@ Universal, high-performance terminal session proxy management toolkit in **Rust*
 
 **macOS / Linux (via Homebrew):**
 ```bash
-brew install LebedevSergeyVach/tap/terminal-session-proxy-manager
+brew install LebedevKondakovSergeyVach/tap/terminal-session-proxy-manager
 ```
 
 **Via Cargo:**
 ```bash
-cargo install --git https://github.com/LebedevSergeyVach/Terminal-Session-Proxy-Manager.git terminal-session-proxy-manager
+cargo install --git https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager.git terminal-session-proxy-manager
 ```
 
 Or build locally from source:
 ```bash
-git clone https://github.com/LebedevSergeyVach/Terminal-Session-Proxy-Manager.git
+git clone https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager.git
 cd Terminal-Session-Proxy-Manager
 cargo install --path .
 ```

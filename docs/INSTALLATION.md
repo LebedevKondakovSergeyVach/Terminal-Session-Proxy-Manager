@@ -5,7 +5,7 @@
 The easiest way to install is via Homebrew using our custom tap:
 
 ```bash
-brew install LebedevSergeyVach/tap/terminal-session-proxy-manager
+brew install LebedevKondakovSergeyVach/tap/terminal-session-proxy-manager
 ```
 
 ## 🦀 Via Cargo (Any OS)
@@ -13,7 +13,7 @@ brew install LebedevSergeyVach/tap/terminal-session-proxy-manager
 If you have Rust installed, you can install the binary directly from GitHub:
 
 ```bash
-cargo install --git https://github.com/LebedevSergeyVach/Terminal-Session-Proxy-Manager.git terminal-session-proxy-manager
+cargo install --git https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager.git terminal-session-proxy-manager
 ```
 
 ---
@@ -24,7 +24,7 @@ If you prefer to compile the application locally:
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/LebedevSergeyVach/Terminal-Session-Proxy-Manager.git
+git clone https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager.git
 cd Terminal-Session-Proxy-Manager
 
 # 2. Compile release binary
