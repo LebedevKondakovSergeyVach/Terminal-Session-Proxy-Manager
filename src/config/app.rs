@@ -46,21 +46,21 @@ impl Default for AppConfig {
     fn default() -> Self {
         let mut profiles = BTreeMap::new();
         profiles.insert(
-            "throne".to_string(),
+            "default".to_string(),
             Profile {
-                name: "Throne".to_string(),
+                name: "Default Proxy".to_string(),
                 host: "127.0.0.1".to_string(),
-                port: 2080,
+                port: 1080,
                 protocol: "socks5".to_string(),
             },
         );
         profiles.insert(
-            "v2ray".to_string(),
+            "custom".to_string(),
             Profile {
-                name: "v2rayN".to_string(),
+                name: "Custom HTTP Proxy".to_string(),
                 host: "127.0.0.1".to_string(),
-                port: 10808,
-                protocol: "socks5".to_string(),
+                port: 8080,
+                protocol: "http".to_string(),
             },
         );
 
