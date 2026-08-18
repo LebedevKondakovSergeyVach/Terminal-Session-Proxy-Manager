@@ -4,7 +4,7 @@
 
 # ⚡ Terminal Session Proxy Manager
 
-![Terminal Session Proxy Manager Banner](assets/banner.jpg)
+![Terminal Session Proxy Manager Banner](assets/banner_new.jpg)
 
 [![Rust](https://img.shields.io/badge/rust-1.70%2B-orange.svg)](https://www.rust-lang.org)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
