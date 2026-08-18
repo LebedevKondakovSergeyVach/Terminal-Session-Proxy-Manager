@@ -1,6 +1,6 @@
 [package]
 name = "terminal-session-proxy-manager"
-version = "2.1.0"
+version = "2.1.1"
 edition = "2021"
 authors = ["LebedevKondakovSergeyVach <sergejlebedev31838@gmail.com>"]
 description = "Universal, configurable CLI proxy management toolkit in Rust"
