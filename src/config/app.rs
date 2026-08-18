@@ -104,7 +104,7 @@ impl Default for AppConfig {
         ];
 
         Self {
-            active_profile: "throne".to_string(),
+            active_profile: "default".to_string(),
             enabled: false,
             profiles,
             ping_targets,
@@ -204,10 +204,10 @@ mod tests {
     #[test]
     fn test_default_app_config() {
         let config = AppConfig::default();
-        assert_eq!(config.active_profile, "throne");
+        assert_eq!(config.active_profile, "default");
         assert!(!config.enabled);
-        assert!(config.profiles.contains_key("throne"));
-        assert!(config.profiles.contains_key("v2ray"));
+        assert!(config.profiles.contains_key("default"));
+        assert!(config.profiles.contains_key("custom"));
         assert!(!config.ping_targets.is_empty());
     }
 
@@ -215,15 +215,15 @@ mod tests {
     fn test_active_profile_resolution() {
         let mut config = AppConfig::default();
 
-        // Default is throne
+        // Default is default profile
         let profile = config.active_profile().unwrap();
-        assert_eq!(profile.name, "Throne");
+        assert_eq!(profile.name, "Default Proxy");
 
-        // Switch to v2ray
-        config.active_profile = "v2ray".to_string();
+        // Switch to custom
+        config.active_profile = "custom".to_string();
         let profile2 = config.active_profile().unwrap();
-        assert_eq!(profile2.name, "v2rayN");
-        assert_eq!(profile2.port, 10808);
+        assert_eq!(profile2.name, "Custom HTTP Proxy");
+        assert_eq!(profile2.port, 8080);
 
         // Invalid profile
         config.active_profile = "nonexistent".to_string();
@@ -233,7 +233,7 @@ mod tests {
     #[test]
     fn test_url_generation() {
         let config = AppConfig::default();
-        assert_eq!(config.get_socks_url().unwrap(), "socks5://127.0.0.1:2080");
-        assert_eq!(config.get_http_url().unwrap(), "http://127.0.0.1:2080");
+        assert_eq!(config.get_socks_url().unwrap(), "socks5://127.0.0.1:1080");
+        assert_eq!(config.get_http_url().unwrap(), "http://127.0.0.1:1080");
     }
 }
