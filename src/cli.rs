@@ -1,8 +1,12 @@
+use std::path::PathBuf;
+
 use clap::{Parser, Subcommand, ValueEnum};
 use clap_complete::Shell;
 
+use crate::config::{CONFIG_PATH_ENV, SETTINGS_PATH_ENV};
+
 /// Top-level CLI configuration | Конфигурация CLI
-#[derive(Parser)]
+#[derive(Parser, Debug)]
 #[command(
     name = "terminal-session-proxy-manager",
     author = "LebedevKondakovSergeyVach",
@@ -11,13 +15,25 @@ use clap_complete::Shell;
     long_about = None
 )]
 pub struct Cli {
+    /// Path to config.json for this run | Путь к config.json для текущего запуска
+    #[arg(long, global = true, value_name = "PATH", env = CONFIG_PATH_ENV)]
+    pub config_file: Option<PathBuf>,
+
+    /// Path to settings.json for this run | Путь к settings.json для текущего запуска
+    #[arg(long, global = true, value_name = "PATH", env = SETTINGS_PATH_ENV)]
+    pub settings_file: Option<PathBuf>,
+
+    /// Interface language for this run only | Язык интерфейса только для этого запуска
+    #[arg(long, global = true, value_enum, env = "TSPM_LANG")]
+    pub lang: Option<LangCode>,
+
     /// The subcommand to execute | Исполняемая подкоманда
     #[command(subcommand)]
     pub command: Commands,
 }
 
 /// Available subcommands for Proxy CLI | Доступные подкоманды
-#[derive(Subcommand)]
+#[derive(Subcommand, Debug)]
 pub enum Commands {
     /// Check network status, IPv4, IPv6, and physical location | Проверить статус сети, IPv4, IPv6 и геолокацию
     Status {
@@ -57,7 +73,7 @@ pub enum Commands {
     #[command(subcommand)]
     Profile(ProfileCommands),
 
-    /// Manage debug logging state (on, off) | Управление режимом отладки (on, off)
+    /// Manage shell-integration debug logging (on, off) | Управление отладочным логом shell-интеграции (on, off)
     Debug {
         /// Mode: on or off | Режим: on или off
         #[arg(value_enum)]
@@ -95,7 +111,7 @@ pub enum Commands {
     /// Run single command through proxy without modifying current shell | Выполнить команду через прокси без изменения текущей сессии
     Run {
         /// Command and arguments | Команда и аргументы
-        #[arg(required = true, num_args = 1..)]
+        #[arg(required = true, num_args = 1.., trailing_var_arg = true, allow_hyphen_values = true)]
         cmd: Vec<String>,
     },
     /// Generate interactive shell initialization script (zsh/bash) | Генерация скрипта инициализации для shell (zsh/bash)
@@ -120,7 +136,7 @@ pub enum Commands {
 }
 
 /// Commands for managing proxy profiles | Команды для управления профилями прокси
-#[derive(Subcommand)]
+#[derive(Subcommand, Debug)]
 pub enum ProfileCommands {
     /// List all available profiles | Вывести список всех профилей
     List,
@@ -142,7 +158,9 @@ pub enum ProfileCommands {
         #[arg(short, long)]
         port: Option<u16>,
         /// Host address | Адрес хоста
-        #[arg(short, long)]
+        ///
+        /// Deliberately long-form only: `-h` belongs to `--help`.
+        #[arg(long)]
         host: Option<String>,
         /// Protocol (socks5, http) | Протокол (socks5, http)
         #[arg(short = 't', long, default_value = "socks5")]
@@ -165,7 +183,7 @@ pub enum ProfileCommands {
 }
 
 /// Commands for managing config file location and contents | Команды управления расположением конфигурации
-#[derive(Subcommand)]
+#[derive(Subcommand, Debug)]
 pub enum ConfigCommands {
     /// Show path to active config.json file | Показать путь к текущему config.json
     Path,
@@ -174,7 +192,7 @@ pub enum ConfigCommands {
 }
 
 /// Commands for application settings (global settings.json) | Команды управления глобальными настройками
-#[derive(Subcommand)]
+#[derive(Subcommand, Debug)]
 pub enum SettingsCommands {
     /// Show path to settings.json file | Показать путь к файлу settings.json
     Path,
@@ -186,13 +204,13 @@ pub enum SettingsCommands {
         #[arg(short, long)]
         config_path: Option<String>,
         /// Interface language (ru, en) | Язык интерфейса (ru, en)
-        #[arg(short, long)]
-        lang: Option<String>,
+        #[arg(short, long, value_enum)]
+        lang: Option<LangCode>,
     },
 }
 
 /// Modes for generating shell environment variables | Режимы для генерации переменных окружения
-#[derive(ValueEnum, Clone, Debug)]
+#[derive(ValueEnum, Clone, Copy, Debug, PartialEq, Eq)]
 pub enum EnvMode {
     /// Enable proxy (export variables) | Включить (export)
     On,
@@ -201,7 +219,7 @@ pub enum EnvMode {
 }
 
 /// Modes for Git global proxy configuration | Режимы для настройки прокси в Git
-#[derive(ValueEnum, Clone, Debug)]
+#[derive(ValueEnum, Clone, Copy, Debug, PartialEq, Eq)]
 pub enum GitMode {
     /// Set Git proxy globally | Включить прокси для Git
     On,
@@ -212,7 +230,7 @@ pub enum GitMode {
 }
 
 /// Output formats for configuration export | Форматы для экспорта конфигурации
-#[derive(ValueEnum, Clone, Debug)]
+#[derive(ValueEnum, Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ExportFormat {
     /// Output as Docker build arguments | В виде Docker build args
     Docker,
@@ -223,7 +241,7 @@ pub enum ExportFormat {
 }
 
 /// Available localization languages | Доступные языки локализации
-#[derive(ValueEnum, Clone, Debug)]
+#[derive(ValueEnum, Clone, Copy, Debug, PartialEq, Eq)]
 pub enum LangCode {
     /// Russian | Русский
     Ru,
@@ -232,10 +250,123 @@ pub enum LangCode {
 }
 
 /// Supported shells for integrations | Поддерживаемые типы shell
-#[derive(ValueEnum, Clone, Debug)]
+#[derive(ValueEnum, Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ShellType {
     /// Zsh shell | Оболочка Zsh
     Zsh,
     /// Bash shell | Оболочка Bash
     Bash,
+}
+
+impl LangCode {
+    /// Returns the two-letter code stored in `settings.json`.
+    #[must_use]
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Ru => "ru",
+            Self::En => "en",
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use clap::CommandFactory;
+
+    #[test]
+    fn the_command_tree_is_internally_consistent() {
+        // clap's own validation: duplicate arg ids, bad defaults, conflicting
+        // shorts. Without this it only fires when a user runs the broken path.
+        Cli::command().debug_assert();
+    }
+
+    #[test]
+    fn global_overrides_are_accepted_before_and_after_the_subcommand() {
+        for args in [
+            vec!["tspm", "--config-file", "/tmp/c.json", "status"],
+            vec!["tspm", "status", "--config-file", "/tmp/c.json"],
+        ] {
+            let cli = Cli::try_parse_from(args).unwrap();
+            assert_eq!(cli.config_file.unwrap().to_str().unwrap(), "/tmp/c.json");
+        }
+    }
+
+    #[test]
+    fn an_unknown_language_is_rejected_rather_than_silently_defaulting() {
+        // `settings set --lang de` used to fall through to Russian.
+        assert!(Cli::try_parse_from(["tspm", "settings", "set", "--lang", "de"]).is_err());
+        assert!(Cli::try_parse_from(["tspm", "settings", "set", "--lang", "en"]).is_ok());
+    }
+
+    #[test]
+    fn run_requires_a_command_to_execute() {
+        assert!(Cli::try_parse_from(["tspm", "run"]).is_err());
+    }
+
+    #[test]
+    fn run_forwards_flags_to_the_child_instead_of_claiming_them() {
+        // `run curl -sS <url>` used to fail with "unknown argument -s".
+        let cli =
+            Cli::try_parse_from(["tspm", "run", "curl", "-sS", "https://example.com"]).unwrap();
+
+        let Commands::Run { cmd } = cli.command else {
+            panic!("expected the run subcommand");
+        };
+        assert_eq!(cmd, ["curl", "-sS", "https://example.com"]);
+    }
+
+    #[test]
+    fn run_still_accepts_the_explicit_double_dash_form() {
+        let cli = Cli::try_parse_from(["tspm", "run", "--", "curl", "-sS"]).unwrap();
+
+        let Commands::Run { cmd } = cli.command else {
+            panic!("expected the run subcommand");
+        };
+        assert_eq!(cmd, ["curl", "-sS"]);
+    }
+
+    #[test]
+    fn help_is_reachable_from_every_subcommand() {
+        // Regression guard for `-h` having been bound to `--host`.
+        for args in [
+            vec!["tspm", "-h"],
+            vec!["tspm", "profile", "set", "-h"],
+            vec!["tspm", "status", "-h"],
+        ] {
+            let err = Cli::try_parse_from(&args).unwrap_err();
+            assert_eq!(
+                err.kind(),
+                clap::error::ErrorKind::DisplayHelp,
+                "{args:?} did not print help"
+            );
+        }
+    }
+
+    #[test]
+    fn ping_has_a_default_timeout() {
+        let cli = Cli::try_parse_from(["tspm", "ping"]).unwrap();
+
+        let Commands::Ping { timeout } = cli.command else {
+            panic!("expected the ping subcommand");
+        };
+        assert_eq!(timeout, 4000);
+    }
+
+    #[test]
+    fn git_defaults_to_the_read_only_status_mode() {
+        // Defaulting to `on` would mutate global git config on a bare `git`.
+        let cli = Cli::try_parse_from(["tspm", "git"]).unwrap();
+
+        let Commands::Git { mode } = cli.command else {
+            panic!("expected the git subcommand");
+        };
+        assert!(matches!(mode, GitMode::Status));
+    }
+
+    #[test]
+    fn lang_codes_map_to_their_stored_representation() {
+        assert_eq!(LangCode::Ru.as_str(), "ru");
+        assert_eq!(LangCode::En.as_str(), "en");
+    }
 }

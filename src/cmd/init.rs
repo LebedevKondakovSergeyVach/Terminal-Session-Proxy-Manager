@@ -1,6 +1,6 @@
 use crate::cli::ShellType;
 use clap::CommandFactory;
-use clap_complete::{generate, Shell};
+use clap_complete::{Shell, generate};
 
 /// Generates shell initialization code and completions for `zsh` or `bash`.
 pub fn generate_shell_init<C: CommandFactory>(shell_type: &ShellType) {
@@ -81,7 +81,7 @@ prompt_proxy_status() {{ terminal-session-proxy-manager prompt; }}
                 &mut buf,
             );
             if let Ok(compl_str) = String::from_utf8(buf) {
-                println!("{}", compl_str);
+                println!("{compl_str}");
                 println!("compdef _terminal-session-proxy-manager proxy 2>/dev/null || true");
             }
         }
@@ -159,7 +159,7 @@ proxy_run() {{ terminal-session-proxy-manager run -- "$@"; }}
                 &mut buf,
             );
             if let Ok(compl_str) = String::from_utf8(buf) {
-                println!("{}", compl_str);
+                println!("{compl_str}");
                 println!("complete -F _terminal-session-proxy-manager proxy 2>/dev/null || true");
             }
         }

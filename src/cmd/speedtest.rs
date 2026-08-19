@@ -1,3 +1,4 @@
+use crate::cmd::profile::rule;
 use crate::config::{AppConfig, I18n};
 use anyhow::Result;
 use colored::Colorize;
@@ -5,40 +6,26 @@ use indicatif::{ProgressBar, ProgressStyle};
 use std::env;
 use std::time::{Duration, Instant};
 
-/// Measures real download throughput (MB/s) through configured active proxy.
-pub async fn run_speedtest(_config: &AppConfig, _i18n: &I18n) -> Result<()> {
-    println!(
-        "{}",
-        "=========================================================="
-            .cyan()
-            .bold()
-    );
-    println!(
-        "   🚀  {}",
-        "BANDWIDTH THROUGHPUT SPEED TEST".white().bold()
-    );
-    println!(
-        "{}",
-        "=========================================================="
-            .cyan()
-            .bold()
-    );
+/// Bytes assumed for the progress bar when the server sends no `Content-Length`.
+const ASSUMED_PAYLOAD_BYTES: u64 = 2 * 1024 * 1024;
+
+/// Measures real download throughput through the session's proxy.
+///
+/// # Errors
+/// Returns an error if the HTTP client cannot be constructed.
+pub async fn run_speedtest(config: &AppConfig, i18n: &I18n) -> Result<()> {
+    rule();
+    println!("   🚀  {}", i18n.t("speedtest_header").white().bold());
+    rule();
 
     let proxy_env = env::var("ALL_PROXY")
+        .or_else(|_| env::var("all_proxy"))
         .or_else(|_| env::var("http_proxy"))
-        .ok();
-    let test_url = "https://speed.cloudflare.com/__down?bytes=2097152";
-
-    let pb = ProgressBar::new(2_097_152);
-    pb.set_style(
-        ProgressStyle::default_bar()
-            .template("{spinner:.cyan.bold} [{bar:40.cyan/blue}] {bytes}/{total_bytes} ({bytes_per_sec}, {eta})")
-            .unwrap_or_else(|_| ProgressStyle::default_bar())
-            .progress_chars("#>-"),
-    );
+        .ok()
+        .filter(|p| !p.is_empty());
 
     let mut builder = reqwest::Client::builder()
-        .timeout(Duration::from_secs(15))
+        .timeout(Duration::from_secs(30))
         .connect_timeout(Duration::from_secs(5));
 
     if let Some(ref p) = proxy_env {
@@ -50,14 +37,30 @@ pub async fn run_speedtest(_config: &AppConfig, _i18n: &I18n) -> Result<()> {
     let client = builder.build()?;
     let start = Instant::now();
 
-    let mut response = match client.get(test_url).send().await {
+    let mut response = match client.get(&config.speedtest_url).send().await {
         Ok(resp) => resp,
         Err(e) => {
-            pb.finish_and_clear();
-            println!("{}", format!("❌ Speedtest failed: {}", e).red().bold());
+            println!(
+                "{}",
+                i18n.format("speedtest_failed", &[&e.to_string()])
+                    .red()
+                    .bold()
+            );
+            rule();
             return Ok(());
         }
     };
+
+    // Size the bar from the response rather than assuming the URL's query
+    // string still says `bytes=2097152` — `speedtest_url` is user-configurable.
+    let total_bytes = response.content_length().unwrap_or(ASSUMED_PAYLOAD_BYTES);
+    let pb = ProgressBar::new(total_bytes);
+    pb.set_style(
+        ProgressStyle::default_bar()
+            .template("{spinner:.cyan.bold} [{bar:40.cyan/blue}] {bytes}/{total_bytes} ({bytes_per_sec}, {eta})")
+            .unwrap_or_else(|_| ProgressStyle::default_bar())
+            .progress_chars("#>-"),
+    );
 
     let mut downloaded = 0u64;
     while let Ok(Some(chunk)) = response.chunk().await {
@@ -68,34 +71,34 @@ pub async fn run_speedtest(_config: &AppConfig, _i18n: &I18n) -> Result<()> {
     let elapsed = start.elapsed().as_secs_f64();
     pb.finish_and_clear();
 
-    if downloaded > 0 && elapsed > 0.0 {
-        let speed_mbps = (downloaded as f64 * 8.0) / (elapsed * 1_000_000.0);
-        let speed_mbs = (downloaded as f64) / (elapsed * 1_048_576.0);
-
-        println!(
-            "  • Payload Downloaded : {} MB",
-            format!("{:.2}", downloaded as f64 / 1_048_576.0)
-                .yellow()
-                .bold()
-        );
-        println!(
-            "  • Time Elapsed       : {} s",
-            format!("{:.2}", elapsed).cyan().bold()
-        );
-        println!(
-            "  • Download Speed     : {} ({})",
-            format!("{:.2} MB/s", speed_mbs).green().bold(),
-            format!("{:.2} Mbps", speed_mbps).bold()
-        );
-    } else {
-        println!("{}", "❌ Unable to complete speed test.".red().bold());
+    if downloaded == 0 || elapsed <= 0.0 {
+        println!("{}", i18n.t("speedtest_incomplete").red().bold());
+        rule();
+        return Ok(());
     }
 
+    #[allow(clippy::cast_precision_loss)]
+    let bytes = downloaded as f64;
+    let speed_mbps = (bytes * 8.0) / (elapsed * 1_000_000.0);
+    let speed_mbs = bytes / (elapsed * 1_048_576.0);
+
     println!(
-        "{}",
-        "=========================================================="
-            .cyan()
-            .bold()
+        "  • {:<22}: {} MB",
+        i18n.t("speedtest_payload"),
+        format!("{:.2}", bytes / 1_048_576.0).yellow().bold()
     );
+    println!(
+        "  • {:<22}: {} s",
+        i18n.t("speedtest_elapsed"),
+        format!("{elapsed:.2}").cyan().bold()
+    );
+    println!(
+        "  • {:<22}: {} ({})",
+        i18n.t("speedtest_speed"),
+        format!("{speed_mbs:.2} MB/s").green().bold(),
+        format!("{speed_mbps:.2} Mbps").bold()
+    );
+    rule();
+
     Ok(())
 }

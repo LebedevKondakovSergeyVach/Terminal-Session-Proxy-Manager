@@ -1,7 +1,7 @@
+use crate::cmd::profile::spinner;
 use crate::config::{AppConfig, I18n};
 use anyhow::Result;
 use colored::Colorize;
-use indicatif::{ProgressBar, ProgressStyle};
 use serde::{Deserialize, Serialize};
 use std::env;
 use std::time::Duration;
@@ -54,24 +54,13 @@ fn build_client(proxy_url: Option<&str>) -> reqwest::Client {
 
 /// Resolves external IPv4, IPv6, and physical location from configured Geo APIs.
 pub async fn get_status_info(config: &AppConfig, i18n: &I18n, show_spinner: bool) -> StatusInfo {
-    let spinner = if show_spinner {
-        let pb = ProgressBar::new_spinner();
-        pb.set_style(
-            ProgressStyle::default_spinner()
-                .tick_chars("⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏")
-                .template("{spinner:.cyan.bold} {msg}")
-                .unwrap_or_else(|_| ProgressStyle::default_spinner()),
-        );
-        pb.set_message(i18n.t("spinner_status").to_string());
-        pb.enable_steady_tick(Duration::from_millis(80));
-        Some(pb)
-    } else {
-        None
-    };
+    let progress = show_spinner.then(|| spinner(i18n.t("spinner_status")));
 
     let proxy_env = env::var("ALL_PROXY")
+        .or_else(|_| env::var("all_proxy"))
         .or_else(|_| env::var("http_proxy"))
-        .ok();
+        .ok()
+        .filter(|p| !p.is_empty());
     let client = build_client(proxy_env.as_deref());
 
     let mut ip_from_json = String::new();
@@ -117,7 +106,7 @@ pub async fn get_status_info(config: &AppConfig, i18n: &I18n, show_spinner: bool
         if !parts.is_empty() {
             let mut loc_str = parts.join(", ");
             if !country_code.is_empty() && !loc_str.contains(&country_code) {
-                loc_str.push_str(&format!(" ({})", country_code));
+                loc_str.push_str(&format!(" ({country_code})"));
             }
             location = loc_str;
         } else if !country_code.is_empty() {
@@ -137,7 +126,7 @@ pub async fn get_status_info(config: &AppConfig, i18n: &I18n, show_spinner: bool
     }
 
     if ipv4.is_empty() {
-        if let Ok(resp) = client.get("https://api4.ipify.org").send().await {
+        if let Ok(resp) = client.get(&config.ipv4_api).send().await {
             if let Ok(text) = resp.text().await {
                 ipv4 = text.trim().to_string();
             }
@@ -148,7 +137,7 @@ pub async fn get_status_info(config: &AppConfig, i18n: &I18n, show_spinner: bool
     }
 
     if ipv6.is_empty() {
-        if let Ok(resp) = client.get("https://api6.ipify.org").send().await {
+        if let Ok(resp) = client.get(&config.ipv6_api).send().await {
             if let Ok(text) = resp.text().await {
                 ipv6 = text.trim().to_string();
             }
@@ -158,7 +147,7 @@ pub async fn get_status_info(config: &AppConfig, i18n: &I18n, show_spinner: bool
         }
     }
 
-    if let Some(pb) = spinner {
+    if let Some(pb) = progress {
         pb.finish_and_clear();
     }
 

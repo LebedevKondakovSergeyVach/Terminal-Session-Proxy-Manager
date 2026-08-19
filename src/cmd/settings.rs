@@ -10,13 +10,19 @@ pub fn show_settings_path(i18n: &I18n) {
 }
 
 /// Displays formatted JSON contents of `settings.json`.
+///
+/// # Errors
+/// Returns an error if the settings cannot be serialised.
 pub fn show_settings() -> Result<()> {
     let settings = AppSettings::load();
     println!("{}", serde_json::to_string_pretty(&settings)?);
     Ok(())
 }
 
-/// Updates target `config_path` inside `settings.json`.
+/// Updates the config path in `settings.json`.
+///
+/// # Errors
+/// Returns an error if the settings file cannot be written.
 pub fn set_config_path(path: String, i18n: &I18n) -> Result<()> {
     let mut settings = AppSettings::load();
     settings.config_path = Some(path.clone());
@@ -25,13 +31,13 @@ pub fn set_config_path(path: String, i18n: &I18n) -> Result<()> {
     Ok(())
 }
 
-/// Updates target `lang` inside `settings.json`.
-pub fn set_lang(lang: &LangCode) -> Result<()> {
+/// Updates the interface language in `settings.json`.
+///
+/// # Errors
+/// Returns an error if the settings file cannot be written.
+pub fn set_lang(lang: LangCode) -> Result<()> {
     let mut settings = AppSettings::load();
-    let code = match lang {
-        LangCode::En => "en",
-        LangCode::Ru => "ru",
-    };
+    let code = lang.as_str();
     settings.lang = code.to_string();
     settings.save()?;
     let i18n = I18n::load(code);
