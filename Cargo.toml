@@ -2,7 +2,8 @@
 name = "terminal-session-proxy-manager"
 version = "2.2.0"
 edition = "2024"
-rust-version = "1.85"
+# Set by the highest MSRV in the resolved tree (ratatui 0.30 requires 1.88).
+rust-version = "1.88"
 authors = ["LebedevKondakovSergeyVach <sergejlebedev31838@gmail.com>"]
 description = "Universal, configurable CLI proxy management toolkit in Rust"
 license = "AGPL-3.0"

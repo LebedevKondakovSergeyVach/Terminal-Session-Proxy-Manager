@@ -32,10 +32,10 @@ pub async fn run_diagnose(config: &AppConfig, i18n: &I18n) -> Result<()> {
         .ok()
         .filter(|p| !p.is_empty());
     let mut builder = reqwest::Client::builder().timeout(Duration::from_secs(3));
-    if let Some(ref p) = proxy_env {
-        if let Ok(proxy) = reqwest::Proxy::all(p) {
-            builder = builder.proxy(proxy);
-        }
+    if let Some(ref p) = proxy_env
+        && let Ok(proxy) = reqwest::Proxy::all(p)
+    {
+        builder = builder.proxy(proxy);
     }
     let client = builder.build().unwrap_or_default();
 

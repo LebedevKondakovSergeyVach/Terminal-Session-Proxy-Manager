@@ -28,10 +28,10 @@ pub async fn run_speedtest(config: &AppConfig, i18n: &I18n) -> Result<()> {
         .timeout(Duration::from_secs(30))
         .connect_timeout(Duration::from_secs(5));
 
-    if let Some(ref p) = proxy_env {
-        if let Ok(proxy) = reqwest::Proxy::all(p) {
-            builder = builder.proxy(proxy);
-        }
+    if let Some(ref p) = proxy_env
+        && let Ok(proxy) = reqwest::Proxy::all(p)
+    {
+        builder = builder.proxy(proxy);
     }
 
     let client = builder.build()?;

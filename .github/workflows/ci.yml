@@ -73,7 +73,7 @@ jobs:
       # Reads `rust-version` from Cargo.toml, so the two can never disagree.
       - uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: '1.85'
+          toolchain: '1.88'
 
       - uses: Swatinem/rust-cache@v2
 

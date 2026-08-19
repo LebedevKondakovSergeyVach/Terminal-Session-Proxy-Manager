@@ -16,7 +16,7 @@ brew upgrade terminal-session-proxy-manager
 
 ## 🦀 Cargo
 
-Требуется Rust **1.85 или новее** (проект использует edition 2024). Установите
+Требуется Rust **1.88 или новее** (проект использует edition 2024). Установите
 toolchain через [rustup.rs](https://rustup.rs), затем:
 
 ```bash

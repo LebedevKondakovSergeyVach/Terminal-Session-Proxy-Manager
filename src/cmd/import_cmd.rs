@@ -99,18 +99,17 @@ fn parse_import_content(content: &str) -> Result<BTreeMap<String, Profile>> {
     // deserialises into it successfully — including `{"unrelated": 1}`, which
     // used to "import" the two built-in default profiles. Require the
     // `profiles` key to be genuinely present before taking this branch.
-    if let Ok(value) = serde_json::from_str::<serde_json::Value>(trimmed) {
-        if value.get("profiles").is_some() {
-            if let Ok(full_cfg) = serde_json::from_str::<AppConfig>(trimmed) {
-                return Ok(full_cfg.profiles);
-            }
-        }
+    if let Ok(value) = serde_json::from_str::<serde_json::Value>(trimmed)
+        && value.get("profiles").is_some()
+        && let Ok(full_cfg) = serde_json::from_str::<AppConfig>(trimmed)
+    {
+        return Ok(full_cfg.profiles);
     }
 
-    if let Ok(profiles_map) = serde_json::from_str::<BTreeMap<String, Profile>>(trimmed) {
-        if !profiles_map.is_empty() {
-            return Ok(profiles_map);
-        }
+    if let Ok(profiles_map) = serde_json::from_str::<BTreeMap<String, Profile>>(trimmed)
+        && !profiles_map.is_empty()
+    {
+        return Ok(profiles_map);
     }
 
     if let Ok(profiles_vec) = serde_json::from_str::<Vec<Profile>>(trimmed) {

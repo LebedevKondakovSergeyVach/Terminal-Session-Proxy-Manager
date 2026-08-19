@@ -133,10 +133,10 @@ impl AppSettings {
     /// Returns an error if the parent directory cannot be created or the file cannot be written.
     pub fn save(&self) -> Result<()> {
         let path = Self::get_settings_path();
-        if let Some(parent) = path.parent() {
-            if !parent.as_os_str().is_empty() {
-                fs::create_dir_all(parent)?;
-            }
+        if let Some(parent) = path.parent()
+            && !parent.as_os_str().is_empty()
+        {
+            fs::create_dir_all(parent)?;
         }
         fs::write(path, serde_json::to_string_pretty(self)?)?;
         Ok(())

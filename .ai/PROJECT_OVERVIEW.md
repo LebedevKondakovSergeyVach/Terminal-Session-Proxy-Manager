@@ -16,7 +16,7 @@ itself need.
 
 | Concern | Crate | Notes |
 | :--- | :--- | :--- |
-| Language | Rust, edition 2024 | MSRV `1.85`, declared as `rust-version` in `Cargo.toml` and checked in CI |
+| Language | Rust, edition 2024 | MSRV `1.88`, declared as `rust-version` in `Cargo.toml` and checked in CI |
 | CLI parsing | `clap` 4 (derive, `env`, `wrap_help`) | Deep subcommand tree in `src/cli.rs` |
 | Async runtime | `tokio` | Only `macros`, `rt-multi-thread`, `time` — not `full` |
 | HTTP | `reqwest` (`json`, `socks`) | Latency probes, geolocation, throughput |

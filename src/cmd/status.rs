@@ -44,10 +44,10 @@ fn build_client(proxy_url: Option<&str>) -> reqwest::Client {
         .timeout(Duration::from_secs(3))
         .connect_timeout(Duration::from_secs(2));
 
-    if let Some(p) = proxy_url {
-        if let Ok(proxy) = reqwest::Proxy::all(p) {
-            builder = builder.proxy(proxy);
-        }
+    if let Some(p) = proxy_url
+        && let Ok(proxy) = reqwest::Proxy::all(p)
+    {
+        builder = builder.proxy(proxy);
     }
     builder.build().unwrap_or_default()
 }
@@ -68,11 +68,11 @@ pub async fn get_status_info(config: &AppConfig, i18n: &I18n, show_spinner: bool
 
     let mut resp_data: Option<GeoResponse> = None;
     for geo_url in &config.geo_apis {
-        if let Ok(resp) = client.get(geo_url).send().await {
-            if let Ok(data) = resp.json::<GeoResponse>().await {
-                resp_data = Some(data);
-                break;
-            }
+        if let Ok(resp) = client.get(geo_url).send().await
+            && let Ok(data) = resp.json::<GeoResponse>().await
+        {
+            resp_data = Some(data);
+            break;
         }
     }
 
@@ -126,10 +126,10 @@ pub async fn get_status_info(config: &AppConfig, i18n: &I18n, show_spinner: bool
     }
 
     if ipv4.is_empty() {
-        if let Ok(resp) = client.get(&config.ipv4_api).send().await {
-            if let Ok(text) = resp.text().await {
-                ipv4 = text.trim().to_string();
-            }
+        if let Ok(resp) = client.get(&config.ipv4_api).send().await
+            && let Ok(text) = resp.text().await
+        {
+            ipv4 = text.trim().to_string();
         }
         if ipv4.is_empty() {
             ipv4 = i18n.t("unavailable").to_string();
@@ -137,10 +137,10 @@ pub async fn get_status_info(config: &AppConfig, i18n: &I18n, show_spinner: bool
     }
 
     if ipv6.is_empty() {
-        if let Ok(resp) = client.get(&config.ipv6_api).send().await {
-            if let Ok(text) = resp.text().await {
-                ipv6 = text.trim().to_string();
-            }
+        if let Ok(resp) = client.get(&config.ipv6_api).send().await
+            && let Ok(text) = resp.text().await
+        {
+            ipv6 = text.trim().to_string();
         }
         if ipv6.is_empty() {
             ipv6 = i18n.t("unavailable").to_string();

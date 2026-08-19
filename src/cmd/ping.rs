@@ -46,10 +46,10 @@ pub async fn run_ping(config: &AppConfig, i18n: &I18n, timeout_ms: u64) -> Resul
                 .timeout(timeout)
                 .connect_timeout(timeout);
 
-            if let Some(ref p) = proxy_str {
-                if let Ok(proxy) = reqwest::Proxy::all(p) {
-                    builder = builder.proxy(proxy);
-                }
+            if let Some(ref p) = proxy_str
+                && let Ok(proxy) = reqwest::Proxy::all(p)
+            {
+                builder = builder.proxy(proxy);
             }
 
             let client = match builder.build() {

@@ -4,7 +4,7 @@ Thanks for taking the time. This is a small project, so the process is short.
 
 ## Getting set up
 
-Requires Rust 1.85 or newer (edition 2024). Install via [rustup](https://rustup.rs).
+Requires Rust 1.88 or newer (edition 2024). Install via [rustup](https://rustup.rs).
 
 ```bash
 git clone https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager.git

@@ -154,10 +154,10 @@ pub fn remove_profile(config: &mut AppConfig, i18n: &I18n, key: &str) -> Result<
 
     // Removing the active profile would leave `active_profile` dangling, so
     // adopt whichever profile remains first.
-    if config.active_profile == key {
-        if let Some((first_key, _)) = config.profiles.iter().next() {
-            config.active_profile = first_key.clone();
-        }
+    if config.active_profile == key
+        && let Some((first_key, _)) = config.profiles.iter().next()
+    {
+        config.active_profile = first_key.clone();
     }
 
     config.save()?;

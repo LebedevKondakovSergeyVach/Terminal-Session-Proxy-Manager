@@ -91,7 +91,7 @@ Also changed:
 - The unused `enabled` field was removed from `config.json`. Existing configs
   keep loading; the field is ignored.
 - `run` propagates the child's exit code exactly.
-- Edition 2024, MSRV 1.85, and dependency upgrades: clap 4.6, tokio 1.48,
+- Edition 2024, MSRV 1.88, and dependency upgrades: clap 4.6, tokio 1.48,
   reqwest 0.13, thiserror 2.0, dirs 6.0, colored 3.1, indicatif 0.18,
   dialoguer 0.12. The macOS config directory is unchanged by the `dirs` upgrade.
 - Release builds use fat LTO, one codegen unit and stripped symbols.
