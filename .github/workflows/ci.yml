@@ -1,40 +1,92 @@
-name: CI Pipeline
+name: CI
 
 on:
   push:
-    branches:
-      - '**'
+    branches: ['**']
   pull_request:
+  # Advisories appear without any code change, so re-check on a schedule.
+  schedule:
+    - cron: '0 6 * * 1'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  # Fail on warnings everywhere rather than only in the clippy step.
+  RUSTFLAGS: -D warnings
 
 jobs:
-  check-and-test:
-    name: Build and Test
+  lint:
+    name: Format and lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+
+      - name: Clippy
+        run: cargo clippy --all-targets --all-features --locked
+
+      - name: Check documentation builds
+        run: cargo doc --no-deps --all-features --locked
+
+  test:
+    name: Test (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Rust Toolchain
-        uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      # --locked proves Cargo.lock is committed and current; without it a
+      # forgotten lockfile update only surfaces at release time.
+      - name: Build
+        run: cargo build --all-targets --locked
+
+      - name: Test
+        run: cargo test --all-features --locked
+
+      - name: Build release
+        run: cargo build --release --locked
+
+  msrv:
+    name: Minimum supported Rust version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Reads `rust-version` from Cargo.toml, so the two can never disagree.
+      - uses: dtolnay/rust-toolchain@master
         with:
-          components: rustfmt, clippy
+          toolchain: '1.85'
 
-      - name: Cache Cargo dependencies
-        uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@v2
 
-      - name: Format Check
-        run: cargo fmt --all -- --check
+      - name: Check against the declared MSRV
+        run: cargo check --all-targets --locked
 
-      - name: Clippy Lint
-        run: cargo clippy --all-targets -- -D warnings
+  audit:
+    name: Security advisories
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-      - name: Build Debug
-        run: cargo build --verbose
-
-      - name: Run Tests
-        run: cargo test --verbose
-
-      - name: Build Release
-        run: cargo build --release --verbose
+      - name: Audit dependencies
+        uses: rustsec/audit-check@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
