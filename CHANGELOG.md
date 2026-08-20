@@ -15,7 +15,45 @@ injection. Two changes affect scripts — see **Changed**.
 
 ### Fixed
 
-- **A malformed `config.json` no longer destroys your profiles.** `load()`
+- **A malformed `config.json` no longer destroys your profiles.** The first
+  attempt at this fix was incomplete and was caught in review: `load()` stopped
+  overwriting the file, but the next command that saved — `profile set/use/
+  remove`, `import`, or Enter in the dashboard — still wrote the fallback
+  defaults straight over it. A config that failed to parse is now marked as
+  such, and any attempt to save over it fails with an explanation. Read-only
+  commands keep working so the file can still be diagnosed. The same applies to
+  `settings.json`, where overwriting also silently dropped `config_path` and
+  pointed the tool at a different config.
+- **`env on` exits non-zero when no profile is active.** It printed an error and
+  exited `0`, so `proxy_on && deploy` carried on against an unproxied shell.
+- **`profile set` no longer resets an existing profile's protocol.** `--protocol`
+  had a default, so changing only the port silently rewrote an `http` profile to
+  `socks5`.
+- **IPv6 profiles produce usable URLs.** A bare `::1` was accepted but rendered
+  as `http://::1:1080`, which no client can parse. Literals are now bracketed in
+  URLs and left bare in the JVM `-Dhttp.proxyHost=` options, as each requires.
+- **A proxy URL that cannot be applied is no longer treated as success.** The
+  error from building the proxy was discarded, so the request went out
+  *directly*: `monitor` reported a broken tunnel as healthy, `benchmark` ranked
+  the broken profile fastest and `best` then selected it, and `status` and the
+  dashboard showed the machine's real IP as though it were the proxy's.
+- **The dashboard no longer corrupts its own display.** Pressing `s` ran a
+  benchmark whose progress spinner writes to stderr on a timer, interleaving
+  with ratatui's frames.
+- **The dashboard selection no longer jumps when benchmark results arrive.** The
+  list re-sorted without remapping the cursor, so Enter applied whichever
+  profile had slid under it.
+- **The shell wrapper reports the real exit status.** The re-apply step became
+  the function's own status and inverted it: `proxy use work` returned failure
+  on success with the proxy off, and `proxy use nope` returned success on
+  failure with it on.
+- **`run` no longer lets the child command retarget the manager.** The
+  pre-parser scanned the whole command line, so `proxy run mytool --lang en`
+  changed which config the manager itself loaded.
+- **`speedtest` reports a dropped connection instead of a confident number.** A
+  mid-stream transport error was indistinguishable from a clean end of body.
+- **`diagnose` resolves hostnames.** The socket check only accepted IP literals,
+  so a profile with a hostname always reported its port as closed. `load()`
   overwrote an unparsable config with the built-in defaults, so a single stray
   comma silently discarded every profile. A file that exists but fails to parse
   is now reported on stderr and left byte-for-byte intact. The same applies to
@@ -103,6 +141,9 @@ Also changed:
   reqwest 0.13, thiserror 2.0, dirs 6.0, colored 3.1, indicatif 0.18,
   dialoguer 0.12. The macOS config directory is unchanged by the `dirs` upgrade.
 - Release builds use fat LTO, one codegen unit and stripped symbols.
+- The release workflow tags only after every binary has built. Tagging first
+  meant a failed build left the tag pushed with nothing published, and every
+  retry then saw the tag and skipped the release permanently.
 - CI gained an MSRV job, a `cargo audit` job, `--locked` builds and a docs build.
   Releases now verify the tag matches the crate version, ship `aarch64` Linux
   binaries, and publish SHA-256 checksums.

@@ -39,17 +39,21 @@ struct GeoResponse {
     country_code_alt: Option<String>,
 }
 
-fn build_client(proxy_url: Option<&str>) -> reqwest::Client {
+/// Builds the probe client, refusing to fall back to a direct connection.
+///
+/// Returns `None` when a proxy was requested but could not be applied.
+/// Silently dropping it would report the machine's real IP and location as
+/// though the traffic had gone through the tunnel — the most misleading thing
+/// this command could possibly do.
+fn build_client(proxy_url: Option<&str>) -> Option<reqwest::Client> {
     let mut builder = reqwest::Client::builder()
         .timeout(Duration::from_secs(3))
         .connect_timeout(Duration::from_secs(2));
 
-    if let Some(p) = proxy_url
-        && let Ok(proxy) = reqwest::Proxy::all(p)
-    {
-        builder = builder.proxy(proxy);
+    if let Some(p) = proxy_url {
+        builder = builder.proxy(reqwest::Proxy::all(p).ok()?);
     }
-    builder.build().unwrap_or_default()
+    builder.build().ok()
 }
 
 /// Resolves external IPv4, IPv6, and physical location from configured Geo APIs.
@@ -61,7 +65,23 @@ pub async fn get_status_info(config: &AppConfig, i18n: &I18n, show_spinner: bool
         .or_else(|_| env::var("http_proxy"))
         .ok()
         .filter(|p| !p.is_empty());
-    let client = build_client(proxy_env.as_deref());
+    let Some(client) = build_client(proxy_env.as_deref()) else {
+        if let Some(pb) = progress {
+            pb.finish_and_clear();
+        }
+        let unavailable = i18n.t("unavailable").to_string();
+        return StatusInfo {
+            status: i18n.t("status_proxy_invalid").to_string(),
+            profile_key: config.active_profile.clone(),
+            profile_name: config
+                .active_profile()
+                .map_or_else(|| "Default".to_string(), |p| p.name.clone()),
+            active_proxy: proxy_env,
+            ipv4: unavailable.clone(),
+            ipv6: unavailable.clone(),
+            location: unavailable,
+        };
+    };
 
     let mut ip_from_json = String::new();
     let mut location = i18n.t("unavailable").to_string();

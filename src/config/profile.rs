@@ -29,6 +29,21 @@ pub struct Profile {
 }
 
 impl Profile {
+    /// The host as it must appear inside a URL authority.
+    ///
+    /// An IPv6 literal has to be bracketed there, otherwise its own colons are
+    /// read as the port separator and `http://::1:1080` parses as nonsense.
+    /// Kept separate from the raw [`Self::host`], which is what the JVM
+    /// `-Dhttp.proxyHost=` options need — those must stay unbracketed.
+    #[must_use]
+    pub fn url_host(&self) -> String {
+        if self.host.contains(':') && !self.host.starts_with('[') {
+            format!("[{}]", self.host)
+        } else {
+            self.host.clone()
+        }
+    }
+
     /// Checks that this profile can produce a usable proxy URL.
     ///
     /// Run before a profile is written to disk, whether it came from
@@ -234,6 +249,40 @@ mod tests {
                 profile.validate("k").is_ok(),
                 "host {host:?} should be accepted"
             );
+        }
+    }
+
+    #[test]
+    fn an_ipv6_literal_is_bracketed_for_use_in_a_url() {
+        let profile = Profile {
+            host: "::1".to_string(),
+            ..valid()
+        };
+
+        assert_eq!(profile.url_host(), "[::1]");
+        // The raw host stays unbracketed for the JVM -D options.
+        assert_eq!(profile.host, "::1");
+    }
+
+    #[test]
+    fn an_already_bracketed_literal_is_not_bracketed_twice() {
+        let profile = Profile {
+            host: "[fe80::1]".to_string(),
+            ..valid()
+        };
+
+        assert_eq!(profile.url_host(), "[fe80::1]");
+    }
+
+    #[test]
+    fn ordinary_hosts_are_left_alone_by_bracketing() {
+        for host in ["127.0.0.1", "proxy.example.com"] {
+            let profile = Profile {
+                host: host.to_string(),
+                ..valid()
+            };
+
+            assert_eq!(profile.url_host(), host);
         }
     }
 

@@ -71,6 +71,14 @@ pub struct AppConfig {
     pub health_check_url: String,
     /// URL downloaded by `speedtest` to measure throughput.
     pub speedtest_url: String,
+
+    /// Set when this value is a fallback because the file could not be parsed.
+    ///
+    /// Travels with the config rather than living in a global so that every
+    /// copy — including the clones handed to background tasks — carries the
+    /// same knowledge. `#[serde(skip)]` keeps it out of the file itself.
+    #[serde(skip)]
+    pub(crate) load_failed: bool,
 }
 
 impl Default for AppConfig {
@@ -135,6 +143,7 @@ impl Default for AppConfig {
             // "the tunnel carries real traffic" signal available.
             health_check_url: "https://www.gstatic.com/generate_204".to_string(),
             speedtest_url: "https://speed.cloudflare.com/__down?bytes=2097152".to_string(),
+            load_failed: false,
         }
     }
 }
@@ -229,10 +238,15 @@ impl AppConfig {
             Err(err) => {
                 eprintln!("warning: {err}");
                 eprintln!(
-                    "warning: falling back to built-in defaults; {} was left unchanged",
+                    "warning: using built-in defaults; {} is left unchanged and will not be written to",
                     path.display()
                 );
-                Self::default()
+                // Marking the value is what makes the promise real: without it
+                // the next `save()` writes these defaults over the user's file.
+                Self {
+                    load_failed: true,
+                    ..Self::default()
+                }
             }
         }
     }
@@ -263,6 +277,13 @@ impl AppConfig {
     /// Returns an error if the parent directory cannot be created or the file cannot be written.
     pub fn save(&self) -> Result<()> {
         let path = Self::get_config_path();
+
+        // The whole point of not clobbering on read is lost if the very next
+        // mutating command writes the fallback defaults over the same file.
+        if self.load_failed {
+            return Err(crate::error::ProxyError::RefusingToOverwrite { path }.into());
+        }
+
         if let Some(parent) = path.parent()
             && !parent.as_os_str().is_empty()
         {
@@ -282,14 +303,14 @@ impl AppConfig {
     #[must_use]
     pub fn get_socks_url(&self) -> Option<String> {
         self.active_profile()
-            .map(|p| format!("{}://{}:{}", p.protocol, p.host, p.port))
+            .map(|p| format!("{}://{}:{}", p.protocol, p.url_host(), p.port))
     }
 
     /// Generates the HTTP-scheme proxy URL for the active profile.
     #[must_use]
     pub fn get_http_url(&self) -> Option<String> {
         self.active_profile()
-            .map(|p| format!("http://{}:{}", p.host, p.port))
+            .map(|p| format!("http://{}:{}", p.url_host(), p.port))
     }
 }
 
@@ -399,6 +420,43 @@ mod tests {
         assert_eq!(loaded.active_profile, config.active_profile);
         assert_eq!(loaded.profiles.len(), config.profiles.len());
         assert_eq!(loaded.speedtest_url, config.speedtest_url);
+    }
+
+    #[test]
+    fn a_config_that_failed_to_load_refuses_to_be_saved() {
+        // Guards the invariant directly: the fallback value must know it is a
+        // fallback, or `save()` writes defaults over whatever could not parse.
+        let fallback = AppConfig {
+            load_failed: true,
+            ..AppConfig::default()
+        };
+
+        let err = fallback.save().unwrap_err();
+
+        assert!(err.to_string().contains("refusing to overwrite"));
+    }
+
+    #[test]
+    fn a_normally_loaded_config_has_no_save_guard_set() {
+        assert!(!AppConfig::default().load_failed);
+    }
+
+    #[test]
+    fn an_ipv6_profile_yields_a_bracketed_proxy_url() {
+        let mut config = AppConfig::default();
+        config.profiles.insert(
+            "v6".to_string(),
+            Profile {
+                name: "V6".to_string(),
+                host: "::1".to_string(),
+                port: 1080,
+                protocol: "socks5".to_string(),
+            },
+        );
+        config.active_profile = "v6".to_string();
+
+        assert_eq!(config.get_socks_url().unwrap(), "socks5://[::1]:1080");
+        assert_eq!(config.get_http_url().unwrap(), "http://[::1]:1080");
     }
 
     #[test]

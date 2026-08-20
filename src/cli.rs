@@ -163,8 +163,11 @@ pub enum ProfileCommands {
         #[arg(long)]
         host: Option<String>,
         /// Protocol (socks5, http) | Протокол (socks5, http)
-        #[arg(short = 't', long, default_value = "socks5")]
-        protocol: String,
+        ///
+        /// Optional: omitting it keeps an existing profile's protocol instead
+        /// of resetting it to the default.
+        #[arg(short = 't', long)]
+        protocol: Option<String>,
     },
     /// Import profiles from file or URL | Импорт профилей из файла или URL
     Import {

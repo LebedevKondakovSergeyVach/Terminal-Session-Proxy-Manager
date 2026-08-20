@@ -100,7 +100,7 @@ pub fn set_profile(
     name: Option<String>,
     port: Option<u16>,
     host: Option<String>,
-    protocol: String,
+    protocol: Option<String>,
 ) -> Result<()> {
     let mut prof = config
         .profiles
@@ -122,7 +122,11 @@ pub fn set_profile(
     if let Some(h) = host {
         prof.host = h;
     }
-    prof.protocol = protocol;
+    // Only when asked. Assigning unconditionally meant that `profile set web
+    // --port 3129` rewrote an http profile to socks5 behind the user's back.
+    if let Some(proto) = protocol {
+        prof.protocol = proto;
+    }
 
     // Validate before writing: a profile that cannot form a proxy URL would
     // otherwise be persisted and break every later command that loads it.
@@ -219,10 +223,20 @@ pub fn select_profile_interactive(config: &mut AppConfig, i18n: &I18n) -> Result
 /// Results are sorted fastest first, with unreachable profiles last.
 pub async fn benchmark_profiles(config: &AppConfig, i18n: &I18n) -> Vec<BenchmarkResult> {
     let pb = spinner(i18n.t("spinner_benchmark"));
+    let results = benchmark_profiles_quiet(config).await;
+    pb.finish_and_clear();
+    results
+}
 
+/// Benchmarks every profile without drawing a progress spinner.
+///
+/// The TUI dashboard needs this: `spinner` writes escape sequences to stderr on
+/// a steady tick, which interleaves with ratatui's frames and corrupts the
+/// alternate screen.
+pub async fn benchmark_profiles_quiet(config: &AppConfig) -> Vec<BenchmarkResult> {
     let mut results = Vec::new();
     for (key, prof) in &config.profiles {
-        let proxy_url = format!("{}://{}:{}", prof.protocol, prof.host, prof.port);
+        let proxy_url = format!("{}://{}:{}", prof.protocol, prof.url_host(), prof.port);
 
         let probes = config.ping_targets.iter().map(|ep| {
             let proxy_url = proxy_url.clone();
@@ -256,22 +270,23 @@ pub async fn benchmark_profiles(config: &AppConfig, i18n: &I18n) -> Vec<Benchmar
         });
     }
 
-    pb.finish_and_clear();
     results.sort_by_key(BenchmarkResult::ranking);
     results
 }
 
 /// Times a single request to `target_url` through `proxy_url`.
 async fn probe(proxy_url: &str, target_url: &str) -> Option<u128> {
-    let mut builder = reqwest::Client::builder()
+    // A rejected proxy URL must fail the probe, not silently fall through to a
+    // direct connection — that made a broken profile look like the fastest one
+    // and got it auto-selected by `best` and `monitor`.
+    let proxy = reqwest::Proxy::all(proxy_url).ok()?;
+
+    let client = reqwest::Client::builder()
         .timeout(BENCHMARK_TIMEOUT)
-        .connect_timeout(BENCHMARK_TIMEOUT);
-
-    if let Ok(proxy) = reqwest::Proxy::all(proxy_url) {
-        builder = builder.proxy(proxy);
-    }
-
-    let client = builder.build().ok()?;
+        .connect_timeout(BENCHMARK_TIMEOUT)
+        .proxy(proxy)
+        .build()
+        .ok()?;
     let start = Instant::now();
     client
         .get(target_url)

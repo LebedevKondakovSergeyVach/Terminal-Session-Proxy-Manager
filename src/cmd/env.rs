@@ -1,20 +1,24 @@
 use crate::cli::EnvMode;
 use crate::config::{AppConfig, I18n};
 use crate::proxy_env::{export_statements, shell_quote, unset_statement};
+use anyhow::{Result, anyhow};
 
-/// Prints shell statements for `eval "$(... env on|off)"`.
+/// Prints the shell statements the caller's shell will evaluate.
 ///
-/// Everything printed here is executed by the caller's shell, so every
-/// interpolated value goes through [`shell_quote`] — including the status
-/// message, which embeds a profile name straight from `config.json`.
-pub fn print_env_commands(mode: &EnvMode, config: &AppConfig, i18n: &I18n) {
+/// Everything printed here is executed by that shell, so every interpolated
+/// value goes through [`shell_quote`] — including the status message, which
+/// embeds a profile name straight from `config.json`.
+///
+/// # Errors
+/// Returns an error when no profile is active. Exiting zero here would let
+/// `proxy_on && deploy` carry on against a shell that has no proxy set.
+pub fn print_env_commands(mode: &EnvMode, config: &AppConfig, i18n: &I18n) -> Result<()> {
     match mode {
         EnvMode::On => {
             let Some(statements) = export_statements(config) else {
-                // Print to stderr so the shell evaluates nothing at all rather
-                // than a half-built environment.
-                eprintln!("{}", i18n.t("proxy_load_failed"));
-                return;
+                // Nothing reaches stdout, so the shell evaluates nothing at
+                // all rather than a half-built environment.
+                return Err(anyhow!("{}", i18n.t("proxy_load_failed")));
             };
 
             for statement in statements {
@@ -34,6 +38,7 @@ pub fn print_env_commands(mode: &EnvMode, config: &AppConfig, i18n: &I18n) {
             println!("echo {};", shell_quote(i18n.t("env_off_msg")));
         }
     }
+    Ok(())
 }
 
 #[cfg(test)]

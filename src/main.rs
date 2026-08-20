@@ -41,7 +41,15 @@ async fn main() -> ExitCode {
 /// remains the authority for every value once parsing happens; this only
 /// bootstraps those three settings.
 fn preparse<'a>(args: &'a [String], flag: &str) -> Option<&'a str> {
-    let mut iter = args.iter();
+    // `run` is a trailing_var_arg subcommand, so everything after it belongs to
+    // the child. Scanning past it let `proxy run mytool --lang en` retarget the
+    // manager itself, changing which proxy the child was given.
+    let scannable = args
+        .iter()
+        .position(|a| a == "run" || a == "--")
+        .map_or(args.len(), |i| i);
+
+    let mut iter = args[..scannable].iter();
     while let Some(arg) = iter.next() {
         if arg == flag {
             return iter.next().map(String::as_str);
@@ -109,7 +117,7 @@ fn subcommand_names(cmd: &clap::Command) -> Vec<String> {
 async fn dispatch(cli: Cli, config: &mut AppConfig, i18n: &I18n) -> Result<ExitCode> {
     match cli.command {
         Commands::Status { json } => status::print_status(config, i18n, json).await?,
-        Commands::Env { mode } => env_cmd::print_env_commands(&mode, config, i18n),
+        Commands::Env { mode } => env_cmd::print_env_commands(&mode, config, i18n)?,
         Commands::Debug { mode } => {
             let enabled = matches!(mode, EnvMode::On);
             shell_handoff::set_debug(enabled)?;

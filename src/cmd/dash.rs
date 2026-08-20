@@ -223,7 +223,12 @@ async fn refresh_loop(state: Arc<Mutex<DashState>>, config: AppConfig, i18n: I18
                 }
             });
 
-            let proxy_url = format!("{}://{}:{}", profile.protocol, profile.host, profile.port);
+            let proxy_url = format!(
+                "{}://{}:{}",
+                profile.protocol,
+                profile.url_host(),
+                profile.port
+            );
             let geo_url = config
                 .geo_apis
                 .first()
@@ -270,15 +275,16 @@ async fn refresh_loop(state: Arc<Mutex<DashState>>, config: AppConfig, i18n: I18
 }
 
 async fn fetch_geo(proxy_url: &str, geo_url: &str) -> Option<(GeoResponse, u128)> {
-    let mut builder = reqwest::Client::builder()
+    // No direct-connection fallback: showing the machine's own IP in a panel
+    // labelled with the proxy profile is worse than showing "offline".
+    let proxy = reqwest::Proxy::all(proxy_url).ok()?;
+
+    let client = reqwest::Client::builder()
         .timeout(Duration::from_secs(3))
-        .connect_timeout(Duration::from_secs(2));
-
-    if let Ok(proxy) = reqwest::Proxy::all(proxy_url) {
-        builder = builder.proxy(proxy);
-    }
-
-    let client = builder.build().ok()?;
+        .connect_timeout(Duration::from_secs(2))
+        .proxy(proxy)
+        .build()
+        .ok()?;
     let start = Instant::now();
     let response = client.get(geo_url).send().await.ok()?;
     let elapsed = start.elapsed().as_millis();
@@ -346,12 +352,21 @@ fn run_app(
         let snapshot = with_state(state, |s| s.clone());
 
         if let Some(ref results) = snapshot.benchmark_results {
+            // Re-sorting moves rows under the cursor. Remember which profile
+            // was selected and restore it afterwards, otherwise the highlight
+            // silently jumps and Enter applies whatever landed on that index.
+            let selected_key = list_state.selected().and_then(|i| profiles.get(i)).cloned();
+
             profiles.sort_by_key(|k| {
                 results
                     .iter()
                     .find(|(key, _)| key == k)
                     .map_or(u128::MAX, |(_, ms)| *ms)
             });
+
+            if let Some(key) = selected_key {
+                list_state.select(profiles.iter().position(|k| *k == key));
+            }
         }
 
         terminal.draw(|frame| {
@@ -446,8 +461,9 @@ fn start_benchmark(state: &Arc<Mutex<DashState>>, config: &AppConfig) {
     let state = Arc::clone(state);
     let config = config.clone();
     tokio::spawn(async move {
-        let i18n = I18n::load("en");
-        let results = crate::cmd::profile::benchmark_profiles(&config, &i18n)
+        // The quiet variant: a spinner here would write to stderr while
+        // ratatui owns the alternate screen.
+        let results = crate::cmd::profile::benchmark_profiles_quiet(&config)
             .await
             .into_iter()
             .map(|r| (r.key, r.avg_ms.unwrap_or(u128::MAX)))
