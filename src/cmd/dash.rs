@@ -44,6 +44,7 @@ struct DashState {
 
 #[derive(Deserialize)]
 struct GeoResponse {
+    ip: Option<String>,
     query: Option<String>,
     city: Option<String>,
     country: Option<String>,
@@ -243,7 +244,7 @@ async fn refresh_loop(state: Arc<Mutex<DashState>>, config: AppConfig, i18n: I18
                 }
                 match probe {
                     Some((geo, elapsed)) => {
-                        s.ip = geo.query.unwrap_or_else(|| i18n.t("unknown").to_string());
+                        s.ip = geo.query.or(geo.ip).unwrap_or_else(|| i18n.t("unknown").to_string());
                         let city = geo.city.unwrap_or_default();
                         let country = geo.country.unwrap_or_default();
                         s.location = if city.is_empty() {
