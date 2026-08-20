@@ -93,7 +93,11 @@ fn translate_bilingual(text: &str, is_ru: bool) -> String {
         let mut parts = text.split(" | ");
         let en = parts.next().unwrap_or(text).trim();
         let ru = parts.next().unwrap_or(text).trim();
-        if is_ru { ru.to_string() } else { en.to_string() }
+        if is_ru {
+            ru.to_string()
+        } else {
+            en.to_string()
+        }
     } else {
         text.to_string()
     }
@@ -116,20 +120,34 @@ fn translate_command_args(mut cmd: clap::Command, is_ru: bool, i18n: &I18n) -> c
     }
 
     // Try explicitly translating help and version args if they exist
-    let arg_ids_set: std::collections::HashSet<String> = cmd.get_arguments().map(|a| a.get_id().to_string()).collect();
+    let arg_ids_set: std::collections::HashSet<String> = cmd
+        .get_arguments()
+        .map(|a| a.get_id().to_string())
+        .collect();
     if arg_ids_set.contains("help") {
-        cmd = cmd.mut_arg("help", |a| a.help(i18n.t("arg_help").to_string()).long_help(i18n.t("arg_help").to_string()));
+        cmd = cmd.mut_arg("help", |a| {
+            a.help(i18n.t("arg_help").to_string())
+                .long_help(i18n.t("arg_help").to_string())
+        });
     }
     if arg_ids_set.contains("version") {
-        cmd = cmd.mut_arg("version", |a| a.help(i18n.t("arg_version").to_string()).long_help(i18n.t("arg_version").to_string()));
+        cmd = cmd.mut_arg("version", |a| {
+            a.help(i18n.t("arg_version").to_string())
+                .long_help(i18n.t("arg_version").to_string())
+        });
     }
 
-    let sub_names: Vec<String> = cmd.get_subcommands().map(|s| s.get_name().to_string()).collect();
+    let sub_names: Vec<String> = cmd
+        .get_subcommands()
+        .map(|s| s.get_name().to_string())
+        .collect();
     for sub_name in sub_names {
-        if sub_name == "help" { continue; }
+        if sub_name == "help" {
+            continue;
+        }
         cmd = cmd.mut_subcommand(sub_name, |sub| translate_command_args(sub, is_ru, i18n));
     }
-    
+
     cmd
 }
 
