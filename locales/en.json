@@ -25,6 +25,7 @@
   "cmd_prompt": "Proxy indicator for Zsh prompt segment",
   "cmd_run": "Run single command through proxy without modifying current shell",
   "cmd_settings": "Manage global settings.json file",
+  "cmd_help": "Print this message or the help of the given subcommand(s)",
   "cmd_speedtest": "Benchmark real download bandwidth throughput in MB/s",
   "cmd_status": "Check network status, IPv4, IPv6, and physical location",
   "cmd_switch": "Interactive proxy profile selector",

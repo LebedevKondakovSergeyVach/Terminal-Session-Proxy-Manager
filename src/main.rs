@@ -93,12 +93,19 @@ async fn run() -> Result<ExitCode> {
 /// clap's derive attributes are static, so the bilingual doc comments in
 /// `cli.rs` are replaced here with a single-language description at runtime.
 fn localised_command(i18n: &I18n) -> clap::Command {
-    let mut cmd = Cli::command().about(i18n.t("cmd_about").to_string());
+    let mut cmd = Cli::command();
+    cmd.build(); // Build early to generate the 'help' subcommand
+
+    cmd = cmd.about(i18n.t("cmd_about").to_string());
 
     for name in subcommand_names(&cmd) {
         let about = i18n.t(&format!("cmd_{name}")).to_string();
         cmd = cmd.mut_subcommand(name, |s| s.about(about));
     }
+    
+    // Explicitly localise the built-in 'help' command
+    cmd = cmd.mut_subcommand("help", |s| s.about(i18n.t("cmd_help").to_string()));
+    
     cmd
 }
 

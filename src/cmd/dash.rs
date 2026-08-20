@@ -504,7 +504,7 @@ fn draw(
 
     let header = Paragraph::new(Line::from(vec![
         Span::styled(
-            "⚡ Terminal Session Proxy Manager ",
+            " ⚡ Terminal Session Proxy Manager ",
             Style::default()
                 .fg(Color::Yellow)
                 .add_modifier(Modifier::BOLD),
