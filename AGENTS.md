@@ -5,8 +5,9 @@ Instructions for AI coding agents working in this repository. Written to the
 [`CONTRIBUTING.md`](CONTRIBUTING.md), which covers the same ground in prose.
 
 > Deeper background lives in [`.ai/PROJECT_OVERVIEW.md`](.ai/PROJECT_OVERVIEW.md)
-> (architecture) and [`.ai/WORKFLOW_GUIDE.md`](.ai/WORKFLOW_GUIDE.md) (release
-> process). This file is the contract; those two are the reference material.
+> (architecture), [`.ai/GIT_WORKFLOW.md`](.ai/GIT_WORKFLOW.md) (branching and
+> releases) and [`.ai/WORKFLOW_GUIDE.md`](.ai/WORKFLOW_GUIDE.md) (verification).
+> This file is the contract; those three are the reference material.
 
 ## What this project is
 
@@ -177,8 +178,24 @@ screenshot needs a **new filename**, not an overwrite.
 ## Conventions
 
 - Commits follow Conventional Commits (`feat:`, `fix:`, `docs:`, `chore:`,
-  `refactor:`, `test:`).
+  `refactor:`, `test:`, `perf:`, `ci:`, `build:`).
 - Comments explain *why*, not *what*. Do not narrate the code.
 - `unsafe` is forbidden by `[lints.rust]` in `Cargo.toml`.
-- Do not bump the version or create tags unless explicitly asked; releases are
-  tag-triggered and publish real artifacts. See `.ai/WORKFLOW_GUIDE.md`.
+
+## Branching — read before your first commit
+
+Full rules in [`.ai/GIT_WORKFLOW.md`](.ai/GIT_WORKFLOW.md), enforced by CI.
+
+```
+main  <--  release/X.Y.Z  <--  feat/… fix/… docs/…
+```
+
+- Task branches come from the **open release branch** and merge back into it.
+  Never from or into `main`.
+- **Never push to `main`, never create a tag, never bump the version** outside a
+  release branch. Merging a release branch into `main` is what tags the commit
+  and publishes to Homebrew, so an unintended merge ships a release.
+- Check `git branch --show-current` before committing. If it says `main`, stop
+  and branch.
+- Every pull request touching `src/`, `locales/` or `Cargo.toml` needs a
+  `CHANGELOG.md` entry under `## [Unreleased]`.

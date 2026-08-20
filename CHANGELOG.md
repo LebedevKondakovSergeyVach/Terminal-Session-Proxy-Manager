@@ -7,7 +7,17 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
-## [2.2.0] — 2026-08-19
+### Added
+
+- A documented branch model — `main` <- `release/X.Y.Z` <- task branches —
+  described in `.ai/GIT_WORKFLOW.md` and enforced by
+  `.github/workflows/branch-policy.yml`. Pull requests are checked for branch
+  naming, a valid head/base pairing, and a changelog entry.
+- Releases now publish themselves. Merging a release branch into `main` makes CI
+  verify the build, create the `vX.Y.Z` tag, build the four target binaries and
+  bump the Homebrew tap. Tagging by hand still works and takes the same path.
+
+## [2.2.0] — 2026-08-20
 
 A correctness and hardening release. Several long-standing bugs are fixed,
 including one that could destroy a user's saved profiles.
