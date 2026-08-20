@@ -30,6 +30,10 @@ pub struct AppSettings {
     pub config_path: Option<String>,
     /// Language code (`"ru"` or `"en"`).
     pub lang: String,
+
+    /// Set when this value is a fallback because the file could not be parsed.
+    #[serde(skip)]
+    pub(crate) load_failed: bool,
 }
 
 impl Default for AppSettings {
@@ -37,6 +41,7 @@ impl Default for AppSettings {
         Self {
             config_path: None,
             lang: default_lang(),
+            load_failed: false,
         }
     }
 }
@@ -99,10 +104,13 @@ impl AppSettings {
             Err(err) => {
                 eprintln!("warning: {err}");
                 eprintln!(
-                    "warning: using default settings; {} was left unchanged",
+                    "warning: using default settings; {} is left unchanged and will not be written to",
                     path.display()
                 );
-                Self::default()
+                Self {
+                    load_failed: true,
+                    ..Self::default()
+                }
             }
         }
     }
@@ -133,6 +141,13 @@ impl AppSettings {
     /// Returns an error if the parent directory cannot be created or the file cannot be written.
     pub fn save(&self) -> Result<()> {
         let path = Self::get_settings_path();
+
+        // Overwriting here would silently drop `config_path` and retarget the
+        // tool at a different config.json, making the user's profiles look lost.
+        if self.load_failed {
+            return Err(crate::error::ProxyError::RefusingToOverwrite { path }.into());
+        }
+
         if let Some(parent) = path.parent()
             && !parent.as_os_str().is_empty()
         {
@@ -190,6 +205,7 @@ mod tests {
         let settings = AppSettings {
             config_path: Some("~/elsewhere.json".to_string()),
             lang: "en".to_string(),
+            ..AppSettings::default()
         };
         fs::write(&path, serde_json::to_string_pretty(&settings).unwrap()).unwrap();
 

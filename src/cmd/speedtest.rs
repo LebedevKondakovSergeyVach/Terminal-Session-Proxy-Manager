@@ -63,13 +63,37 @@ pub async fn run_speedtest(config: &AppConfig, i18n: &I18n) -> Result<()> {
     );
 
     let mut downloaded = 0u64;
-    while let Ok(Some(chunk)) = response.chunk().await {
-        downloaded += chunk.len() as u64;
-        pb.set_position(downloaded);
+    let mut transport_error = None;
+    loop {
+        match response.chunk().await {
+            Ok(Some(chunk)) => {
+                downloaded += chunk.len() as u64;
+                pb.set_position(downloaded);
+            }
+            // Clean end of the body.
+            Ok(None) => break,
+            // A connection dropped mid-stream used to be indistinguishable
+            // from EOF, so a truncated download printed a confident MB/s.
+            Err(e) => {
+                transport_error = Some(e);
+                break;
+            }
+        }
     }
 
     let elapsed = start.elapsed().as_secs_f64();
     pb.finish_and_clear();
+
+    if let Some(e) = transport_error {
+        println!(
+            "{}",
+            i18n.format("speedtest_failed", &[&e.to_string()])
+                .red()
+                .bold()
+        );
+        rule();
+        return Ok(());
+    }
 
     if downloaded == 0 || elapsed <= 0.0 {
         println!("{}", i18n.t("speedtest_incomplete").red().bold());

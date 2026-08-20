@@ -72,15 +72,18 @@ async fn check_active_proxy(config: &AppConfig) -> bool {
         return false;
     };
 
-    let mut builder = reqwest::Client::builder()
+    // Without the proxy applied this request would succeed directly and report
+    // a broken tunnel as healthy, which is the opposite of what it must do.
+    let Ok(proxy) = reqwest::Proxy::all(&proxy_url) else {
+        return false;
+    };
+
+    let Ok(client) = reqwest::Client::builder()
         .timeout(Duration::from_secs(3))
-        .connect_timeout(Duration::from_secs(2));
-
-    if let Ok(proxy) = reqwest::Proxy::all(&proxy_url) {
-        builder = builder.proxy(proxy);
-    }
-
-    let Ok(client) = builder.build() else {
+        .connect_timeout(Duration::from_secs(2))
+        .proxy(proxy)
+        .build()
+    else {
         return false;
     };
 

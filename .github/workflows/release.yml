@@ -88,31 +88,10 @@ jobs:
             exit 1
           fi
 
-  tag:
-    name: Create tag
-    needs: [resolve, verify]
-    if: needs.resolve.outputs.should_release == 'true' && github.ref_type != 'tag'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Tag the merge commit
-        run: |
-          set -euo pipefail
-          git config user.name  'github-actions[bot]'
-          git config user.email 'github-actions[bot]@users.noreply.github.com'
-          git tag -a "${{ needs.resolve.outputs.tag }}" \
-            -m "Release ${{ needs.resolve.outputs.tag }}"
-          git push origin "${{ needs.resolve.outputs.tag }}"
-
   build:
     name: Build ${{ matrix.artifact_name }}
-    needs: [resolve, verify, tag]
-    # `tag` is skipped on the tag-triggered path, which would otherwise skip
-    # this job too.
-    if: always() && needs.resolve.outputs.should_release == 'true' && needs.verify.result == 'success' && needs.tag.result != 'failure'
+    needs: [resolve, verify]
+    if: needs.resolve.outputs.should_release == 'true'
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -169,12 +148,28 @@ jobs:
             ${{ matrix.artifact_name }}.sha256
 
   publish:
-    name: Publish release and bump Homebrew
+    name: Tag, publish and bump Homebrew
     needs: [resolve, build]
-    if: always() && needs.build.result == 'success'
+    if: needs.resolve.outputs.should_release == 'true'
     runs-on: ubuntu-latest
+    env:
+      RELEASE_TAG: ${{ needs.resolve.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Deliberately after `build`. Tagging first meant a failing matrix leg
+      # left the tag pushed with nothing published, and every retry then saw
+      # that tag, set should_release=false, and skipped the release for good.
+      - name: Create tag
+        if: github.ref_type != 'tag'
+        run: |
+          set -euo pipefail
+          git config user.name  'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git tag -a "$RELEASE_TAG" -m "Release $RELEASE_TAG"
+          git push origin "refs/tags/$RELEASE_TAG"
 
       - uses: actions/download-artifact@v4
         with:

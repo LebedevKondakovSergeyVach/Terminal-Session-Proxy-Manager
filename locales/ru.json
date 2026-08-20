@@ -127,6 +127,7 @@
   "status_direct": "🔴 НАПРЯМУЮ (Прокси выключен)",
   "status_enabled": "🟢 ВКЛЮЧЕН",
   "status_header": "Статус:",
+  "status_proxy_invalid": "Некорректный URL прокси",
   "timeout_label": "Таймаут",
   "unavailable": "недоступен",
   "unknown": "неизвестно"

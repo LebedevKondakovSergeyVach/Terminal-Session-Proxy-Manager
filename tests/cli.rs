@@ -174,6 +174,142 @@ fn a_malformed_config_is_reported_and_left_byte_for_byte_intact() {
 // ----------------------------------------------------------- env exports ---
 
 #[test]
+fn a_mutating_command_refuses_to_overwrite_a_malformed_config() {
+    // The read-only case was already covered, which is exactly why this got
+    // through: `load()` stopped clobbering, but the next `save()` still wrote
+    // the fallback defaults over the user's file and erased every profile.
+    let broken = "{ \"active_profile\": \"work\", \"profiles\": { \"work\": oops } }";
+    let cli = Cli::new().with_config(broken);
+
+    cli.cmd()
+        .args([
+            "profile", "set", "lab", "--host", "10.0.0.5", "--port", "9050",
+        ])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("refusing to overwrite"));
+
+    assert_eq!(cli.config_contents(), broken);
+}
+
+#[test]
+fn every_mutating_command_leaves_a_malformed_config_intact() {
+    let broken = "{ not json at all";
+
+    for args in [
+        vec!["profile", "use", "default"],
+        vec!["profile", "remove", "default"],
+        vec!["profile", "set", "x", "--port", "1080"],
+    ] {
+        let cli = Cli::new().with_config(broken);
+        cli.cmd().args(&args).assert().failure();
+
+        assert_eq!(
+            cli.config_contents(),
+            broken,
+            "`{}` rewrote an unparsable config",
+            args.join(" ")
+        );
+    }
+}
+
+#[test]
+fn read_only_commands_still_work_with_a_malformed_config() {
+    // The refusal must not make the tool unusable for diagnosis.
+    let cli = Cli::new().with_config("{ broken");
+
+    cli.cmd().args(["profile", "list"]).assert().success();
+    cli.cmd().args(["config", "path"]).assert().success();
+}
+
+#[test]
+fn env_on_exits_non_zero_when_no_profile_is_active() {
+    // `proxy_on && deploy` must not proceed against an unproxied shell.
+    let cli = Cli::new().with_config(r#"{"active_profile":"missing","profiles":{}}"#);
+
+    cli.cmd()
+        .args(["env", "on"])
+        .assert()
+        .failure()
+        .stdout(predicate::str::is_empty());
+}
+
+#[test]
+fn profile_set_keeps_the_existing_protocol_when_not_asked_to_change_it() {
+    let cli = Cli::new().with_config(
+        r#"{"active_profile":"web",
+            "profiles":{"web":{"name":"Web","host":"127.0.0.1","port":3128,"protocol":"http"}}}"#,
+    );
+
+    cli.cmd()
+        .args(["profile", "set", "web", "--port", "3129"])
+        .assert()
+        .success();
+
+    assert!(
+        cli.config_contents().contains("\"protocol\": \"http\""),
+        "editing the port silently reset the protocol:\n{}",
+        cli.config_contents()
+    );
+}
+
+#[test]
+fn profile_set_changes_the_protocol_when_asked() {
+    let cli = Cli::new().with_config(ONE_PROFILE);
+
+    cli.cmd()
+        .args(["profile", "set", "work", "--protocol", "http"])
+        .assert()
+        .success();
+
+    assert!(cli.config_contents().contains("\"protocol\": \"http\""));
+}
+
+#[test]
+fn an_ipv6_profile_produces_a_parseable_proxy_url() {
+    // `http://::1:1080` is not a URL any client can read; the literal needs
+    // brackets inside the authority.
+    let cli = Cli::new().with_config(
+        r#"{"active_profile":"v6",
+            "profiles":{"v6":{"name":"V6","host":"::1","port":1080,"protocol":"socks5"}}}"#,
+    );
+
+    cli.cmd()
+        .args(["export", "curl"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("socks5://[::1]:1080"));
+
+    cli.cmd()
+        .args(["env", "on"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("http://[::1]:1080"))
+        // The JVM options take a bare host, not a bracketed one.
+        .stdout(predicate::str::contains("-Dhttp.proxyHost=::1"));
+}
+
+#[test]
+fn run_does_not_let_the_child_command_retarget_the_manager() {
+    // `preparse` scanned the whole argv, so a child flag could change which
+    // config the manager itself loaded.
+    let cli = Cli::new().with_config(ONE_PROFILE);
+
+    cli.cmd()
+        .args([
+            "run",
+            "sh",
+            "-c",
+            "printf %s \"$ALL_PROXY\"",
+            "--config-file",
+            "/nonexistent/elsewhere.json",
+        ])
+        .assert()
+        .success()
+        .stdout("socks5://127.0.0.1:1080");
+}
+
+#[test]
 fn env_on_exports_every_managed_variable() {
     let cli = Cli::new().with_config(ONE_PROFILE);
 
@@ -448,6 +584,72 @@ fn init_emits_a_sourceable_shell_function() {
             );
         }
     }
+}
+
+#[test]
+fn the_shell_wrapper_reports_the_binary_exit_status() {
+    // The re-apply test used to end the branch, so it became the function's own
+    // status and inverted it: success looked like failure when no proxy was
+    // set, and failure looked like success when one was. Driven against a stub
+    // binary so no real command or network is involved.
+    let dir = tempfile::tempdir().unwrap();
+    let bin_dir = dir.path().join("bin");
+    fs::create_dir_all(&bin_dir).unwrap();
+
+    let stub = bin_dir.join("terminal-session-proxy-manager");
+    fs::write(
+        &stub,
+        concat!(
+            "#!/bin/sh\n",
+            "[ \"$1\" = env ] && exit 0\n",
+            "[ \"$1\" = profile ] && [ \"$3\" = ok ] && exit 0\n",
+            "exit 1\n",
+        ),
+    )
+    .unwrap();
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        fs::set_permissions(&stub, fs::Permissions::from_mode(0o755)).unwrap();
+    }
+
+    let cli = Cli::new();
+    let script =
+        String::from_utf8(cli.cmd().args(["init", "bash"]).output().unwrap().stdout).unwrap();
+    // Keep only the function definitions; the completion dump below them needs
+    // bash-completion loaded to source cleanly.
+    let functions = &script[..script.find("proxy_run()").unwrap()];
+    let script_path = dir.path().join("init.bash");
+    fs::write(&script_path, functions).unwrap();
+
+    let path = format!("{}:{}", bin_dir.display(), std::env::var("PATH").unwrap());
+    let status_of = |proxy: &str, sub: &str, key: &str| -> Option<i32> {
+        let program = format!(
+            ". {}; export ALL_PROXY={}; proxy {} {}",
+            script_path.display(),
+            proxy,
+            sub,
+            key
+        );
+        Command::new("bash")
+            .arg("-c")
+            .arg(program)
+            .env("PATH", &path)
+            .status()
+            .unwrap()
+            .code()
+    };
+
+    assert_eq!(
+        status_of("", "use", "ok"),
+        Some(0),
+        "success became failure"
+    );
+    assert_eq!(
+        status_of("socks5://127.0.0.1:1080", "use", "nope"),
+        Some(1),
+        "failure was masked as success"
+    );
 }
 
 // -------------------------------------------------------------- settings ---

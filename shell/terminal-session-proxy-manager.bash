@@ -16,15 +16,20 @@ proxy() {
     if command -v terminal-session-proxy-manager >/dev/null 2>&1; then
         if [ "$1" = "on" ] || [ "$1" = "off" ]; then
             eval "$(terminal-session-proxy-manager env "$1")"
-        elif [ "$1" = "use" ]; then
-            terminal-session-proxy-manager profile use "$2"
-            [ -n "$ALL_PROXY" ] && eval "$(terminal-session-proxy-manager env on)"
-        elif [ "$1" = "switch" ]; then
-            terminal-session-proxy-manager profile select
-            [ -n "$ALL_PROXY" ] && eval "$(terminal-session-proxy-manager env on)"
-        elif [ "$1" = "best" ]; then
-            terminal-session-proxy-manager profile best
-            [ -n "$ALL_PROXY" ] && eval "$(terminal-session-proxy-manager env on)"
+        elif [ "$1" = "use" ] || [ "$1" = "switch" ] || [ "$1" = "best" ]; then
+            case "$1" in
+                use)    terminal-session-proxy-manager profile use "$2" ;;
+                switch) terminal-session-proxy-manager profile select ;;
+                best)   terminal-session-proxy-manager profile best ;;
+            esac
+            # Capture first: the re-apply test used to become the function's
+            # own status, so `proxy use work` reported failure on success when
+            # the proxy was off, and success on failure when it was on.
+            _tspm_rc=$?
+            if [ $_tspm_rc -eq 0 ] && [ -n "$ALL_PROXY" ]; then
+                eval "$(terminal-session-proxy-manager env on)"
+            fi
+            return $_tspm_rc
         else
             terminal-session-proxy-manager "$@"
             if [ -f "$HOME/.terminal-session-proxy-manager-eval" ]; then

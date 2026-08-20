@@ -3,7 +3,7 @@ use crate::config::{AppConfig, I18n};
 use anyhow::Result;
 use colored::Colorize;
 use std::env;
-use std::net::TcpStream;
+use std::net::{TcpStream, ToSocketAddrs};
 use std::time::Duration;
 
 /// Runs diagnostic tests on local sockets, session env vars, and HTTP endpoints.
@@ -19,12 +19,15 @@ pub async fn run_diagnose(config: &AppConfig, i18n: &I18n) -> Result<()> {
     let host = profile.map(|p| p.host.as_str()).unwrap_or("127.0.0.1");
     let port = profile.map(|p| p.port).unwrap_or(2080);
 
-    let socket_addr = format!("{host}:{port}");
-    let socket_ok = if let Ok(addr) = socket_addr.parse() {
-        TcpStream::connect_timeout(&addr, Duration::from_secs(2)).is_ok()
-    } else {
-        false
-    };
+    // Resolve first: `SocketAddr::parse` only accepts IP literals, so a profile
+    // with a hostname always reported its port as closed.
+    let socket_ok = (host, port)
+        .to_socket_addrs()
+        .ok()
+        .and_then(|mut addrs| {
+            addrs.find(|addr| TcpStream::connect_timeout(addr, Duration::from_secs(2)).is_ok())
+        })
+        .is_some();
 
     let proxy_env = env::var("ALL_PROXY")
         .or_else(|_| env::var("all_proxy"))

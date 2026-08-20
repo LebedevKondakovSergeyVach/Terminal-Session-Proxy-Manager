@@ -30,6 +30,21 @@ pub enum ProxyError {
         source: serde_json::Error,
     },
 
+    /// A mutating command was asked to write over a file that never loaded.
+    ///
+    /// Falling back to defaults lets read-only commands keep working, but
+    /// saving that fallback would replace the user's real content with
+    /// built-in defaults — destroying exactly what the fallback was meant to
+    /// protect.
+    #[error(
+        "refusing to overwrite {path}: it exists but could not be parsed, so saving would \
+         replace your settings with defaults. Fix the JSON, or move the file aside, then retry."
+    )]
+    RefusingToOverwrite {
+        /// The unparsable file that would have been clobbered.
+        path: PathBuf,
+    },
+
     /// A profile field would produce an unusable proxy URL.
     #[error("invalid profile '{key}': {reason}")]
     InvalidProfile {

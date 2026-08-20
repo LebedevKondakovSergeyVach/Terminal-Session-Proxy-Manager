@@ -127,6 +127,7 @@
   "status_direct": "🔴 DIRECT (Proxy disabled)",
   "status_enabled": "🟢 ENABLED",
   "status_header": "Status:",
+  "status_proxy_invalid": "Proxy URL is invalid",
   "timeout_label": "Timeout",
   "unavailable": "unavailable",
   "unknown": "unknown"
