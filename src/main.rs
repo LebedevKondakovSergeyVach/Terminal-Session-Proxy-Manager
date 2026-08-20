@@ -88,6 +88,51 @@ async fn run() -> Result<ExitCode> {
     dispatch(cli, &mut config, &i18n).await
 }
 
+fn translate_bilingual(text: &str, is_ru: bool) -> String {
+    if text.contains(" | ") {
+        let mut parts = text.split(" | ");
+        let en = parts.next().unwrap_or(text).trim();
+        let ru = parts.next().unwrap_or(text).trim();
+        if is_ru { ru.to_string() } else { en.to_string() }
+    } else {
+        text.to_string()
+    }
+}
+
+fn translate_command_args(mut cmd: clap::Command, is_ru: bool, i18n: &I18n) -> clap::Command {
+    let arg_ids: Vec<_> = cmd.get_arguments().map(|a| a.get_id().clone()).collect();
+    for id in arg_ids {
+        cmd = cmd.mut_arg(id.clone(), |mut a| {
+            if let Some(help) = a.get_help() {
+                let text = help.to_string();
+                let localized = translate_bilingual(&text, is_ru);
+                if text != localized {
+                    a = a.help(localized.clone());
+                    a = a.long_help(localized); // ensure long_help is also replaced if it existed
+                }
+            }
+            a
+        });
+    }
+
+    // Try explicitly translating help and version args if they exist
+    let arg_ids_set: std::collections::HashSet<String> = cmd.get_arguments().map(|a| a.get_id().to_string()).collect();
+    if arg_ids_set.contains("help") {
+        cmd = cmd.mut_arg("help", |a| a.help(i18n.t("arg_help").to_string()).long_help(i18n.t("arg_help").to_string()));
+    }
+    if arg_ids_set.contains("version") {
+        cmd = cmd.mut_arg("version", |a| a.help(i18n.t("arg_version").to_string()).long_help(i18n.t("arg_version").to_string()));
+    }
+
+    let sub_names: Vec<String> = cmd.get_subcommands().map(|s| s.get_name().to_string()).collect();
+    for sub_name in sub_names {
+        if sub_name == "help" { continue; }
+        cmd = cmd.mut_subcommand(sub_name, |sub| translate_command_args(sub, is_ru, i18n));
+    }
+    
+    cmd
+}
+
 /// Builds the command tree with subcommand descriptions in the active language.
 ///
 /// clap's derive attributes are static, so the bilingual doc comments in
@@ -105,6 +150,9 @@ fn localised_command(i18n: &I18n) -> clap::Command {
 
     // Explicitly localise the built-in 'help' command
     cmd = cmd.mut_subcommand("help", |s| s.about(i18n.t("cmd_help").to_string()));
+
+    let is_ru = i18n.lang() == "ru";
+    cmd = translate_command_args(cmd, is_ru, i18n);
 
     cmd
 }
