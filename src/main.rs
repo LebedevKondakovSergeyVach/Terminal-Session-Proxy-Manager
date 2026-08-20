@@ -102,10 +102,10 @@ fn localised_command(i18n: &I18n) -> clap::Command {
         let about = i18n.t(&format!("cmd_{name}")).to_string();
         cmd = cmd.mut_subcommand(name, |s| s.about(about));
     }
-    
+
     // Explicitly localise the built-in 'help' command
     cmd = cmd.mut_subcommand("help", |s| s.about(i18n.t("cmd_help").to_string()));
-    
+
     cmd
 }
 
