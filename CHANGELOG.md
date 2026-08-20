@@ -7,10 +7,11 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
-## [2.2.0] — 2026-08-19
+## [2.3.0] — 2026-08-20
 
 A correctness and hardening release. Several long-standing bugs are fixed,
-including one that could destroy a user's saved profiles.
+including one that could destroy a user's saved profiles, and one shell
+injection. Two changes affect scripts — see **Changed**.
 
 ### Fixed
 
@@ -61,6 +62,13 @@ including one that could destroy a user's saved profiles.
 
 ### Added
 
+- A documented branch model — `main` <- `release/X.Y.Z` <- task branches —
+  described in `.ai/GIT_WORKFLOW.md` and enforced by
+  `.github/workflows/branch-policy.yml`. Pull requests are checked for branch
+  naming, a valid head/base pairing, and a changelog entry.
+- Releases publish themselves. Merging a release branch into `main` makes CI
+  verify the build, create the `vX.Y.Z` tag, build the four target binaries and
+  bump the Homebrew tap. Tagging by hand still works and takes the same path.
 - `--config-file`, `--settings-file` and `--lang` global options, with matching
   `TSPM_CONFIG`, `TSPM_SETTINGS` and `TSPM_LANG` environment variables. This
   makes the tool scriptable and lets tests run in full isolation.
@@ -109,6 +117,6 @@ Also changed:
 
 - Default configuration uses safe generic profiles.
 
-[Unreleased]: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/compare/v2.2.0...HEAD
-[2.2.0]: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/compare/v2.1.1...v2.2.0
+[Unreleased]: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/compare/v2.3.0...HEAD
+[2.3.0]: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/compare/v2.1.1...v2.3.0
 [2.1.1]: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/releases/tag/v2.1.1

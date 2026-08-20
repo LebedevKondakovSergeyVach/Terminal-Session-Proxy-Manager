@@ -87,28 +87,25 @@ cargo run -- init zsh
 cargo run -- init bash
 ```
 
-## 7. Releases
+## 7. Branching and releases
 
-Releases are triggered by pushing a tag. The workflow re-runs clippy and the
-tests, verifies the tag matches the crate version, builds four targets
-(macOS x86_64/arm64, Linux x86_64/arm64), publishes archives with SHA-256
-checksums, and bumps the Homebrew tap.
+Branching, pull requests and the release pipeline are documented in
+[`GIT_WORKFLOW.md`](GIT_WORKFLOW.md) and enforced by
+`.github/workflows/branch-policy.yml`.
 
-**Do not bump the version or push tags unless explicitly asked** — a tag
-publishes real artifacts to real users.
+The short version:
 
-When asked:
+```
+main  <--  release/X.Y.Z  <--  feat/… fix/… docs/…
+```
 
-1. Move the `Unreleased` section of `CHANGELOG.md` under the new version and date.
-2. Set `version = "X.Y.Z"` in `Cargo.toml`, following SemVer.
-3. `cargo check` to sync `Cargo.lock`.
-4. `git commit -m "chore: release vX.Y.Z"`
-5. `git tag vX.Y.Z`
-6. `git push origin main --tags`
+Task branches come from the open release branch and merge back into it. `main`
+is advanced only by merging a release branch, and that merge is what creates the
+tag, publishes the binaries and bumps the Homebrew tap.
 
-The release job fails fast if the tag and `Cargo.toml` disagree, so a mistyped
-tag costs a re-run rather than a broken release. The Homebrew tap is updated
-automatically; do not edit it by hand.
+**Never push to `main`, never create a tag, and never bump the version outside a
+release branch.** All three publish a release, or set one up to publish
+unintentionally.
 
 ## 8. Commits
 

@@ -1,8 +1,19 @@
 name: Release
 
+# Two ways in:
+#
+#   1. A release branch is merged into main. The version in Cargo.toml is
+#      already the released one, so this workflow tags it and publishes.
+#   2. A tag is pushed by hand, for a re-run or an out-of-band release.
+#
+# The tag is created and consumed inside the same run on purpose. A tag pushed
+# with GITHUB_TOKEN does not trigger further workflows, so relying on the tag
+# push to start the build would silently release nothing.
 on:
   push:
+    branches: [main]
     tags: ['v*']
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -11,35 +22,97 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
+  resolve:
+    name: Decide whether to release
+    runs-on: ubuntu-latest
+    outputs:
+      should_release: ${{ steps.decide.outputs.should_release }}
+      version: ${{ steps.decide.outputs.version }}
+      tag: ${{ steps.decide.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve version and tag
+        id: decide
+        run: |
+          set -euo pipefail
+          crate_version=$(awk -F'"' '/^\[package\]/{p=1;next} /^\[/{p=0} p && /^version[[:space:]]*=/{print $2; exit}' Cargo.toml)
+
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            version="${GITHUB_REF_NAME#v}"
+            if [ "$version" != "$crate_version" ]; then
+              echo "::error::tag ${GITHUB_REF_NAME} does not match Cargo.toml version ${crate_version}"
+              exit 1
+            fi
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+          else
+            version="$crate_version"
+            if git rev-parse -q --verify "refs/tags/v${version}" >/dev/null; then
+              echo "::notice::v${version} is already tagged; nothing to release."
+              echo "should_release=false" >> "$GITHUB_OUTPUT"
+            else
+              echo "::notice::main is at ${version} with no tag yet; releasing."
+              echo "should_release=true" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "tag=v${version}" >> "$GITHUB_OUTPUT"
+
   verify:
     name: Verify before publishing
+    needs: resolve
+    if: needs.resolve.outputs.should_release == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
         with:
-          components: clippy
+          components: clippy, rustfmt
       - uses: Swatinem/rust-cache@v2
 
-      # A tag that fails CI must not produce downloadable binaries.
-      - name: Test and lint
+      # A commit that cannot pass CI must not become a downloadable binary,
+      # even though the pull request that produced it was already green.
+      - name: Format, lint and test
         run: |
-          cargo clippy --all-targets --locked -- -D warnings
+          cargo fmt --all -- --check
+          cargo clippy --all-targets --all-features --locked -- -D warnings
           cargo test --all-features --locked
 
-      - name: Tag must match the crate version
+      - name: Changelog documents this release
         run: |
-          crate_version=$(cargo metadata --format-version 1 --no-deps \
-            | python3 -c 'import json,sys; print(json.load(sys.stdin)["packages"][0]["version"])')
-          tag_version="${GITHUB_REF_NAME#v}"
-          if [ "$crate_version" != "$tag_version" ]; then
-            echo "::error::tag $GITHUB_REF_NAME does not match Cargo.toml version $crate_version"
+          if ! grep -q "## \[${{ needs.resolve.outputs.version }}\]" CHANGELOG.md; then
+            echo "::error::CHANGELOG.md has no section for ${{ needs.resolve.outputs.version }}"
             exit 1
           fi
 
-  build-release:
+  tag:
+    name: Create tag
+    needs: [resolve, verify]
+    if: needs.resolve.outputs.should_release == 'true' && github.ref_type != 'tag'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Tag the merge commit
+        run: |
+          set -euo pipefail
+          git config user.name  'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git tag -a "${{ needs.resolve.outputs.tag }}" \
+            -m "Release ${{ needs.resolve.outputs.tag }}"
+          git push origin "${{ needs.resolve.outputs.tag }}"
+
+  build:
     name: Build ${{ matrix.artifact_name }}
-    needs: verify
+    needs: [resolve, verify, tag]
+    # `tag` is skipped on the tag-triggered path, which would otherwise skip
+    # this job too.
+    if: always() && needs.resolve.outputs.should_release == 'true' && needs.verify.result == 'success' && needs.tag.result != 'failure'
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -95,9 +168,10 @@ jobs:
             ${{ matrix.artifact_name }}
             ${{ matrix.artifact_name }}.sha256
 
-  publish-release:
-    name: Publish GitHub release
-    needs: build-release
+  publish:
+    name: Publish release and bump Homebrew
+    needs: [resolve, build]
+    if: always() && needs.build.result == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -106,11 +180,12 @@ jobs:
         with:
           path: release-artifacts
 
-      - name: Create release
+      - name: Create GitHub release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ needs.resolve.outputs.tag }}
+          name: Release ${{ needs.resolve.outputs.tag }}
           files: release-artifacts/*/*
-          name: Release ${{ github.ref_name }}
           generate_release_notes: true
           draft: false
           prerelease: false
@@ -120,6 +195,6 @@ jobs:
         with:
           formula-name: terminal-session-proxy-manager
           homebrew-tap: LebedevKondakovSergeyVach/homebrew-tap
-          download-url: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/releases/download/${{ github.ref_name }}/terminal-session-proxy-manager-macos-x86_64.tar.gz
+          download-url: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/releases/download/${{ needs.resolve.outputs.tag }}/terminal-session-proxy-manager-macos-x86_64.tar.gz
         env:
           COMMITTER_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}

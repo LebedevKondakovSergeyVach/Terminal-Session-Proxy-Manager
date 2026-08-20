@@ -1,12 +1,19 @@
 name: CI
 
+# Runs on every pull request, and on pushes to the long-lived branches.
+# Task branches are covered by their pull request rather than by their pushes,
+# which halves the number of runs without losing a gate.
 on:
-  push:
-    branches: ['**']
   pull_request:
+  push:
+    branches:
+      - main
+      - 'release/**'
+      - 'hotfix/**'
   # Advisories appear without any code change, so re-check on a schedule.
   schedule:
     - cron: '0 6 * * 1'
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -14,7 +21,7 @@ concurrency:
 
 env:
   CARGO_TERM_COLOR: always
-  # Fail on warnings everywhere rather than only in the clippy step.
+  # Fail on warnings everywhere, not only in the clippy step.
   RUSTFLAGS: -D warnings
 
 jobs:
@@ -70,7 +77,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Reads `rust-version` from Cargo.toml, so the two can never disagree.
+      # Must match `rust-version` in Cargo.toml. Raised together, or the
+      # published MSRV becomes a promise the crate cannot keep.
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: '1.88'

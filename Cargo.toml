@@ -1,6 +1,6 @@
 [package]
 name = "terminal-session-proxy-manager"
-version = "2.2.0"
+version = "2.3.0"
 edition = "2024"
 # Set by the highest MSRV in the resolved tree (ratatui 0.30 requires 1.88).
 rust-version = "1.88"

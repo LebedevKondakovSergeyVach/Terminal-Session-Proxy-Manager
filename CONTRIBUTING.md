@@ -73,16 +73,44 @@ If you change commands or configuration, update `README.md` **and**
 `README.ru.md`, the matching file in `docs/` and its `.ru.md` twin, and add a
 `CHANGELOG.md` entry under `Unreleased`.
 
+## Branching
+
+```
+main  <--  release/X.Y.Z  <--  feat/… fix/… docs/…
+```
+
+Branch your work off the **open release branch**, not off `main`, and open the
+pull request against that same release branch:
+
+```bash
+git checkout release/2.3.0 && git pull
+git checkout -b fix/dashboard-empty-list
+```
+
+`main` only ever moves when a release branch is merged into it, and that merge
+publishes a release. CI rejects a pull request that targets the wrong branch or
+uses an unrecognised branch prefix. Valid task prefixes: `feat/`, `fix/`,
+`docs/`, `chore/`, `refactor/`, `test/`, `perf/`, `ci/`, `build/`.
+
+Full rules, including how a release is cut, are in
+[`.ai/GIT_WORKFLOW.md`](.ai/GIT_WORKFLOW.md).
+
+## Changelog
+
+Any pull request touching `src/`, `locales/` or `Cargo.toml` needs an entry
+under `## [Unreleased]` in `CHANGELOG.md`. CI checks this. Docs-only and CI-only
+changes are exempt.
+
 ## Commits
 
 [Conventional Commits](https://www.conventionalcommits.org/): `feat:`, `fix:`,
-`docs:`, `chore:`, `refactor:`, `test:`, `perf:`, `ci:`.
+`docs:`, `chore:`, `refactor:`, `test:`, `perf:`, `ci:`, `build:`.
 
 ## Releases
 
-Maintainers only, and never as a side effect of another change — pushing a tag
-publishes binaries. The process is in
-[`.ai/WORKFLOW_GUIDE.md`](.ai/WORKFLOW_GUIDE.md).
+Maintainers only. Cutting a release means opening `release/X.Y.Z` from `main`,
+setting the version and changelog, and merging it into `main` when ready — the
+pipeline does the rest. Never tag by hand as part of another change.
 
 ## Using an AI agent
 
