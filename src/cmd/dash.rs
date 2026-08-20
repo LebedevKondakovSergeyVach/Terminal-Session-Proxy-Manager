@@ -617,7 +617,7 @@ fn draw_profiles_tab(
     let mut info_text = vec![Line::from(Vec::new())];
     info_text.extend(rows.into_iter().map(|(label, value)| {
         Line::from(vec![
-            Span::styled(format!(" {label:<14}"), Style::default().fg(Color::White)),
+            Span::styled(format!(" {label:<16}"), Style::default().fg(Color::White)),
             value,
         ])
     }));
