@@ -7,6 +7,11 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [2.2.1] — 2026-08-21
+
+### Fixed
+- **Release Automation**: Fixed a release issue where the Homebrew formula was not successfully updated during the v2.2.0 release. Triggering a patch release to force the `mislav/bump-homebrew-formula-action` to run correctly and synchronize the tap.
+
 ## [2.2.0] — 2026-08-20
 
 A correctness and hardening release. Several long-standing bugs are fixed,
