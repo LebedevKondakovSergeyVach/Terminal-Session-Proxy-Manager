@@ -1,49 +1,42 @@
-# Starlight Starter Kit: Basics
+# Terminal Session Proxy Manager - Documentation Website
 
-[![Built with Starlight](https://astro.badg.es/v2/built-with-starlight/tiny.svg)](https://starlight.astro.build)
+This is the Astro Starlight documentation website for `Terminal-Session-Proxy-Manager`.
 
-```
-npm create astro@latest -- --template starlight
-```
+## 🎨 Theme & Styling
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+This website uses a customized **Material Design 3** theme via `starlight-theme-md3`.
+
+Key visual features:
+- **Orange Accent:** The theme is configured with an expressive orange palette (`accent: 'orange'`, `variant: 'expressive'`).
+- **Rounded Corners & Spacious Layout:** Set to `shape: 'large'` and `density: 'comfortable'`.
+- **Astro View Transitions:** We use Astro's `<ClientRouter />` to enable SPA-like smooth fading transitions between pages without full browser reloads.
+- **Circular Theme Toggle:** The dark/light mode toggle (`ThemeSelect.astro`) features a custom `document.startViewTransition()` implementation that creates a smooth expanding circle effect from the cursor when switched.
+- **Typography:** Uses **Inter** for standard text and **JetBrains Mono** for code blocks, with customized Material Design scrollbars.
 
 ## 🚀 Project Structure
 
-Inside of your Astro + Starlight project, you'll see the following folders and files:
-
-```
-.
-├── public/
+```text
+website/
 ├── src/
-│   ├── assets/
-│   ├── content/
-│   │   └── docs/
-│   └── content.config.ts
-├── astro.config.mjs
-├── package.json
-└── tsconfig.json
+│   ├── components/       # Custom overrides (ThemeSelect.astro, Head.astro)
+│   ├── content/docs/     # Markdown (.md, .mdx) pages (English and Russian)
+│   ├── styles/           # custom.css (fonts, scrollbars, overrides)
+│   └── assets/           # Images and static assets
+├── astro.config.mjs      # Starlight and md3Theme configuration
+└── package.json
 ```
-
-Starlight looks for `.md` or `.mdx` files in the `src/content/docs/` directory. Each file is exposed as a route based on its file name.
-
-Images can be added to `src/assets/` and embedded in Markdown with a relative link.
-
-Static assets, like favicons, can be placed in the `public/` directory.
 
 ## 🧞 Commands
 
-All commands are run from the root of the project, from a terminal:
+Run these from the `website/` directory:
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+| Command           | Action                                           |
+| :---------------- | :----------------------------------------------- |
+| `npm install`     | Installs dependencies                            |
+| `npm run dev`     | Starts local dev server at `localhost:4321`      |
+| `npm run build`   | Build your production site to `./dist/`          |
+| `npm run preview` | Preview your build locally, before deploying     |
 
-## 👀 Want to learn more?
+## 🤖 For AI Agents
 
-Check out [Starlight’s docs](https://starlight.astro.build/), read [the Astro documentation](https://docs.astro.build), or jump into the [Astro Discord server](https://astro.build/chat).
+Agents working on this website **MUST** read `AGENTS.md` and use the available MCP servers (like `astro-docs`) and skills (`starlight-website`).

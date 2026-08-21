@@ -25,7 +25,8 @@ npm run preview  # Preview the built static site locally
 ```
 
 ## Guidelines for Agents
-1. **MCP Server**: When making structural changes or writing complex Astro components, query the `astro-docs` MCP server. The Astro ecosystem moves fast, and the MCP server has the latest up-to-date API references.
-2. **Markdown First**: Starlight is designed to convert `.md` and `.mdx` directly into styled UI pages. Do not build custom React/Astro layout components for content that can be represented with standard markdown tables, headings, or Starlight's built-in components (like `<Tabs>`, `<Card>`, `<Aside>`).
-3. **i18n (Translations)**: The project maintains both English and Russian documentation. When adding a new page, ensure you configure it in both languages according to Starlight's i18n structure.
-4. **Links**: Use relative links for internal documentation routing (e.g. `[Features](../features)`).
+1. **🚨 MANDATORY - MCP Servers & Skills**: When making structural changes or fixing bugs, you MUST use the `astro-docs` MCP server to get the latest API references. If you need external tools or integrations, use `brave-search` or `github` MCP servers. ALWAYS rely on these tools instead of guessing.
+2. **Material Design & View Transitions**: This site uses `starlight-theme-md3` (Material Design 3) and `<ClientRouter />` for SPA-like page transitions. When writing client-side `<script>` tags, remember to listen to `astro:page-load` because scripts don't re-run on soft navigations. 
+3. **Markdown First**: Starlight converts `.md`/`.mdx` directly into styled UI pages. Do not build custom layout components for content that can be represented with standard markdown or Starlight's built-in components (`<Tabs>`, `<Card>`, `<Aside>`).
+4. **i18n (Translations)**: The project maintains both English and Russian documentation. When adding a new page, ensure you configure it in both languages.
+5. **Links**: Use relative links for internal documentation routing (e.g. `[Features](../features)`).

@@ -41,15 +41,15 @@ import { Icon } from '@astrojs/starlight/components';
 		align-items: center;
 		justify-content: center;
 		border-radius: 999px;
-		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		transition: color 0.3s ease, background-color 0.3s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
 		position: relative;
 	}
 	button:hover {
 		color: var(--sl-color-text-accent);
-		background-color: rgba(128, 128, 128, 0.1);
+		background-color: var(--sl-color-gray-5);
 	}
 	button:active {
-		transform: scale(0.95);
+		transform: scale(0.9);
 	}
 	button[aria-pressed="true"] {
 		background-color: var(--sl-color-bg);
@@ -59,6 +59,17 @@ import { Icon } from '@astrojs/starlight/components';
 	:global([data-theme='light']) button[aria-pressed="true"] {
 		background-color: white;
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+	}
+	:global(::view-transition-old(root)),
+	:global(::view-transition-new(root)) {
+		animation: none;
+		mix-blend-mode: normal;
+	}
+	:global(::view-transition-old(root)) {
+		z-index: 1;
+	}
+	:global(::view-transition-new(root)) {
+		z-index: 9999;
 	}
 </style>
 
@@ -100,8 +111,40 @@ import { Icon } from '@astrojs/starlight/components';
 			
 			// Click event handlers
 			this.querySelectorAll('button').forEach((btn) => {
-				btn.addEventListener('click', () => {
-					setTheme(btn.dataset.themeValue);
+				btn.addEventListener('click', (e) => {
+					const newTheme = btn.dataset.themeValue;
+					
+					if (!document.startViewTransition) {
+						setTheme(newTheme);
+						return;
+					}
+
+					const x = e.clientX;
+					const y = e.clientY;
+					const endRadius = Math.hypot(
+						Math.max(x, innerWidth - x),
+						Math.max(y, innerHeight - y)
+					);
+
+					const transition = document.startViewTransition(() => {
+						setTheme(newTheme);
+					});
+
+					transition.ready.then(() => {
+						document.documentElement.animate(
+							{
+								clipPath: [
+									`circle(0px at ${x}px ${y}px)`,
+									`circle(${endRadius}px at ${x}px ${y}px)`,
+								],
+							},
+							{
+								duration: 500,
+								easing: 'ease-in-out',
+								pseudoElement: '::view-transition-new(root)',
+							}
+						);
+					});
 				});
 			});
 			

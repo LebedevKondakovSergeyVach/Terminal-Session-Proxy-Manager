@@ -1,9 +1,16 @@
+/* Import Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
 /* Custom Rust-like theme colors */
 :root {
 	--sl-hue-accent: 25; /* Orange/Rust hue */
 	--sl-color-accent-low: hsl(var(--sl-hue-accent), 70%, 20%);
 	--sl-color-accent: hsl(var(--sl-hue-accent), 80%, 50%);
 	--sl-color-accent-high: hsl(var(--sl-hue-accent), 90%, 80%);
+
+	/* Update fonts */
+	--sl-font: 'Inter', sans-serif;
+	--sl-font-mono: 'JetBrains Mono', monospace;
 }
 
 /* Fix peach color in dark mode to be more vibrant orange */
@@ -48,4 +55,24 @@ button.DocSearch-Button {
 /* Smooth scrolling */
 html {
 	scroll-behavior: smooth;
+}
+
+/* Material Design Scrollbar styling */
+::-webkit-scrollbar {
+	width: 10px;
+	height: 10px;
+}
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+::-webkit-scrollbar-thumb {
+	background: var(--sl-color-gray-5);
+	border-radius: 10px;
+	border: 2px solid var(--sl-color-bg);
+}
+::-webkit-scrollbar-thumb:hover {
+	background: var(--sl-color-gray-4);
+}
+:root[data-theme="light"] ::-webkit-scrollbar-thumb {
+	border-color: white;
 }
