@@ -19,6 +19,20 @@
 	-webkit-backdrop-filter: blur(12px);
 }
 
+/* Rounded Cards with smooth hover (now works properly without stagger bug) */
+.sl-card, .card {
+	border-radius: 16px !important;
+	transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease !important;
+}
+
+.sl-card:hover, .card:hover {
+	transform: translateY(-4px);
+	box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15) !important;
+}
+:root[data-theme='light'] .sl-card:hover {
+	box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08) !important;
+}
+
 /* Rounded Asides (Alerts) */
 .starlight-aside {
 	border-radius: 12px !important;

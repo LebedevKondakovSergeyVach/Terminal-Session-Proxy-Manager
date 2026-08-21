@@ -42,13 +42,14 @@ import { Icon } from '@astrojs/starlight/components';
 		justify-content: center;
 		border-radius: 999px;
 		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		position: relative;
 	}
 	button:hover {
 		color: var(--sl-color-text-accent);
-		transform: scale(1.1);
+		background-color: rgba(128, 128, 128, 0.1);
 	}
 	button:active {
-		transform: scale(0.9);
+		transform: scale(0.95);
 	}
 	button[aria-pressed="true"] {
 		background-color: var(--sl-color-bg);
