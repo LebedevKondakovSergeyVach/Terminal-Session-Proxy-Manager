@@ -1,0 +1,34 @@
+---
+title: Terminal Session Proxy Manager
+description: Управление SOCKS/HTTP прокси-профилями для терминальных сессий.
+template: splash
+hero:
+  tagline: Легкое переключение прокси, профили, тестирование скорости и экспорт окружения для терминала.
+  actions:
+    - text: Быстрый старт
+      link: /ru/guides/example/
+      icon: right-arrow
+    - text: GitHub Repository
+      link: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+## Возможности
+
+<CardGrid stagger>
+	<Card title="Менеджер профилей" icon="setting">
+		Создавайте, импортируйте и переключайте прокси-профили в один клик.
+	</Card>
+	<Card title="Встроенные утилиты" icon="magnifier">
+		Тестируйте скорость соединения (speedtest) и проверяйте доступность (ping).
+	</Card>
+	<Card title="Поддержка Shell" icon="laptop">
+		Автоматический экспорт переменных среды (`HTTP_PROXY`, `ALL_PROXY`) для bash и zsh.
+	</Card>
+	<Card title="TUI Интерфейс" icon="monitor">
+		Красивый терминальный интерфейс для управления профилями в интерактивном режиме.
+	</Card>
+</CardGrid>

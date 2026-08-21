@@ -17,6 +17,9 @@
       "env": {
         "BRAVE_API_KEY": "ВСТАВЬТЕ_ВАШ_BRAVE_API_KEY_СЮДА"
       }
+    },
+    "astro-docs": {
+      "serverUrl": "https://mcp.docs.astro.build/mcp"
     }
   }
 }
