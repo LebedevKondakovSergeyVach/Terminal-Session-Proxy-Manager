@@ -1,7 +1,0 @@
-/* Custom Rust-like theme colors */
-:root {
-	--sl-hue-accent: 25; /* Orange/Rust hue */
-	--sl-color-accent-low: hsl(var(--sl-hue-accent), 70%, 20%);
-	--sl-color-accent: hsl(var(--sl-hue-accent), 80%, 50%);
-	--sl-color-accent-high: hsl(var(--sl-hue-accent), 90%, 80%);
-}
