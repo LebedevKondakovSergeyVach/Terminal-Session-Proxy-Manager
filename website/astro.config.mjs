@@ -1,23 +1,39 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import md3Theme from 'starlight-theme-md3';
 
 // https://astro.build/config
 export default defineConfig({
 	integrations: [
 		starlight({
 			title: 'Terminal Session Proxy Manager',
+			plugins: [
+				md3Theme({
+					accent: 'orange',
+					shape: 'large',
+					variant: 'expressive',
+					density: 'comfortable',
+				}),
+			],
 			defaultLocale: 'root',
 			locales: {
 				root: {
-					label: 'English',
+					label: 'EN',
 					lang: 'en',
 				},
 				ru: {
-					label: 'Русский',
+					label: 'RU',
 					lang: 'ru',
 				},
 			},
+			components: {
+				ThemeSelect: './src/components/ThemeSelect.astro',
+				Head: './src/components/Head.astro',
+			},
+			customCss: [
+				'./src/styles/custom.css',
+			],
 			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager' }],
 			sidebar: [
 				{
