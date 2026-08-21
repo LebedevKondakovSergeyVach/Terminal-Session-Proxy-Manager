@@ -186,7 +186,7 @@ jobs:
           prerelease: false
 
       - name: Update Homebrew formula
-        uses: mislav/bump-homebrew-formula-action@v3
+        uses: mislav/bump-homebrew-formula-action@v4
         with:
           formula-name: terminal-session-proxy-manager
           homebrew-tap: LebedevKondakovSergeyVach/homebrew-tap
