@@ -1,0 +1,108 @@
+---
+import { Icon } from '@astrojs/starlight/components';
+---
+
+<starlight-theme-switch>
+	<div class="theme-switch-container">
+		<button data-theme-value="light" aria-label="Светлая тема" title="Светлая">
+			<Icon name="sun" />
+		</button>
+		<button data-theme-value="auto" aria-label="Системная тема" title="Авто">
+			<Icon name="laptop" />
+		</button>
+		<button data-theme-value="dark" aria-label="Тёмная тема" title="Тёмная">
+			<Icon name="moon" />
+		</button>
+	</div>
+</starlight-theme-switch>
+
+<style>
+	starlight-theme-switch {
+		display: flex;
+		align-items: center;
+	}
+	.theme-switch-container {
+		display: flex;
+		align-items: center;
+		background-color: var(--sl-color-gray-6);
+		border-radius: 999px;
+		padding: 2px;
+		gap: 2px;
+		border: 1px solid var(--sl-color-gray-5);
+	}
+	button {
+		background: transparent;
+		border: none;
+		padding: 0.35rem 0.5rem;
+		cursor: pointer;
+		color: var(--sl-color-gray-3);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 999px;
+		transition: all 0.2s ease;
+	}
+	button:hover {
+		color: var(--sl-color-text-accent);
+	}
+	button[aria-pressed="true"] {
+		background-color: var(--sl-color-bg-nav);
+		color: var(--sl-color-text-accent);
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+	}
+	:global([data-theme='light']) button[aria-pressed="true"] {
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	}
+</style>
+
+<script>
+	class StarlightThemeSwitch extends HTMLElement {
+		constructor() {
+			super();
+			
+			const storageKey = 'starlight-theme';
+			
+			const getTheme = () => {
+				if (typeof localStorage !== 'undefined' && localStorage.getItem(storageKey)) {
+					return localStorage.getItem(storageKey);
+				}
+				return 'auto';
+			};
+			
+			const getPreferredColorScheme = () =>
+				matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+			
+			const setTheme = (theme) => {
+				// Update buttons UI
+				this.querySelectorAll('button').forEach((btn) => {
+					btn.setAttribute('aria-pressed', btn.dataset.themeValue === theme ? 'true' : 'false');
+				});
+				
+				// Update DOM theme and localStorage
+				if (theme === 'auto') {
+					document.documentElement.dataset.theme = getPreferredColorScheme();
+					if (typeof localStorage !== 'undefined') localStorage.removeItem(storageKey);
+				} else {
+					document.documentElement.dataset.theme = theme;
+					if (typeof localStorage !== 'undefined') localStorage.setItem(storageKey, theme);
+				}
+			};
+			
+			// Initial setup on load
+			setTheme(getTheme());
+			
+			// Click event handlers
+			this.querySelectorAll('button').forEach((btn) => {
+				btn.addEventListener('click', () => {
+					setTheme(btn.dataset.themeValue);
+				});
+			});
+			
+			// Watch for system preference changes (only update if set to auto)
+			matchMedia(`(prefers-color-scheme: light)`).addEventListener('change', () => {
+				if (getTheme() === 'auto') setTheme('auto');
+			});
+		}
+	}
+	customElements.define('starlight-theme-switch', StarlightThemeSwitch);
+</script>

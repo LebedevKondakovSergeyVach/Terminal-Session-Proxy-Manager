@@ -18,6 +18,12 @@ export default defineConfig({
 					lang: 'ru',
 				},
 			},
+			components: {
+				ThemeSelect: './src/components/ThemeSelect.astro',
+			},
+			customCss: [
+				'./src/styles/custom.css',
+			],
 			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager' }],
 			sidebar: [
 				{
