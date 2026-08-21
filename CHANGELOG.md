@@ -7,6 +7,11 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [2.2.2] — 2026-08-21
+
+### Fixed
+- **Release Automation**: Retry the Homebrew tap update with the fixed tag-name reference.
+
 ## [2.2.1] — 2026-08-21
 
 ### Fixed
