@@ -176,7 +176,7 @@ jobs:
           path: release-artifacts
 
       - name: Create GitHub release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ needs.resolve.outputs.tag }}
           name: Release ${{ needs.resolve.outputs.tag }}
