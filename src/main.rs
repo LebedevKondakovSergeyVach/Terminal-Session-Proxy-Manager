@@ -47,7 +47,7 @@ fn preparse<'a>(args: &'a [String], flag: &str) -> Option<&'a str> {
     let scannable = args
         .iter()
         .position(|a| a == "run" || a == "--")
-        .map_or(args.len(), |i| i);
+        .unwrap_or(args.len());
 
     let mut iter = args[..scannable].iter();
     while let Some(arg) = iter.next() {
