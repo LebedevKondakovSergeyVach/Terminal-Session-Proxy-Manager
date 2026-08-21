@@ -1,57 +1,44 @@
+use crate::cmd::profile::{rule, spinner};
 use crate::config::{AppConfig, I18n};
 use anyhow::Result;
 use colored::Colorize;
-use indicatif::{ProgressBar, ProgressStyle};
 use std::env;
-use std::net::TcpStream;
+use std::net::{TcpStream, ToSocketAddrs};
 use std::time::Duration;
 
 /// Runs diagnostic tests on local sockets, session env vars, and HTTP endpoints.
 pub async fn run_diagnose(config: &AppConfig, i18n: &I18n) -> Result<()> {
-    println!(
-        "{}",
-        "=========================================================="
-            .cyan()
-            .bold()
-    );
-    println!("      🔍 {}", i18n.t("diagnose_header").white().bold());
-    println!(
-        "{}",
-        "=========================================================="
-            .cyan()
-            .bold()
-    );
+    rule();
+    println!("   🔍 {}", i18n.t("diagnose_header").white().bold());
+    rule();
 
-    let pb = ProgressBar::new_spinner();
-    pb.set_style(
-        ProgressStyle::default_spinner()
-            .tick_chars("⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏")
-            .template("{spinner:.cyan.bold} {msg}")
-            .unwrap_or_else(|_| ProgressStyle::default_spinner()),
-    );
-    pb.set_message(i18n.t("spinner_diagnose").to_string());
-    pb.enable_steady_tick(Duration::from_millis(80));
+    let pb = spinner(i18n.t("spinner_diagnose"));
 
     let profile = config.active_profile();
     let name = profile.map(|p| p.name.as_str()).unwrap_or("Default");
     let host = profile.map(|p| p.host.as_str()).unwrap_or("127.0.0.1");
     let port = profile.map(|p| p.port).unwrap_or(2080);
 
-    let socket_addr = format!("{}:{}", host, port);
-    let socket_ok = if let Ok(addr) = socket_addr.parse() {
-        TcpStream::connect_timeout(&addr, Duration::from_secs(2)).is_ok()
-    } else {
-        false
-    };
+    // Resolve first: `SocketAddr::parse` only accepts IP literals, so a profile
+    // with a hostname always reported its port as closed.
+    let socket_ok = (host, port)
+        .to_socket_addrs()
+        .ok()
+        .and_then(|mut addrs| {
+            addrs.find(|addr| TcpStream::connect_timeout(addr, Duration::from_secs(2)).is_ok())
+        })
+        .is_some();
 
     let proxy_env = env::var("ALL_PROXY")
+        .or_else(|_| env::var("all_proxy"))
         .or_else(|_| env::var("http_proxy"))
-        .ok();
+        .ok()
+        .filter(|p| !p.is_empty());
     let mut builder = reqwest::Client::builder().timeout(Duration::from_secs(3));
-    if let Some(ref p) = proxy_env {
-        if let Ok(proxy) = reqwest::Proxy::all(p) {
-            builder = builder.proxy(proxy);
-        }
+    if let Some(ref p) = proxy_env
+        && let Ok(proxy) = reqwest::Proxy::all(p)
+    {
+        builder = builder.proxy(proxy);
     }
     let client = builder.build().unwrap_or_default();
 
@@ -109,7 +96,7 @@ pub async fn run_diagnose(config: &AppConfig, i18n: &I18n) -> Result<()> {
     println!("{}", i18n.t("critical_endpoints"));
 
     for (ep_name, ep_url, status_code) in endpoint_results {
-        print!("   • {} ({}): ", ep_name, ep_url);
+        print!("   • {ep_name} ({ep_url}): ");
         if let Some(code) = status_code {
             let code_str = code.to_string();
             let msg = i18n.t("endpoint_accessible").replace("{}", &code_str);
@@ -119,11 +106,6 @@ pub async fn run_diagnose(config: &AppConfig, i18n: &I18n) -> Result<()> {
         }
     }
 
-    println!(
-        "{}",
-        "=========================================================="
-            .cyan()
-            .bold()
-    );
+    rule();
     Ok(())
 }

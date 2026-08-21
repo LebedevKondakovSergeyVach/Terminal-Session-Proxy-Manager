@@ -1,7 +1,7 @@
+use crate::cmd::profile::spinner;
 use crate::config::{AppConfig, I18n};
 use anyhow::Result;
 use colored::Colorize;
-use indicatif::{ProgressBar, ProgressStyle};
 use serde::{Deserialize, Serialize};
 use std::env;
 use std::time::Duration;
@@ -39,51 +39,60 @@ struct GeoResponse {
     country_code_alt: Option<String>,
 }
 
-fn build_client(proxy_url: Option<&str>) -> reqwest::Client {
+/// Builds the probe client, refusing to fall back to a direct connection.
+///
+/// Returns `None` when a proxy was requested but could not be applied.
+/// Silently dropping it would report the machine's real IP and location as
+/// though the traffic had gone through the tunnel — the most misleading thing
+/// this command could possibly do.
+fn build_client(proxy_url: Option<&str>) -> Option<reqwest::Client> {
     let mut builder = reqwest::Client::builder()
         .timeout(Duration::from_secs(3))
         .connect_timeout(Duration::from_secs(2));
 
     if let Some(p) = proxy_url {
-        if let Ok(proxy) = reqwest::Proxy::all(p) {
-            builder = builder.proxy(proxy);
-        }
+        builder = builder.proxy(reqwest::Proxy::all(p).ok()?);
     }
-    builder.build().unwrap_or_default()
+    builder.build().ok()
 }
 
 /// Resolves external IPv4, IPv6, and physical location from configured Geo APIs.
 pub async fn get_status_info(config: &AppConfig, i18n: &I18n, show_spinner: bool) -> StatusInfo {
-    let spinner = if show_spinner {
-        let pb = ProgressBar::new_spinner();
-        pb.set_style(
-            ProgressStyle::default_spinner()
-                .tick_chars("⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏")
-                .template("{spinner:.cyan.bold} {msg}")
-                .unwrap_or_else(|_| ProgressStyle::default_spinner()),
-        );
-        pb.set_message(i18n.t("spinner_status").to_string());
-        pb.enable_steady_tick(Duration::from_millis(80));
-        Some(pb)
-    } else {
-        None
-    };
+    let progress = show_spinner.then(|| spinner(i18n.t("spinner_status")));
 
     let proxy_env = env::var("ALL_PROXY")
+        .or_else(|_| env::var("all_proxy"))
         .or_else(|_| env::var("http_proxy"))
-        .ok();
-    let client = build_client(proxy_env.as_deref());
+        .ok()
+        .filter(|p| !p.is_empty());
+    let Some(client) = build_client(proxy_env.as_deref()) else {
+        if let Some(pb) = progress {
+            pb.finish_and_clear();
+        }
+        let unavailable = i18n.t("unavailable").to_string();
+        return StatusInfo {
+            status: i18n.t("status_proxy_invalid").to_string(),
+            profile_key: config.active_profile.clone(),
+            profile_name: config
+                .active_profile()
+                .map_or_else(|| "Default".to_string(), |p| p.name.clone()),
+            active_proxy: proxy_env,
+            ipv4: unavailable.clone(),
+            ipv6: unavailable.clone(),
+            location: unavailable,
+        };
+    };
 
     let mut ip_from_json = String::new();
     let mut location = i18n.t("unavailable").to_string();
 
     let mut resp_data: Option<GeoResponse> = None;
     for geo_url in &config.geo_apis {
-        if let Ok(resp) = client.get(geo_url).send().await {
-            if let Ok(data) = resp.json::<GeoResponse>().await {
-                resp_data = Some(data);
-                break;
-            }
+        if let Ok(resp) = client.get(geo_url).send().await
+            && let Ok(data) = resp.json::<GeoResponse>().await
+        {
+            resp_data = Some(data);
+            break;
         }
     }
 
@@ -117,7 +126,7 @@ pub async fn get_status_info(config: &AppConfig, i18n: &I18n, show_spinner: bool
         if !parts.is_empty() {
             let mut loc_str = parts.join(", ");
             if !country_code.is_empty() && !loc_str.contains(&country_code) {
-                loc_str.push_str(&format!(" ({})", country_code));
+                loc_str.push_str(&format!(" ({country_code})"));
             }
             location = loc_str;
         } else if !country_code.is_empty() {
@@ -137,10 +146,10 @@ pub async fn get_status_info(config: &AppConfig, i18n: &I18n, show_spinner: bool
     }
 
     if ipv4.is_empty() {
-        if let Ok(resp) = client.get("https://api4.ipify.org").send().await {
-            if let Ok(text) = resp.text().await {
-                ipv4 = text.trim().to_string();
-            }
+        if let Ok(resp) = client.get(&config.ipv4_api).send().await
+            && let Ok(text) = resp.text().await
+        {
+            ipv4 = text.trim().to_string();
         }
         if ipv4.is_empty() {
             ipv4 = i18n.t("unavailable").to_string();
@@ -148,17 +157,17 @@ pub async fn get_status_info(config: &AppConfig, i18n: &I18n, show_spinner: bool
     }
 
     if ipv6.is_empty() {
-        if let Ok(resp) = client.get("https://api6.ipify.org").send().await {
-            if let Ok(text) = resp.text().await {
-                ipv6 = text.trim().to_string();
-            }
+        if let Ok(resp) = client.get(&config.ipv6_api).send().await
+            && let Ok(text) = resp.text().await
+        {
+            ipv6 = text.trim().to_string();
         }
         if ipv6.is_empty() {
             ipv6 = i18n.t("unavailable").to_string();
         }
     }
 
-    if let Some(pb) = spinner {
+    if let Some(pb) = progress {
         pb.finish_and_clear();
     }
 

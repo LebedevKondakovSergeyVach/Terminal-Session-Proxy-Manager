@@ -1,31 +1,49 @@
 {
   "active_profile": "default",
-  "enabled": false,
   "profiles": {
-    "default": {
-      "name": "Default Proxy",
-      "host": "127.0.0.1",
-      "port": 1080,
-      "protocol": "socks5"
-    },
     "custom": {
       "name": "Custom HTTP Proxy",
       "host": "127.0.0.1",
       "port": 8080,
       "protocol": "http"
+    },
+    "default": {
+      "name": "Default Proxy",
+      "host": "127.0.0.1",
+      "port": 1080,
+      "protocol": "socks5"
     }
   },
   "ping_targets": [
-    { "name": "Google", "url": "https://www.google.com" },
-    { "name": "GitHub", "url": "https://github.com" },
-    { "name": "Cloudflare", "url": "https://1.1.1.1" }
+    {
+      "name": "Google",
+      "url": "https://www.google.com"
+    },
+    {
+      "name": "GitHub",
+      "url": "https://github.com"
+    },
+    {
+      "name": "Cloudflare",
+      "url": "https://1.1.1.1"
+    }
   ],
   "diagnose_endpoints": [
-    { "name": "Google API", "url": "https://generativelanguage.googleapis.com" },
-    { "name": "GitHub API", "url": "https://api.github.com" }
+    {
+      "name": "GitHub API",
+      "url": "https://api.github.com"
+    },
+    {
+      "name": "Cloudflare DNS",
+      "url": "https://cloudflare-dns.com"
+    }
   ],
   "geo_apis": [
     "https://ifconfig.co/json",
     "http://ip-api.com/json"
-  ]
+  ],
+  "ipv4_api": "https://api4.ipify.org",
+  "ipv6_api": "https://api6.ipify.org",
+  "health_check_url": "https://www.gstatic.com/generate_204",
+  "speedtest_url": "https://speed.cloudflare.com/__down?bytes=2097152"
 }

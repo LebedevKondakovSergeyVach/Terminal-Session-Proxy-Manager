@@ -1,18 +1,100 @@
-name: Release Pipeline
+name: Release
 
+# Two ways in:
+#
+#   1. A release branch is merged into main. The version in Cargo.toml is
+#      already the released one, so this workflow tags it and publishes.
+#   2. A tag is pushed by hand, for a re-run or an out-of-band release.
+#
+# The tag is created and consumed inside the same run on purpose. A tag pushed
+# with GITHUB_TOKEN does not trigger further workflows, so relying on the tag
+# push to start the build would silently release nothing.
 on:
   push:
-    tags:
-      - 'v*'
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
 
 permissions:
   contents: write
 
+env:
+  CARGO_TERM_COLOR: always
+
 jobs:
-  build-release:
-    name: Build Release Binary
+  resolve:
+    name: Decide whether to release
+    runs-on: ubuntu-latest
+    outputs:
+      should_release: ${{ steps.decide.outputs.should_release }}
+      version: ${{ steps.decide.outputs.version }}
+      tag: ${{ steps.decide.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve version and tag
+        id: decide
+        run: |
+          set -euo pipefail
+          crate_version=$(awk -F'"' '/^\[package\]/{p=1;next} /^\[/{p=0} p && /^version[[:space:]]*=/{print $2; exit}' Cargo.toml)
+
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            version="${GITHUB_REF_NAME#v}"
+            if [ "$version" != "$crate_version" ]; then
+              echo "::error::tag ${GITHUB_REF_NAME} does not match Cargo.toml version ${crate_version}"
+              exit 1
+            fi
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+          else
+            version="$crate_version"
+            if git rev-parse -q --verify "refs/tags/v${version}" >/dev/null; then
+              echo "::notice::v${version} is already tagged; nothing to release."
+              echo "should_release=false" >> "$GITHUB_OUTPUT"
+            else
+              echo "::notice::main is at ${version} with no tag yet; releasing."
+              echo "should_release=true" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "tag=v${version}" >> "$GITHUB_OUTPUT"
+
+  verify:
+    name: Verify before publishing
+    needs: resolve
+    if: needs.resolve.outputs.should_release == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
+
+      # A commit that cannot pass CI must not become a downloadable binary,
+      # even though the pull request that produced it was already green.
+      - name: Format, lint and test
+        run: |
+          cargo fmt --all -- --check
+          cargo clippy --all-targets --all-features --locked -- -D warnings
+          cargo test --all-features --locked
+
+      - name: Changelog documents this release
+        run: |
+          if ! grep -q "## \[${{ needs.resolve.outputs.version }}\]" CHANGELOG.md; then
+            echo "::error::CHANGELOG.md has no section for ${{ needs.resolve.outputs.version }}"
+            exit 1
+          fi
+
+  build:
+    name: Build ${{ matrix.artifact_name }}
+    needs: [resolve, verify]
+    if: needs.resolve.outputs.should_release == 'true'
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - target: x86_64-apple-darwin
@@ -24,58 +106,90 @@ jobs:
           - target: x86_64-unknown-linux-gnu
             os: ubuntu-latest
             artifact_name: terminal-session-proxy-manager-linux-x86_64.tar.gz
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-latest
+            artifact_name: terminal-session-proxy-manager-linux-arm64.tar.gz
+            cross: true
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Rust Toolchain
-        uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
 
-      - name: Build Binary
-        run: cargo build --release --target ${{ matrix.target }}
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.target }}
 
-      - name: Package Binary
+      - name: Install cross-linker
+        if: matrix.cross
         run: |
-          cd target/${{ matrix.target }}/release
-          tar -czvf ../../../${{ matrix.artifact_name }} terminal-session-proxy-manager
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu
+          echo 'CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc' >> "$GITHUB_ENV"
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+      - name: Build
+        run: cargo build --release --locked --target ${{ matrix.target }}
+
+      # Checksums let users verify a download; the release page alone proves
+      # nothing about the bytes they actually received.
+      - name: Package with checksum
+        run: |
+          tar -czf "${{ matrix.artifact_name }}" \
+            -C "target/${{ matrix.target }}/release" terminal-session-proxy-manager
+          shasum -a 256 "${{ matrix.artifact_name }}" > "${{ matrix.artifact_name }}.sha256"
+
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact_name }}
-          path: ${{ matrix.artifact_name }}
+          path: |
+            ${{ matrix.artifact_name }}
+            ${{ matrix.artifact_name }}.sha256
 
-  publish-release:
-    name: Create GitHub Release
-    needs: build-release
+  publish:
+    name: Tag, publish and bump Homebrew
+    needs: [resolve, build]
+    if: needs.resolve.outputs.should_release == 'true'
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+    env:
+      RELEASE_TAG: ${{ needs.resolve.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Download Artifacts
-        uses: actions/download-artifact@v4
+      # Deliberately after `build`. Tagging first meant a failing matrix leg
+      # left the tag pushed with nothing published, and every retry then saw
+      # that tag, set should_release=false, and skipped the release for good.
+      - name: Create tag
+        if: github.ref_type != 'tag'
+        run: |
+          set -euo pipefail
+          git config user.name  'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git tag -a "$RELEASE_TAG" -m "Release $RELEASE_TAG"
+          git push origin "refs/tags/$RELEASE_TAG"
+
+      - uses: actions/download-artifact@v4
         with:
           path: release-artifacts
 
-      - name: Create Release
+      - name: Create GitHub release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ needs.resolve.outputs.tag }}
+          name: Release ${{ needs.resolve.outputs.tag }}
           files: release-artifacts/*/*
-          name: Release ${{ github.ref_name }}
+          generate_release_notes: true
           draft: false
           prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update Homebrew formula
         uses: mislav/bump-homebrew-formula-action@v3
         with:
           formula-name: terminal-session-proxy-manager
           homebrew-tap: LebedevKondakovSergeyVach/homebrew-tap
-          download-url: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/releases/download/${{ github.ref_name }}/terminal-session-proxy-manager-macos-x86_64.tar.gz
+          download-url: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/releases/download/${{ needs.resolve.outputs.tag }}/terminal-session-proxy-manager-macos-x86_64.tar.gz
         env:
           COMMITTER_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}

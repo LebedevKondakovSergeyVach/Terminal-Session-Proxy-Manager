@@ -1,0 +1,135 @@
+name: Branch policy
+
+# Enforces the branch model documented in .ai/GIT_WORKFLOW.md:
+#
+#   main  <--  release/X.Y.Z  <--  task branches
+#
+# Task branches never target main directly, because main is only ever advanced
+# by a release, and merging a release into main is what triggers the tag and
+# the Homebrew bump.
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  branch-names:
+    name: Source and target branches
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check the head/base pairing
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+          echo "Merging '${HEAD_REF}' into '${BASE_REF}'"
+
+          task_pattern='^(feat|fix|docs|chore|refactor|test|perf|ci|build)/'
+
+          case "${BASE_REF}" in
+            main)
+              # Only a release or an emergency hotfix may advance main.
+              if [[ "${HEAD_REF}" =~ ^release/[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+                echo "Release branch into main: allowed."
+              elif [[ "${HEAD_REF}" =~ ^hotfix/[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+                echo "Hotfix branch into main: allowed."
+              else
+                echo "::error::'${HEAD_REF}' cannot target main."
+                echo "::error::main accepts only release/X.Y.Z or hotfix/X.Y.Z."
+                echo "::error::Retarget this pull request at the open release branch."
+                exit 1
+              fi
+              ;;
+
+            release/*)
+              if [[ ! "${BASE_REF}" =~ ^release/[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+                echo "::error::release branches must be named release/X.Y.Z; got '${BASE_REF}'."
+                exit 1
+              fi
+              if [[ "${HEAD_REF}" =~ ${task_pattern} ]]; then
+                echo "Task branch into a release branch: allowed."
+              else
+                echo "::error::'${HEAD_REF}' is not a valid task branch name."
+                echo "::error::Use one of: feat/ fix/ docs/ chore/ refactor/ test/ perf/ ci/ build/"
+                exit 1
+              fi
+              ;;
+
+            *)
+              echo "::error::'${BASE_REF}' is not a valid merge target."
+              echo "::error::Target either main or an open release/X.Y.Z branch."
+              exit 1
+              ;;
+          esac
+
+  release-readiness:
+    name: Release readiness
+    # Only meaningful for the pull request that actually cuts a release.
+    if: startsWith(github.head_ref, 'release/') && github.base_ref == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Version, changelog and tag are consistent
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+          branch_version="${HEAD_REF#release/}"
+          crate_version=$(awk -F'"' '/^\[package\]/{p=1;next} /^\[/{p=0} p && /^version[[:space:]]*=/{print $2; exit}' Cargo.toml)
+
+          # Merging this pull request tags Cargo.toml's version automatically,
+          # so a mismatch here would publish under the wrong number.
+          if [ "$branch_version" != "$crate_version" ]; then
+            echo "::error::branch says ${branch_version} but Cargo.toml says ${crate_version}."
+            exit 1
+          fi
+
+          if git rev-parse -q --verify "refs/tags/v${crate_version}" >/dev/null; then
+            echo "::error::v${crate_version} is already released. Bump the version."
+            exit 1
+          fi
+
+          if ! grep -q "## \[${crate_version}\]" CHANGELOG.md; then
+            echo "::error::CHANGELOG.md has no '## [${crate_version}]' section."
+            exit 1
+          fi
+
+          echo "Ready to release ${crate_version}."
+
+  changelog:
+    name: Changelog entry
+    # A task branch that only touches docs or CI does not need an entry.
+    if: startsWith(github.base_ref, 'release/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Code changes come with a changelog note
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          changed=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA")
+
+          touches_code=$(echo "$changed" | grep -E '^(src/|locales/|Cargo\.toml)' || true)
+          touches_changelog=$(echo "$changed" | grep -E '^CHANGELOG\.md$' || true)
+
+          if [ -n "$touches_code" ] && [ -z "$touches_changelog" ]; then
+            echo "::error::This pull request changes behaviour but not CHANGELOG.md."
+            echo "::error::Add an entry under '## [Unreleased]'."
+            echo "Changed files:"
+            echo "$touches_code"
+            exit 1
+          fi
+
+          echo "Changelog requirement satisfied."

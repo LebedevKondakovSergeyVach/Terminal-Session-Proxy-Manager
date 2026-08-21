@@ -1,28 +1,60 @@
 [package]
 name = "terminal-session-proxy-manager"
-version = "2.1.1"
-edition = "2021"
+version = "2.2.0"
+edition = "2024"
+# Set by the highest MSRV in the resolved tree (ratatui 0.30 requires 1.88).
+rust-version = "1.88"
 authors = ["LebedevKondakovSergeyVach <sergejlebedev31838@gmail.com>"]
 description = "Universal, configurable CLI proxy management toolkit in Rust"
 license = "AGPL-3.0"
 repository = "https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager"
+homepage = "https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager"
+documentation = "https://docs.rs/terminal-session-proxy-manager"
 readme = "README.md"
-keywords = ["proxy", "cli", "zsh", "bash", "socks5"]
+keywords = ["proxy", "cli", "socks5", "tui", "shell"]
+categories = ["command-line-utilities", "network-programming"]
+exclude = ["/assets", "/.github", "/.ai", "/docs"]
 
 [dependencies]
-clap = { version = "4.4", features = ["derive", "env"] }
-clap_complete = "4.4"
-tokio = { version = "1.35", features = ["full"] }
-reqwest = { version = "0.11", features = ["json", "socks"] }
+anyhow = "1.0"
+clap = { version = "4.6", features = ["derive", "env", "wrap_help"] }
+clap_complete = "4.6"
+colored = "3.1"
+crossterm = "0.29"
+dialoguer = "0.12"
+dirs = "6.0"
+futures = "0.3"
+indicatif = "0.18"
+ratatui = "0.30"
+reqwest = { version = "0.13", features = ["json", "socks"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-colored = "2.1"
-dirs = "5.0"
-anyhow = "1.0"
-thiserror = "1.0"
-futures = "0.3"
+thiserror = "2.0"
+tokio = { version = "1.48", features = ["macros", "rt-multi-thread", "time"] }
 url = "2.5"
-indicatif = "0.17"
-dialoguer = "0.11"
-ratatui = "0.30.2"
-crossterm = "0.29.0"
+
+[dev-dependencies]
+assert_cmd = "2.2"
+predicates = "3.1"
+tempfile = "3.27"
+
+# Lints are declared here so `cargo clippy` and IDEs agree with CI.
+# See https://doc.rust-lang.org/cargo/reference/manifest.html#the-lints-section
+[lints.rust]
+missing_docs = "warn"
+unsafe_code = "forbid"
+unused_qualifications = "warn"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+todo = "warn"
+unimplemented = "warn"
+panic_in_result_fn = "warn"
+uninlined_format_args = "warn"
+
+# Optimised for a small, fast single binary rather than fast rebuilds.
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = "symbols"

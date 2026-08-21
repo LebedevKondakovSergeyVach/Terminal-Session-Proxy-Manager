@@ -1,0 +1,53 @@
+name: Bug report
+description: Something does not work as documented
+labels: [bug]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you expect instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. terminal-session-proxy-manager profile use work
+        2. proxy on
+        3. ...
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Output of `terminal-session-proxy-manager --version`
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options: [macOS, Linux, Other]
+    validations:
+      required: true
+
+  - type: input
+    id: shell
+    attributes:
+      label: Shell
+      placeholder: zsh 5.9
+
+  - type: textarea
+    id: config
+    attributes:
+      label: Configuration
+      description: >
+        Output of `terminal-session-proxy-manager config show`.
+        Remove any host, port, or credential you do not want to publish.
+      render: json
