@@ -1,12 +1,14 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import md3Theme from 'starlight-theme-md3';
 
 // https://astro.build/config
 export default defineConfig({
 	integrations: [
 		starlight({
 			title: 'Terminal Session Proxy Manager',
+			plugins: [md3Theme()],
 			defaultLocale: 'root',
 			locales: {
 				root: {

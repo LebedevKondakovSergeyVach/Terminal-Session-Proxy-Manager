@@ -19,20 +19,6 @@
 	-webkit-backdrop-filter: blur(12px);
 }
 
-/* Rounded Cards */
-.sl-card, .card {
-	border-radius: 16px !important;
-	transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease !important;
-}
-
-.sl-card:hover, .card:hover {
-	transform: translateY(-1px);
-	box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1) !important;
-}
-:root[data-theme='light'] .sl-card:hover {
-	box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05) !important;
-}
-
 /* Rounded Asides (Alerts) */
 .starlight-aside {
 	border-radius: 12px !important;
