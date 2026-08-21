@@ -189,6 +189,7 @@ jobs:
         uses: mislav/bump-homebrew-formula-action@v3
         with:
           formula-name: terminal-session-proxy-manager
+          tag-name: ${{ needs.resolve.outputs.tag }}
           homebrew-tap: LebedevKondakovSergeyVach/homebrew-tap
           download-url: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/releases/download/${{ needs.resolve.outputs.tag }}/terminal-session-proxy-manager-macos-x86_64.tar.gz
         env:
