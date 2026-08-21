@@ -5,3 +5,34 @@
 	--sl-color-accent: hsl(var(--sl-hue-accent), 80%, 50%);
 	--sl-color-accent-high: hsl(var(--sl-hue-accent), 90%, 80%);
 }
+
+/* Translucent blurred header */
+:root header.header {
+	background-color: color-mix(in srgb, var(--sl-color-bg-nav) 75%, transparent) !important;
+	backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
+}
+
+/* Rounded Cards */
+.sl-card, .card {
+	border-radius: 16px !important;
+	transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease !important;
+}
+
+.sl-card:hover, .card:hover {
+	transform: translateY(-3px);
+	box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+}
+:global([data-theme='light']) .sl-card:hover {
+	box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Rounded Asides (Alerts) */
+.starlight-aside {
+	border-radius: 12px !important;
+}
+
+/* Smooth scrolling */
+html {
+	scroll-behavior: smooth;
+}

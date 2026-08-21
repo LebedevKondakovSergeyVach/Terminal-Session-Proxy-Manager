@@ -26,32 +26,38 @@ import { Icon } from '@astrojs/starlight/components';
 		align-items: center;
 		background-color: var(--sl-color-gray-6);
 		border-radius: 999px;
-		padding: 2px;
+		padding: 4px;
 		gap: 2px;
 		border: 1px solid var(--sl-color-gray-5);
+		box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
 	}
 	button {
 		background: transparent;
 		border: none;
-		padding: 0.35rem 0.5rem;
+		padding: 0.4rem 0.6rem;
 		cursor: pointer;
 		color: var(--sl-color-gray-3);
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		border-radius: 999px;
-		transition: all 0.2s ease;
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 	}
 	button:hover {
 		color: var(--sl-color-text-accent);
+		transform: scale(1.1);
+	}
+	button:active {
+		transform: scale(0.9);
 	}
 	button[aria-pressed="true"] {
-		background-color: var(--sl-color-bg-nav);
+		background-color: var(--sl-color-bg);
 		color: var(--sl-color-text-accent);
-		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 	}
 	:global([data-theme='light']) button[aria-pressed="true"] {
-		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+		background-color: white;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 	}
 </style>
 
