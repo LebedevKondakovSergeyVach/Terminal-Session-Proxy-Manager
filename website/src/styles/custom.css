@@ -6,6 +6,12 @@
 	--sl-color-accent-high: hsl(var(--sl-hue-accent), 90%, 80%);
 }
 
+/* Fix peach color in dark mode to be more vibrant orange */
+:root[data-theme='dark'] {
+	--sl-color-text-accent: hsl(var(--sl-hue-accent), 95%, 65%);
+	--sl-color-accent-high: hsl(var(--sl-hue-accent), 95%, 65%);
+}
+
 /* Translucent blurred header */
 :root header.header {
 	background-color: color-mix(in srgb, var(--sl-color-bg-nav) 75%, transparent) !important;
@@ -16,20 +22,27 @@
 /* Rounded Cards */
 .sl-card, .card {
 	border-radius: 16px !important;
-	transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease !important;
+	transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease !important;
 }
 
 .sl-card:hover, .card:hover {
-	transform: translateY(-3px);
-	box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+	transform: translateY(-1px);
+	box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1) !important;
 }
-:global([data-theme='light']) .sl-card:hover {
-	box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08) !important;
+:root[data-theme='light'] .sl-card:hover {
+	box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05) !important;
 }
 
 /* Rounded Asides (Alerts) */
 .starlight-aside {
 	border-radius: 12px !important;
+}
+
+/* Rounded Search Button */
+site-search > button, 
+.DocSearch-Button, 
+button.DocSearch-Button {
+	border-radius: 999px !important;
 }
 
 /* Smooth scrolling */
