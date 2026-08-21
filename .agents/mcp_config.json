@@ -6,6 +6,17 @@
       "env": {
         "GITHUB_PERSONAL_ACCESS_TOKEN": "ВСТАВЬТЕ_ВАШ_GITHUB_PAT_СЮДА"
       }
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"]
+    },
+    "brave-search": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+      "env": {
+        "BRAVE_API_KEY": "ВСТАВЬТЕ_ВАШ_BRAVE_API_KEY_СЮДА"
+      }
     }
   }
 }
