@@ -10,11 +10,11 @@ export default defineConfig({
 			defaultLocale: 'root',
 			locales: {
 				root: {
-					label: 'English',
+					label: 'EN',
 					lang: 'en',
 				},
 				ru: {
-					label: 'Русский',
+					label: 'RU',
 					lang: 'ru',
 				},
 			},
