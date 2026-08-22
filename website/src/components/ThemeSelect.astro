@@ -60,15 +60,20 @@ import { Icon } from '@astrojs/starlight/components';
 		background-color: white;
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 	}
-	:global(::view-transition-old(root)),
-	:global(::view-transition-new(root)) {
+	/*
+	 * These pseudo-elements are shared with astro-vtbot's page transitions.
+	 * Scoping the override to an attribute set only while the theme changes
+	 * keeps the circular reveal without killing navigation animations.
+	 */
+	:global([data-theme-transition]::view-transition-old(root)),
+	:global([data-theme-transition]::view-transition-new(root)) {
 		animation: none;
 		mix-blend-mode: normal;
 	}
-	:global(::view-transition-old(root)) {
+	:global([data-theme-transition]::view-transition-old(root)) {
 		z-index: 1;
 	}
-	:global(::view-transition-new(root)) {
+	:global([data-theme-transition]::view-transition-new(root)) {
 		z-index: 9999;
 	}
 </style>
@@ -126,8 +131,13 @@ import { Icon } from '@astrojs/starlight/components';
 						Math.max(y, innerHeight - y)
 					);
 
+					document.documentElement.dataset.themeTransition = '';
 					const transition = document.startViewTransition(() => {
 						setTheme(newTheme);
+					});
+
+					transition.finished.finally(() => {
+						delete document.documentElement.dataset.themeTransition;
 					});
 
 					transition.ready.then(() => {
