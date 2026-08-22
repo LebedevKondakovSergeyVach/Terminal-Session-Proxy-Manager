@@ -311,14 +311,23 @@ test('badge lines are removed but prose survives', () => {
 	assert.equal(out.includes('Manage proxy profiles.'), true);
 });
 
-test('a content image is never mistaken for a badge', () => {
-	const withScreenshot = '# T\n\n![Dashboard](assets/proxy_dashboard_final.png)\n\nProse.\n';
-	const out = applyCleanup(withScreenshot, {
+test('a content image survives while a badge on the same document is removed', () => {
+	const mixed = [
+		'# T',
+		'',
+		'[![Rust](https://img.shields.io/badge/rust-1.88-orange.svg)](https://www.rust-lang.org)',
+		'',
+		'![Dashboard](assets/proxy_dashboard_final.png)',
+		'',
+		'Prose.',
+	].join('\n');
+	const out = applyCleanup(mixed, {
 		source: 'docs/USAGE.md',
 		stripPreamble: false,
 		stripBadges: true,
 		stripHeroImage: false,
 	});
+	assert.equal(out.includes('img.shields.io'), false);
 	assert.equal(out.includes('proxy_dashboard_final.png'), true);
 });
 
@@ -591,8 +600,17 @@ export const PAGES = [
 In `website/package.json`, add to `"scripts"`:
 
 ```json
-"test": "node --test scripts/"
+"test": "node --test \"scripts/**/*.test.mjs\""
 ```
+
+The glob is quoted so Node expands it, not the shell. npm runs scripts under
+`sh`, where `**` is not recursive — an unquoted glob silently matches only one
+directory level, so a test file added directly under `scripts/` would never
+run. Silently skipping tests is the same class of defect this plan exists to
+remove.
+
+Passing the directory (`node --test scripts/`) does not work here: on Node
+26.7.0 it fails with a CJS `MODULE_NOT_FOUND` instead of recursing.
 
 - [ ] **Step 11: Run the whole suite**
 
@@ -1226,17 +1244,22 @@ cp ../assets/banner_new.jpg public/og.jpg
 
 Hero action links are passed straight to an `<a>` without base prefixing —
 confirmed both in `node_modules/@astrojs/starlight/components/Hero.astro` and
-in Starlight's own reference. Relative targets resolve correctly from the index
-page under any base, so they need no knowledge of `BASE`.
+in Starlight's own reference. They must therefore carry the base themselves.
 
 In `website/src/content/docs/index.mdx`, change the three `link:` values:
 
+The link validator configured in Step 3 rejects relative links, so these are
+written as absolute paths that already carry the base. The literal duplicates
+`BASE`, which MDX frontmatter cannot import — but the duplication is
+self-policing: if `BASE` ever changes, these links stop resolving and the
+validator fails the build.
+
 ```yaml
     - text: Get Started
-      link: overview/
+      link: /Terminal-Session-Proxy-Manager/overview/
       icon: right-arrow
     - text: Read the Docs
-      link: installation/
+      link: /Terminal-Session-Proxy-Manager/installation/
       variant: minimal
       icon: document
 ```
@@ -1245,10 +1268,10 @@ In `website/src/content/docs/ru/index.mdx`:
 
 ```yaml
     - text: Начать работу
-      link: overview/
+      link: /Terminal-Session-Proxy-Manager/ru/overview/
       icon: right-arrow
     - text: Документация
-      link: installation/
+      link: /Terminal-Session-Proxy-Manager/ru/installation/
       variant: minimal
       icon: document
 ```
