@@ -1,42 +1,61 @@
-# Terminal Session Proxy Manager - Documentation Website
+# Documentation website
 
-This is the Astro Starlight documentation website for `Terminal-Session-Proxy-Manager`.
+The [Astro Starlight](https://starlight.astro.build/) documentation site for
+Terminal Session Proxy Manager. Intended for deployment as a GitHub Pages
+project page at `/Terminal-Session-Proxy-Manager/`, in English and Russian.
+The deployment workflow is not set up yet — there is no GitHub Actions job
+publishing the site.
 
-## 🎨 Theme & Styling
+## Commands
 
-This website uses a customized **Material Design 3** theme via `starlight-theme-md3`.
+Run from this directory.
 
-Key visual features:
-- **Orange Accent:** The theme is configured with an expressive orange palette (`accent: 'orange'`, `variant: 'expressive'`).
-- **Rounded Corners & Spacious Layout:** Set to `shape: 'large'` and `density: 'comfortable'`.
-- **Astro View Transitions:** We use Astro's `<ClientRouter />` to enable SPA-like smooth fading transitions between pages without full browser reloads.
-- **Circular Theme Toggle:** The dark/light mode toggle (`ThemeSelect.astro`) features a custom `document.startViewTransition()` implementation that creates a smooth expanding circle effect from the cursor when switched.
-- **Typography:** Uses **Inter** for standard text and **JetBrains Mono** for code blocks, with customized Material Design scrollbars.
+| Command | Action |
+| :--- | :--- |
+| `npm install` | Install dependencies |
+| `npm run sync` | Regenerate content from the repository's Markdown |
+| `npm run dev` | Dev server on `localhost:4321` (syncs first) |
+| `npm run build` | Production build into `dist/` (syncs first, validates links) |
+| `npm run preview` | Serve the built site |
+| `npm test` | Unit tests for the content generator |
 
-## 🚀 Project Structure
+## How content works
+
+Documentation is **not** written here. The canonical sources are the
+repository's own Markdown — `README.md`, `README.ru.md`, `docs/*.md`,
+`CONTRIBUTING.md` and `CHANGELOG*.md` — so they stay readable on GitHub.
+
+`scripts/sync-docs.mjs` generates the site's pages from them at build time:
+
+- `scripts/docs-manifest.mjs` declares each page's source, slug, locale, title
+  and cleanup rules.
+- `scripts/lib/cleanup.mjs` strips GitHub chrome — language switchers, the
+  banner, status badges — asserting each rule matched.
+- `scripts/lib/links.mjs` rewrites every link to a base-prefixed site path or
+  an absolute GitHub URL, and throws on anything unrecognised.
+- `scripts/lib/frontmatter.mjs` serialises frontmatter as valid YAML.
+
+Generated pages are Git-ignored, so the site cannot drift from its sources.
+
+`astro.config.mjs` pins `markdown.processor` to `unified()` rather than
+Astro 7's default Sätteri processor: `starlight-image-zoom` doesn't yet
+support Sätteri.
+
+## Structure
 
 ```text
 website/
-├── src/
-│   ├── components/       # Custom overrides (ThemeSelect.astro, Head.astro)
-│   ├── content/docs/     # Markdown (.md, .mdx) pages (English and Russian)
-│   ├── styles/           # custom.css (fonts, scrollbars, overrides)
-│   └── assets/           # Images and static assets
-├── astro.config.mjs      # Starlight and md3Theme configuration
-└── package.json
+├── site.config.mjs        # site + base, imported by the config and the generator
+├── astro.config.mjs       # Starlight config: locales, sidebar, plugins
+├── scripts/               # content generator and its tests
+├── public/                # served at the site root (favicon, og.jpg)
+└── src/
+    ├── assets/            # images processed by Astro
+    ├── components/        # Starlight component overrides
+    ├── content/docs/      # index.mdx is hand-written; the rest is generated
+    └── styles/custom.css  # theme layer over stock Starlight
 ```
 
-## 🧞 Commands
+## For agents
 
-Run these from the `website/` directory:
-
-| Command           | Action                                           |
-| :---------------- | :----------------------------------------------- |
-| `npm install`     | Installs dependencies                            |
-| `npm run dev`     | Starts local dev server at `localhost:4321`      |
-| `npm run build`   | Build your production site to `./dist/`          |
-| `npm run preview` | Preview your build locally, before deploying     |
-
-## 🤖 For AI Agents
-
-Agents working on this website **MUST** read `AGENTS.md` and use the available MCP servers (like `astro-docs`) and skills (`starlight-website`).
+Read [`AGENTS.md`](AGENTS.md) before changing anything here.
