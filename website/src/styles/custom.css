@@ -1,85 +1,45 @@
-/* Import Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+/*
+ * A thin layer over stock Starlight. Everything here uses Starlight's
+ * documented custom properties, so there is nothing to out-rank and no
+ * `!important` anywhere in this file. Keep it that way: an `!important` here
+ * means a property is being fought rather than set.
+ */
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/jetbrains-mono';
 
-/* Custom Rust-like theme colors */
 :root {
-	--sl-hue-accent: 25; /* Orange/Rust hue */
-	--sl-color-accent-low: hsl(var(--sl-hue-accent), 70%, 20%);
-	--sl-color-accent: hsl(var(--sl-hue-accent), 80%, 50%);
-	--sl-color-accent-high: hsl(var(--sl-hue-accent), 90%, 80%);
+	--sl-font: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+	--sl-font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, monospace;
 
-	/* Update fonts */
-	--sl-font: 'Inter', sans-serif;
-	--sl-font-mono: 'JetBrains Mono', monospace;
+	/* Rust orange, matching the project banner. */
+	--sl-hue-accent: 25;
+	--sl-color-accent-low: hsl(var(--sl-hue-accent) 70% 20%);
+	--sl-color-accent: hsl(var(--sl-hue-accent) 80% 50%);
+	--sl-color-accent-high: hsl(var(--sl-hue-accent) 90% 80%);
 }
 
-/* Fix peach color in dark mode to be more vibrant orange */
-:root[data-theme='dark'] {
-	--sl-color-text-accent: hsl(var(--sl-hue-accent), 95%, 65%);
-	--sl-color-accent-high: hsl(var(--sl-hue-accent), 95%, 65%);
+:root[data-theme='light'] {
+	--sl-color-accent-low: hsl(var(--sl-hue-accent) 90% 88%);
+	--sl-color-accent: hsl(var(--sl-hue-accent) 85% 45%);
+	--sl-color-accent-high: hsl(var(--sl-hue-accent) 80% 25%);
 }
 
-/* Force MD3 to use Primary (Orange) instead of Secondary (which generates green/brown hues) */
-:root {
-	--md3-comp-nav-item-selected-container-color: var(--md-sys-color-primary-container) !important;
-	--md3-comp-nav-item-selected-label-color: var(--md-sys-color-on-primary-container) !important;
-	
-	--md3-comp-tabs-active-container-color: var(--md-sys-color-primary-container) !important;
-	--md3-comp-tabs-active-label-color: var(--md-sys-color-on-primary-container) !important;
-	
-	--md3-comp-aside-container-color: var(--md-sys-color-primary-container) !important;
-	--md3-comp-aside-label-color: var(--md-sys-color-on-primary-container) !important;
-	
-	--md3-comp-badge-secondary-container-color: var(--md-sys-color-primary-container) !important;
-	--md3-comp-badge-secondary-label-color: var(--md-sys-color-on-primary-container) !important;
-	--md3-comp-badge-secondary-outline-color: color-mix(in srgb, var(--md-sys-color-primary) 45%, transparent) !important;
+/* Translucent header, so content scrolling under it stays legible. */
+header.header {
+	background-color: color-mix(in srgb, var(--sl-color-bg-nav) 80%, transparent);
+	backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
 }
 
-/* Translucent blurred header */
-:root header.header {
-	background-color: color-mix(in srgb, var(--sl-color-bg-nav) 40%, transparent) !important;
-	backdrop-filter: blur(16px);
-	-webkit-backdrop-filter: blur(16px);
-}
-
-/* Rounded Cards with smooth hover (now works properly without stagger bug) */
-.sl-card, .card {
-	border-radius: 16px !important;
-	transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease !important;
-}
-
-.sl-card:hover, .card:hover {
-	transform: translateY(-4px);
-	box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15) !important;
-}
-:root[data-theme='light'] .sl-card:hover {
-	box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08) !important;
-}
-
-/* Rounded Asides (Alerts) */
-.starlight-aside {
-	border-radius: 12px !important;
-}
-
-/* Rounded Search Button */
-site-search > button, 
-.DocSearch-Button, 
-button.DocSearch-Button {
-	border-radius: 999px !important;
-}
-
-/* Rounded Images in content */
 .sl-markdown-content img {
-	border-radius: 12px;
-	/* Optional: add a subtle border or shadow if needed in the future */
+	border-radius: 0.5rem;
 }
 
-/* Smooth scrolling */
-html {
-	scroll-behavior: smooth;
+/* Screenshots of the TUI are the one place where a border helps. */
+.sl-markdown-content img[src*='proxy_dashboard'] {
+	border: 1px solid var(--sl-color-hairline);
 }
 
-/* Material Design Scrollbar styling */
 ::-webkit-scrollbar {
 	width: 10px;
 	height: 10px;
@@ -89,12 +49,15 @@ html {
 }
 ::-webkit-scrollbar-thumb {
 	background: var(--sl-color-gray-5);
-	border-radius: 10px;
 	border: 2px solid var(--sl-color-bg);
+	border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
 	background: var(--sl-color-gray-4);
 }
-:root[data-theme="light"] ::-webkit-scrollbar-thumb {
-	border-color: white;
+
+@media (prefers-reduced-motion: no-preference) {
+	html {
+		scroll-behavior: smooth;
+	}
 }
