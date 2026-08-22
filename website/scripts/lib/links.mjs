@@ -119,53 +119,57 @@ function splitFencedBlocks(markdown) {
 }
 
 /**
- * Split a fence-free text segment into inline-code and plain-text runs.
- *
- * A run of backticks opens a code span, closed by the next run of exactly the
- * same length; a run with no matching close is left as literal text.
+ * If `text[i]` opens a run of backticks with a matching close of the same
+ * length, return the index just past that close. Otherwise return -1 — an
+ * unmatched run of backticks is literal text, not a code span.
  */
-function splitInlineCode(text) {
-	const segments = [];
-	const tickRe = /`+/g;
-	let lastIndex = 0;
-	let match;
+function matchInlineCode(text, i) {
+	if (text[i] !== '`') return -1;
 
-	while ((match = tickRe.exec(text)) !== null) {
-		const tickLen = match[0].length;
-		const openStart = match.index;
-		const closeRe = new RegExp('`{' + tickLen + '}(?!`)', 'g');
-		closeRe.lastIndex = tickRe.lastIndex;
-		const closeMatch = closeRe.exec(text);
+	let j = i;
+	while (text[j] === '`') j += 1;
+	const tickLen = j - i;
 
-		if (closeMatch) {
-			if (openStart > lastIndex) segments.push({ type: 'text', value: text.slice(lastIndex, openStart) });
-			const codeEnd = closeMatch.index + closeMatch[0].length;
-			segments.push({ type: 'code', value: text.slice(openStart, codeEnd) });
-			lastIndex = codeEnd;
-			tickRe.lastIndex = codeEnd;
-		}
-		// No matching close: this backtick run is literal text. Leave lastIndex
-		// where it is and let the next iteration's match (if any) sweep it in.
-	}
-
-	if (lastIndex < text.length) segments.push({ type: 'text', value: text.slice(lastIndex) });
-	return segments;
+	const closeRe = new RegExp('`{' + tickLen + '}(?!`)', 'g');
+	closeRe.lastIndex = j;
+	const closeMatch = closeRe.exec(text);
+	return closeMatch ? closeMatch.index + closeMatch[0].length : -1;
 }
 
-/** Index of the character that closes `openChar` opened at `openIndex`, or -1. */
+/**
+ * Index of the character that closes `openChar` opened at `openIndex`, or -1.
+ *
+ * Inline code spans are skipped atomically: a bracket-like character inside
+ * one (e.g. the `]` in `` `a[b]` ``) must not affect the depth count, and a
+ * link's display text may itself be entirely or partly backtick-wrapped
+ * (`` [`path`](href) ``) without breaking the match.
+ */
 function findMatchingBracket(text, openIndex, openChar, closeChar) {
 	let depth = 0;
-	for (let i = openIndex; i < text.length; i++) {
+	let i = openIndex;
+
+	while (i < text.length) {
 		if (text[i] === '\\') {
-			i += 1;
+			i += 2;
 			continue;
 		}
-		if (text[i] === openChar) depth += 1;
-		else if (text[i] === closeChar) {
+
+		const codeEnd = matchInlineCode(text, i);
+		if (codeEnd !== -1) {
+			i = codeEnd;
+			continue;
+		}
+
+		if (text[i] === openChar) {
+			depth += 1;
+		} else if (text[i] === closeChar) {
 			depth -= 1;
 			if (depth === 0) return i;
 		}
+
+		i += 1;
 	}
+
 	return -1;
 }
 
@@ -189,15 +193,32 @@ function renderLinkOrImage(isImage, innerText, hrefRaw, entry, pageMap, assetPre
 
 /**
  * Rewrite links and images in a run of text known to contain no fenced code
- * or inline code spans. Walks the text by hand rather than with a single
- * regex because a link's text can itself contain a bracket-paren image
- * (`[![alt](img)](target)`), which a non-recursive regex cannot balance.
+ * blocks (inline code spans are handled here, atomically). Walks the text by
+ * hand rather than with a single regex because a link's text can itself
+ * contain a bracket-paren image (`[![alt](img)](target)`), which a
+ * non-recursive regex cannot balance.
+ *
+ * Inline code is resolved before link detection at each position: a run of
+ * backticks that opens before any `[`/`![` (e.g. `` `[nope](NOPE.md)` ``) is
+ * consumed as one opaque, unrewritten span, exactly as if it were never link
+ * syntax. A `[`/`![` reached without first crossing an unmatched backtick is
+ * eligible for link detection, and `findMatchingBracket` skips any inline
+ * code nested inside its display text (e.g. `` [`path`](href) ``) the same
+ * way, so a code-formatted link label doesn't hide the link's href from
+ * rewriting.
  */
 function rewriteTextRun(text, entry, pageMap, assetPrefix) {
 	let out = '';
 	let i = 0;
 
 	while (i < text.length) {
+		const codeEnd = matchInlineCode(text, i);
+		if (codeEnd !== -1) {
+			out += text.slice(i, codeEnd);
+			i = codeEnd;
+			continue;
+		}
+
 		const isImage = text[i] === '!' && text[i + 1] === '[';
 		const bracketStart = isImage ? i + 1 : text[i] === '[' ? i : -1;
 
@@ -238,11 +259,8 @@ export function rewriteLinks(markdown, entry, pageMap) {
 	const assetPrefix = '../'.repeat(depth + 2) + 'assets/';
 
 	return splitFencedBlocks(markdown)
-		.map((segment) => {
-			if (segment.type === 'code') return segment.value;
-			return splitInlineCode(segment.value)
-				.map((run) => (run.type === 'code' ? run.value : rewriteTextRun(run.value, entry, pageMap, assetPrefix)))
-				.join('');
-		})
+		.map((segment) =>
+			segment.type === 'code' ? segment.value : rewriteTextRun(segment.value, entry, pageMap, assetPrefix)
+		)
 		.join('');
 }

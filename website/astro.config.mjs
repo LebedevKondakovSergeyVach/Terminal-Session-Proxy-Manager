@@ -2,6 +2,10 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import { viewTransitions } from 'astro-vtbot/starlight-view-transitions';
+import { unified } from '@astrojs/markdown-remark';
+import starlightLinksValidator from 'starlight-links-validator';
+import starlightImageZoom from 'starlight-image-zoom';
+import starlightLlmsTxt from 'starlight-llms-txt';
 
 import { SITE, BASE } from './site.config.mjs';
 
@@ -14,10 +18,22 @@ export default defineConfig({
 	// same way the static build on GitHub Pages does.
 	trailingSlash: 'always',
 	build: { format: 'directory' },
+	// starlight-image-zoom injects a rehype plugin and does not yet support
+	// Sätteri, Astro 7's default Markdown processor. Fall back to the
+	// remark/rehype pipeline it does support.
+	// https://github.com/HiDeoo/starlight-image-zoom/issues/63
+	markdown: { processor: unified() },
 	integrations: [
 		starlight({
 			title: 'Terminal Session Proxy Manager',
-			plugins: [viewTransitions()],
+			plugins: [
+				viewTransitions(),
+				starlightImageZoom(),
+				starlightLlmsTxt(),
+				// A dead internal link fails the build. This is the gate that would
+				// have caught the `href="CHANGELOG.md"` links shipped previously.
+				starlightLinksValidator({ errorOnRelativeLinks: true }),
+			],
 			defaultLocale: 'root',
 			locales: {
 				root: { label: 'EN', lang: 'en' },
@@ -27,6 +43,16 @@ export default defineConfig({
 				ThemeSelect: './src/components/ThemeSelect.astro',
 			},
 			customCss: ['./src/styles/custom.css'],
+			head: [
+				{
+					tag: 'meta',
+					attrs: { property: 'og:image', content: `${SITE}${BASE}/og.jpg` },
+				},
+				{
+					tag: 'meta',
+					attrs: { name: 'twitter:image', content: `${SITE}${BASE}/og.jpg` },
+				},
+			],
 			social: [
 				{
 					icon: 'github',
