@@ -88,3 +88,32 @@ test('rewriteLinks leaves link text untouched', () => {
 	);
 	assert.equal(out, 'See [the guide](/Terminal-Session-Proxy-Manager/usage/) for details.');
 });
+
+test('a link inside a fenced code block is left unchanged', () => {
+	const markdown = ['```bash', 'See [guide](docs/USAGE.md) for details.', '```', ''].join('\n');
+	const out = rewriteLinks(markdown, { source: 'README.md', dest: 'overview.md' }, pageMap);
+	assert.equal(out, markdown);
+});
+
+test('an unknown link target inside a fenced code block does not throw', () => {
+	const markdown = ['```', '[nope](NOPE.md)', '```', ''].join('\n');
+	assert.doesNotThrow(() => rewriteLinks(markdown, { source: 'README.md', dest: 'overview.md' }, pageMap));
+});
+
+test('a link inside an inline code span is left unchanged', () => {
+	const markdown = 'Run `[nope](NOPE.md)` as shown.';
+	const out = rewriteLinks(markdown, { source: 'README.md', dest: 'overview.md' }, pageMap);
+	assert.equal(out, markdown);
+});
+
+test('a link wrapping an image rewrites both the image path and the outer href', () => {
+	const out = rewriteLinks(
+		'[![alt](assets/proxy_dashboard_final.png)](docs/USAGE.md)',
+		{ source: 'README.md', dest: 'overview.md' },
+		pageMap
+	);
+	assert.equal(
+		out,
+		'[![alt](../../assets/proxy_dashboard_final.png)](/Terminal-Session-Proxy-Manager/usage/)'
+	);
+});
