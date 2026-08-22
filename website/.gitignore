@@ -19,3 +19,9 @@ pnpm-debug.log*
 
 # macOS-specific files
 .DS_Store
+
+# Generated from the repository's canonical Markdown by scripts/sync-docs.mjs.
+# Never edit these by hand and never commit them — edit the source documents
+# listed in scripts/docs-manifest.mjs instead.
+src/content/docs/*.md
+src/content/docs/ru/*.md
