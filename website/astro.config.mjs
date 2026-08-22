@@ -2,6 +2,7 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import md3Theme from 'starlight-theme-md3';
+import { viewTransitions } from 'astro-vtbot/starlight-view-transitions';
 
 // https://astro.build/config
 export default defineConfig({
@@ -9,10 +10,11 @@ export default defineConfig({
 		starlight({
 			title: 'Terminal Session Proxy Manager',
 			plugins: [
+				viewTransitions(),
 				md3Theme({
 					accent: 'orange',
 					shape: 'large',
-					variant: 'expressive',
+					variant: 'fidelity',
 					density: 'comfortable',
 				}),
 			],
@@ -29,7 +31,6 @@ export default defineConfig({
 			},
 			components: {
 				ThemeSelect: './src/components/ThemeSelect.astro',
-				Head: './src/components/Head.astro',
 			},
 			customCss: [
 				'./src/styles/custom.css',
@@ -37,15 +38,23 @@ export default defineConfig({
 			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager' }],
 			sidebar: [
 				{
-					label: 'Guides',
+					label: 'Start Here',
+					translations: { ru: 'Начало работы' },
 					items: [
-						// Each item here is one entry in the navigation menu.
-						{ label: 'Example Guide', slug: 'guides/example' },
+						{ label: 'Overview', translations: { ru: 'Обзор' }, slug: 'overview' },
+						{ label: 'Installation', translations: { ru: 'Установка' }, slug: 'installation' },
+						{ label: 'Contributing', translations: { ru: 'Разработка' }, slug: 'contributing' },
+						{ label: 'Changelog', translations: { ru: 'История изменений' }, slug: 'changelog' },
 					],
 				},
 				{
-					label: 'Reference',
-					items: [{ autogenerate: { directory: 'reference' } }],
+					label: 'Guides',
+					translations: { ru: 'Руководства' },
+					items: [
+						{ label: 'Configuration', translations: { ru: 'Конфигурация' }, slug: 'configuration' },
+						{ label: 'Usage', translations: { ru: 'Использование' }, slug: 'usage' },
+						{ label: 'Shell Integration', translations: { ru: 'Интеграция с Shell' }, slug: 'shell-integration' },
+					],
 				},
 			],
 		}),

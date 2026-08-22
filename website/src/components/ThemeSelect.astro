@@ -154,5 +154,7 @@ import { Icon } from '@astrojs/starlight/components';
 			});
 		}
 	}
-	customElements.define('starlight-theme-switch', StarlightThemeSwitch);
+	if (!customElements.get('starlight-theme-switch')) {
+		customElements.define('starlight-theme-switch', StarlightThemeSwitch);
+	}
 </script>

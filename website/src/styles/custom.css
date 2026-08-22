@@ -19,11 +19,27 @@
 	--sl-color-accent-high: hsl(var(--sl-hue-accent), 95%, 65%);
 }
 
+/* Force MD3 to use Primary (Orange) instead of Secondary (which generates green/brown hues) */
+:root {
+	--md3-comp-nav-item-selected-container-color: var(--md-sys-color-primary-container) !important;
+	--md3-comp-nav-item-selected-label-color: var(--md-sys-color-on-primary-container) !important;
+	
+	--md3-comp-tabs-active-container-color: var(--md-sys-color-primary-container) !important;
+	--md3-comp-tabs-active-label-color: var(--md-sys-color-on-primary-container) !important;
+	
+	--md3-comp-aside-container-color: var(--md-sys-color-primary-container) !important;
+	--md3-comp-aside-label-color: var(--md-sys-color-on-primary-container) !important;
+	
+	--md3-comp-badge-secondary-container-color: var(--md-sys-color-primary-container) !important;
+	--md3-comp-badge-secondary-label-color: var(--md-sys-color-on-primary-container) !important;
+	--md3-comp-badge-secondary-outline-color: color-mix(in srgb, var(--md-sys-color-primary) 45%, transparent) !important;
+}
+
 /* Translucent blurred header */
 :root header.header {
-	background-color: color-mix(in srgb, var(--sl-color-bg-nav) 75%, transparent) !important;
-	backdrop-filter: blur(12px);
-	-webkit-backdrop-filter: blur(12px);
+	background-color: color-mix(in srgb, var(--sl-color-bg-nav) 40%, transparent) !important;
+	backdrop-filter: blur(16px);
+	-webkit-backdrop-filter: blur(16px);
 }
 
 /* Rounded Cards with smooth hover (now works properly without stagger bug) */
@@ -50,6 +66,12 @@ site-search > button,
 .DocSearch-Button, 
 button.DocSearch-Button {
 	border-radius: 999px !important;
+}
+
+/* Rounded Images in content */
+.sl-markdown-content img {
+	border-radius: 12px;
+	/* Optional: add a subtle border or shadow if needed in the future */
 }
 
 /* Smooth scrolling */

@@ -1,34 +1,21 @@
 ---
-title: Terminal Session Proxy Manager
-description: Manage SOCKS/HTTP proxy profiles for terminal sessions.
+title: Welcome to Terminal Session Proxy Manager
+description: Fast and seamless proxy management for your terminal sessions.
 template: splash
 hero:
-  tagline: Easy proxy switching, profiles, speed testing, and environment export for your terminal.
+  tagline: Manage proxy profiles for your terminal session from one command, in Rust.
+  image:
+    file: ../../assets/demo.gif
   actions:
-    - text: Quick Start
-      link: /guides/example/
+    - text: Get Started
+      link: /overview
       icon: right-arrow
-    - text: GitHub Repository
+    - text: Read the Docs
+      link: /installation
+      variant: minimal
+      icon: document
+    - text: View on GitHub
       link: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager
-      icon: external
+      icon: github
       variant: minimal
 ---
-
-import { Card, CardGrid } from '@astrojs/starlight/components';
-
-## Features
-
-<CardGrid>
-	<Card title="Profile Manager" icon="setting">
-		Create, import, and switch proxy profiles in a single click.
-	</Card>
-	<Card title="Built-in Utilities" icon="magnifier">
-		Test connection speed (speedtest) and verify availability (ping).
-	</Card>
-	<Card title="Shell Support" icon="laptop">
-		Automatic environment variable export (`HTTP_PROXY`, `ALL_PROXY`) for bash and zsh.
-	</Card>
-	<Card title="TUI Interface" icon="monitor">
-		Beautiful terminal UI for interactive profile management.
-	</Card>
-</CardGrid>
