@@ -106,6 +106,15 @@ test('a link inside an inline code span is left unchanged', () => {
 	assert.equal(out, markdown);
 });
 
+test('a link whose display text is itself backtick-wrapped still has its href rewritten', () => {
+	const markdown = '[`configs/config.default.json`](../configs/config.default.json)';
+	const out = rewriteLinks(markdown, { source: 'docs/CONFIGURATION.md', dest: 'configuration.md' }, pageMap);
+	assert.equal(
+		out,
+		'[`configs/config.default.json`](https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/blob/main/configs/config.default.json)'
+	);
+});
+
 test('a link wrapping an image rewrites both the image path and the outer href', () => {
 	const out = rewriteLinks(
 		'[![alt](assets/proxy_dashboard_final.png)](docs/USAGE.md)',
