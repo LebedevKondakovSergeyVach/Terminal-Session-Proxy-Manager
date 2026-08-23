@@ -52,8 +52,15 @@ header.header {
 	backdrop-filter: blur(18px) saturate(1.6);
 }
 
-/* Screenshots of the TUI need an edge; the terminal's own background is dark
-   and otherwise bleeds into a dark page. The theme rounds images already. */
+/* The theme ships no `img` rules at all, so rounding content images is ours to
+   do. Checked before assuming otherwise: an earlier revision dropped this rule
+   claiming the theme handled it, and every screenshot went square-cornered. */
+.sl-markdown-content img {
+	border-radius: 0.5rem;
+}
+
+/* Screenshots of the TUI need an edge too; the terminal's own background is
+   dark and otherwise bleeds into a dark page. */
 .sl-markdown-content img[src*='proxy_dashboard'] {
 	border: 1px solid var(--sl-color-hairline);
 }

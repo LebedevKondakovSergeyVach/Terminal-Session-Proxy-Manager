@@ -24,7 +24,8 @@ never configured, and a link style the build now rejects. One source of truth.
 cd website
 npm install
 npm run sync     # regenerate content from the repository's Markdown
-npm run dev      # dev server (syncs first); add --background to free the shell
+npm run dev      # dev server (syncs first)
+npm run dev -- --background   # same, detached — note the `--`, npm eats a bare flag
 npm run build    # production build (syncs first, validates every link)
 npm run preview  # serve the built site
 npm test         # unit tests for the content generator
