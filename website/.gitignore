@@ -22,6 +22,7 @@ pnpm-debug.log*
 
 # Generated from the repository's canonical Markdown by scripts/sync-docs.mjs.
 # Never edit these by hand and never commit them — edit the source documents
-# listed in scripts/docs-manifest.mjs instead.
-src/content/docs/*.md
-src/content/docs/ru/*.md
+# listed in scripts/docs-manifest.mjs instead. `**` matches zero or more
+# directories, so this covers any depth a manifest `dest` might use
+# (e.g. `guides/foo.md`), not just the currently flat and `ru/`-nested cases.
+src/content/docs/**/*.md

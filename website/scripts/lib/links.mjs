@@ -9,14 +9,26 @@ import { BASE, REPO_BLOB_URL } from '../../site.config.mjs';
  */
 const REPO_FILE_PREFIXES = ['LICENSE', 'SECURITY.md', 'AGENTS.md', '.ai/', 'configs/', 'shell/'];
 
-/** Map every synced source path to its absolute, base-prefixed site path. */
+/**
+ * Map every synced source path to its site page: the absolute, base-prefixed
+ * path plus the slug/locale needed to find a same-slug page in another
+ * locale (see `resolveLink`'s locale preference below).
+ */
 export function buildPageMap(pages) {
 	const map = new Map();
 	for (const page of pages) {
 		const prefix = page.locale === 'ru' ? `${BASE}/ru` : BASE;
-		map.set(page.source, `${prefix}/${page.slug}/`);
+		map.set(page.source, { path: `${prefix}/${page.slug}/`, slug: page.slug, locale: page.locale });
 	}
 	return map;
+}
+
+/** Find the page with the given slug in the given locale, if one exists. */
+function findPageBySlugAndLocale(pageMap, slug, locale) {
+	for (const page of pageMap.values()) {
+		if (page.slug === slug && page.locale === locale) return page;
+	}
+	return undefined;
 }
 
 function isExternal(href) {
@@ -28,6 +40,15 @@ function isExternal(href) {
  *
  * Throws on anything unrecognised. The generator this replaces fell through to
  * the original text, which is how `href="CHANGELOG.md"` reached production.
+ *
+ * The root documents (`README.ru.md` and friends) link to their targets by
+ * the English filename regardless of the source's own locale — there is no
+ * `CHANGELOG.ru.md`-shaped link in the Markdown, just `CHANGELOG.md`. So a
+ * Russian source resolving to a page that also exists in Russian prefers that
+ * Russian twin (matched by slug); a target with no Russian twin — like
+ * `contributing`, where only `CONTRIBUTING.md` exists — still resolves to the
+ * English page via Starlight's own locale fallback. An English source always
+ * resolves to the page the map already names, unchanged.
  */
 export function resolveLink(href, sourcePath, pageMap) {
 	if (href.startsWith('#') || isExternal(href)) return href;
@@ -44,7 +65,14 @@ export function resolveLink(href, sourcePath, pageMap) {
 		.replace(/^\.\//, '');
 
 	const page = pageMap.get(resolved);
-	if (page) return page + hash;
+	if (page) {
+		const sourceLocale = pageMap.get(sourcePath)?.locale;
+		if (sourceLocale === 'ru' && page.locale !== 'ru') {
+			const twin = findPageBySlugAndLocale(pageMap, page.slug, 'ru');
+			if (twin) return twin.path + hash;
+		}
+		return page.path + hash;
+	}
 
 	if (REPO_FILE_PREFIXES.some((prefix) => resolved === prefix || resolved.startsWith(prefix))) {
 		return REPO_BLOB_URL + resolved + hash;

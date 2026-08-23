@@ -126,3 +126,24 @@ test('a link wrapping an image rewrites both the image path and the outer href',
 		'[![alt](../../assets/proxy_dashboard_final.png)](/Terminal-Session-Proxy-Manager/usage/)'
 	);
 });
+
+test('a Russian source linking to the changelog resolves to the Russian changelog page', () => {
+	assert.equal(
+		resolveLink('CHANGELOG.md', 'README.ru.md', pageMap),
+		'/Terminal-Session-Proxy-Manager/ru/changelog/'
+	);
+});
+
+test('an English source linking to the changelog still resolves to the English changelog page', () => {
+	assert.equal(
+		resolveLink('CHANGELOG.md', 'README.md', pageMap),
+		'/Terminal-Session-Proxy-Manager/changelog/'
+	);
+});
+
+test('a Russian source linking to a target with no Russian twin still resolves to the English page', () => {
+	assert.equal(
+		resolveLink('CONTRIBUTING.md', 'README.ru.md', pageMap),
+		'/Terminal-Session-Proxy-Manager/contributing/'
+	);
+});
