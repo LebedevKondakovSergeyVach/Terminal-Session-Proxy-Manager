@@ -100,9 +100,12 @@ fix is the theme's options, not the specificity.
 
 ### 7. Client scripts and page transitions
 
-`astro-vtbot` gives the site SPA-style navigation, so `<script>` tags do not
-re-run on soft navigations. Listen for `astro:page-load`, or define a custom
-element as `ThemeSelect.astro` does.
+`astro-vtbot` here drives **native cross-document** view transitions —
+`@view-transition { navigation: auto }` — not a client-side router. There is no
+`ClientRouter` in this project. Every navigation is therefore a full document
+load, scripts run normally on each page, and **`astro:page-load` never fires**
+(it appears zero times in the built HTML). Do not write initialisation that
+waits for it; it will simply never run.
 
 `ThemeSelect.astro` animates `::view-transition-*(root)`, the same
 pseudo-elements astro-vtbot uses. Its overrides are scoped behind
