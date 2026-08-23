@@ -18,6 +18,20 @@
 :root {
 	--sl-font: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
 	--sl-font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, monospace;
+
+	/* The selected sidebar item, in the brand orange rather than the theme's
+	   default. MD3 paints a selected navigation item with the *secondary*
+	   container, which is a deliberate contrast role — but this site has one
+	   colour identity and the highlight should carry it, so point both tokens
+	   at the primary pair instead. They stay a matched pair: swapping the
+	   container without its `on-` colour is how highlights lose their contrast.
+
+	   The theme declares these in `@layer md3.tokens`, and this file is
+	   unlayered, so a plain `:root` wins. This is the one place we deliberately
+	   redirect a theme token — everything else is configured through the
+	   plugin's options. */
+	--md3-comp-nav-item-selected-container-color: var(--md-sys-color-primary-container);
+	--md3-comp-nav-item-selected-label-color: var(--md-sys-color-on-primary-container);
 }
 
 /* Translucent header, so content stays visible scrolling under it. The theme
@@ -34,8 +48,8 @@
    the same choice. On a browser old enough to need the prefix the header is
    simply translucent without the blur, which is a fine thing to degrade to. */
 header.header {
-	background-color: color-mix(in srgb, var(--sl-color-bg-nav) 70%, transparent);
-	backdrop-filter: blur(14px) saturate(1.5);
+	background-color: color-mix(in srgb, var(--sl-color-bg-nav) 45%, transparent);
+	backdrop-filter: blur(18px) saturate(1.6);
 }
 
 /* Screenshots of the TUI need an edge; the terminal's own background is dark
@@ -63,5 +77,63 @@ header.header {
 @media (prefers-reduced-motion: no-preference) {
 	html {
 		scroll-behavior: smooth;
+	}
+
+	/*
+	 * Page transitions.
+	 *
+	 * astro-vtbot drives these with native cross-document view transitions —
+	 * `@view-transition { navigation: auto }`, not a client-side router. It
+	 * already names the groups (`main`, `title`, `header`, `current-page`) and
+	 * supplies a directional clip-path wipe, and it pins the header and the
+	 * mobile ToC so they never flicker. None of that is re-declared here; this
+	 * only sets how the motion feels.
+	 *
+	 * Everything sits inside `prefers-reduced-motion: no-preference`, and vtbot
+	 * gates `@view-transition` on the same query, so a reader who asks for less
+	 * motion gets a plain swap.
+	 */
+
+	/* MD3's emphasised-decelerate curve, so navigation matches the motion the
+	   theme uses everywhere else. */
+	::view-transition-group(*) {
+		animation-duration: 320ms;
+		animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
+	}
+
+	/* The outgoing page otherwise sits still underneath the incoming wipe.
+	   Fading it softens the edge without weakening the direction cue. */
+	:active-view-transition-type(forward, backward)::view-transition-old(main) {
+		animation: tspm-page-fade-out 320ms cubic-bezier(0.4, 0, 1, 1) both;
+	}
+
+	/* First paint — a direct visit, a reload, or any browser without
+	   cross-document view transitions. There is no transition to arrive on, so
+	   the content introduces itself. */
+	main {
+		animation: tspm-page-enter 420ms cubic-bezier(0.2, 0, 0, 1) both;
+	}
+
+	/* ...but never during a navigation, where the wipe already covers it.
+	   Running both is what makes page changes look unsettled. */
+	:active-view-transition-type(forward, backward) main {
+		animation: none;
+	}
+}
+
+@keyframes tspm-page-fade-out {
+	to {
+		opacity: 0;
+	}
+}
+
+@keyframes tspm-page-enter {
+	from {
+		opacity: 0;
+		transform: translateY(0.5rem);
+	}
+	to {
+		opacity: 1;
+		transform: none;
 	}
 }
