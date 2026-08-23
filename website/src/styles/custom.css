@@ -1,8 +1,16 @@
 /*
- * A thin layer over stock Starlight. Everything here uses Starlight's
- * documented custom properties, so there is nothing to out-rank and no
- * `!important` anywhere in this file. Keep it that way: an `!important` here
- * means a property is being fought rather than set.
+ * A thin layer on top of `starlight-theme-md3`.
+ *
+ * The theme owns colour, shape, elevation and motion — it derives all of them
+ * from the `seed` set in astro.config.mjs. Nothing here may restate them. What
+ * is left is what the theme does not claim: typography, scrollbars, and the one
+ * screenshot rule.
+ *
+ * There is no `!important` in this file, and there must not be. The previous
+ * version of this stylesheet had fifteen, all of them repainting the theme's
+ * derived tokens because the theme had been given the wrong accent. An
+ * `!important` here means the two are fighting again — fix the theme's options,
+ * not the specificity.
  */
 @import '@fontsource-variable/inter';
 @import '@fontsource-variable/jetbrains-mono';
@@ -10,32 +18,10 @@
 :root {
 	--sl-font: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
 	--sl-font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, monospace;
-
-	/* Rust orange, matching the project banner. */
-	--sl-hue-accent: 25;
-	--sl-color-accent-low: hsl(var(--sl-hue-accent) 70% 20%);
-	--sl-color-accent: hsl(var(--sl-hue-accent) 80% 50%);
-	--sl-color-accent-high: hsl(var(--sl-hue-accent) 90% 80%);
 }
 
-:root[data-theme='light'] {
-	--sl-color-accent-low: hsl(var(--sl-hue-accent) 90% 88%);
-	--sl-color-accent: hsl(var(--sl-hue-accent) 85% 45%);
-	--sl-color-accent-high: hsl(var(--sl-hue-accent) 80% 25%);
-}
-
-/* Translucent header, so content scrolling under it stays legible. */
-header.header {
-	background-color: color-mix(in srgb, var(--sl-color-bg-nav) 80%, transparent);
-	backdrop-filter: blur(12px);
-	-webkit-backdrop-filter: blur(12px);
-}
-
-.sl-markdown-content img {
-	border-radius: 0.5rem;
-}
-
-/* Screenshots of the TUI are the one place where a border helps. */
+/* Screenshots of the TUI need an edge; the terminal's own background is dark
+   and otherwise bleeds into a dark page. The theme rounds images already. */
 .sl-markdown-content img[src*='proxy_dashboard'] {
 	border: 1px solid var(--sl-color-hairline);
 }

@@ -82,11 +82,21 @@ Every content change lands in English and Russian. `contributing` is the sole
 exception — there is no `CONTRIBUTING.ru.md`, so Starlight's fallback serves
 the English page and the sidebar carries a badge saying so.
 
-### 6. No `!important` in `custom.css`
+### 6. The theme owns colour, shape, elevation and motion
 
-The stylesheet sets Starlight's documented custom properties. An `!important`
-means something is being fought rather than configured, which is what the
-removed Material Design 3 theme required.
+`starlight-theme-md3` supplies all four, derived from the `seed` hex in
+`astro.config.mjs` — the project's rust orange. Change the look by changing the
+theme's options (`seed`, `variant`, `shape`, `density`, `motion`), never by
+overriding its `--md-sys-*` or `--md3-comp-*` tokens.
+
+`custom.css` is a thin layer for what the theme does not claim: typography,
+scrollbars, and one screenshot border.
+
+**No `!important` in `custom.css`.** An earlier version had fifteen, every one
+of them repainting the theme's derived tokens because the theme had been handed
+the wrong accent — `accent: 'orange'` plus an invalid `variant: 'fidelity'`
+instead of a seed. An `!important` here means the two are fighting again; the
+fix is the theme's options, not the specificity.
 
 ### 7. Client scripts and page transitions
 

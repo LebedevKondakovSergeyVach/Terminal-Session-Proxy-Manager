@@ -3,6 +3,7 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import { viewTransitions } from 'astro-vtbot/starlight-view-transitions';
 import { unified } from '@astrojs/markdown-remark';
+import md3Theme from 'starlight-theme-md3';
 import starlightLinksValidator from 'starlight-links-validator';
 import starlightImageZoom from 'starlight-image-zoom';
 import starlightLlmsTxt from 'starlight-llms-txt';
@@ -28,6 +29,27 @@ export default defineConfig({
 			title: 'Terminal Session Proxy Manager',
 			plugins: [
 				viewTransitions(),
+				// Material Design 3 shapes, elevation and motion.
+				//
+				// `seed` generates the whole tonal palette from the project's own
+				// rust orange — hsl(25 80% 50%), the accent this site already used.
+				// The earlier attempt at this theme instead picked the canned
+				// `accent: 'orange'` and then repainted the derived `--md3-comp-*`
+				// tokens from custom.css with fifteen `!important` declarations.
+				// Seeding is the supported way to get a specific brand colour, so
+				// there is nothing left to out-rank. If a rule here ever seems to
+				// need `!important`, reconfigure the theme instead — that is the
+				// signal the two are fighting again.
+				md3Theme({
+					seed: '#E66E1A',
+					variant: 'expressive',
+					shape: 'large',
+					density: 'comfortable',
+					// State layers on hover, a ripple from the pointer, and brief
+					// navigation feedback. On by default; named because it is the
+					// reason the theme is here.
+					motion: true,
+				}),
 				starlightImageZoom(),
 				starlightLlmsTxt(),
 				// A dead internal link fails the build. This is the gate that would
