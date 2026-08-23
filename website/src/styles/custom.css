@@ -107,33 +107,28 @@ header.header {
 		animation: tspm-page-fade-out 320ms cubic-bezier(0.4, 0, 1, 1) both;
 	}
 
-	/* First paint — a direct visit, a reload, or any browser without
-	   cross-document view transitions. There is no transition to arrive on, so
-	   the content introduces itself. */
-	main {
-		animation: tspm-page-enter 420ms cubic-bezier(0.2, 0, 0, 1) both;
-	}
-
-	/* ...but never during a navigation, where the wipe already covers it.
-	   Running both is what makes page changes look unsettled. */
-	:active-view-transition-type(forward, backward) main {
-		animation: none;
-	}
+	/*
+	 * There is deliberately no page-enter animation here.
+	 *
+	 * The theme already provides one: `motion.css` animates
+	 * `main > .content-panel` in from `opacity: 0; translateY(16px)`, paired
+	 * with a matching leave animation, and its `route-bootstrap` script clears
+	 * the state after two frames.
+	 *
+	 * An earlier version of this file added a second entrance on `main`,
+	 * suppressed during a navigation via
+	 * `:active-view-transition-type(forward, backward) main { animation: none }`.
+	 * That suppression is only true *while* the transition runs. The moment it
+	 * ends the selector stops matching, the entrance animation applies for the
+	 * first time, and it starts at its first keyframe — so the content blanked
+	 * and faded back in, looking like a reload. Any animation toggled by that
+	 * pseudo-class has the same flaw: it fires when the transition ends, not
+	 * when the page arrives.
+	 */
 }
 
 @keyframes tspm-page-fade-out {
 	to {
 		opacity: 0;
-	}
-}
-
-@keyframes tspm-page-enter {
-	from {
-		opacity: 0;
-		transform: translateY(0.5rem);
-	}
-	to {
-		opacity: 1;
-		transform: none;
 	}
 }
