@@ -42,7 +42,13 @@ export default defineConfig({
 				// signal the two are fighting again.
 				md3Theme({
 					seed: '#E66E1A',
-					variant: 'expressive',
+					// `content` keeps the derived palette faithful to the seed.
+					// This matters because the selected sidebar item is painted
+					// with `--md-sys-color-secondary-container`, and the variants
+					// derive secondary very differently from the same orange:
+					// expressive gives #006c46 (green), tonalSpot #765848,
+					// content #7d5540 — a warm tan that stays in the orange family.
+					variant: 'content',
 					shape: 'large',
 					density: 'comfortable',
 					// State layers on hover, a ripple from the pointer, and brief

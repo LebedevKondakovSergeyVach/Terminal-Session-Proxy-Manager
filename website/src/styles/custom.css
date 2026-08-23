@@ -20,6 +20,24 @@
 	--sl-font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, monospace;
 }
 
+/* Translucent header, so content stays visible scrolling under it. The theme
+   paints it opaque from `.page > .header` inside `@layer md3.layout`, and offers
+   no option for this. Unlayered CSS outranks layered CSS whatever the
+   specificity, so this plain selector wins on its own — no `!important`, and no
+   escalating selector war. The colour still comes from the theme's own nav
+   surface token, so it follows the palette in both light and dark.
+
+   `backdrop-filter` is declared unprefixed only, and ships that way — the
+   bundler adds no `-webkit-` twin. Writing the twin by hand is worse than
+   leaving it out: the minifier then collapses the pair down to *just* the
+   prefixed form, losing the blur in Firefox. The theme's own stylesheet makes
+   the same choice. On a browser old enough to need the prefix the header is
+   simply translucent without the blur, which is a fine thing to degrade to. */
+header.header {
+	background-color: color-mix(in srgb, var(--sl-color-bg-nav) 70%, transparent);
+	backdrop-filter: blur(14px) saturate(1.5);
+}
+
 /* Screenshots of the TUI need an edge; the terminal's own background is dark
    and otherwise bleeds into a dark page. The theme rounds images already. */
 .sl-markdown-content img[src*='proxy_dashboard'] {
