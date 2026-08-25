@@ -40,7 +40,7 @@ overwritten, so a typo cannot cost you your profiles.
 
 ## 1. `settings.json`
 
-```json
+```json title="settings.json"
 {
   "config_path": null,
   "lang": "ru"
@@ -58,7 +58,7 @@ Edit it with `proxy settings set --config-path ~/proxies.json` or `proxy lang en
 
 ## 2. `config.json`
 
-```json
+```json title="config.json"
 {
   "active_profile": "work",
   "profiles": {

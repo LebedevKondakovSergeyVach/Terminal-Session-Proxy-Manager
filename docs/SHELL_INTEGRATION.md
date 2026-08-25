@@ -30,6 +30,30 @@ files are generated from `init`, but the `eval` form can never go stale.
 
 ---
 
+## How it works
+
+> [!NOTE]
+> A background process cannot modify its parent shell's environment. This is why running the binary directly cannot export variables into your active session.
+
+To solve this, the `proxy` shell function wraps the Rust binary:
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Shell as Zsh / Bash
+    participant Proxy as Rust Binary
+    
+    User->>Shell: proxy switch
+    Shell->>Proxy: Execute binary
+    Proxy-->>Shell: Prints "export HTTP_PROXY=..."
+    Shell->>Shell: eval() applies variables
+    Shell-->>User: Environment Updated
+```
+
+This ensures that your terminal session receives the environment variables immediately.
+
+---
+
 ## What you get
 
 The `proxy` function forwards anything it does not handle itself to the binary,

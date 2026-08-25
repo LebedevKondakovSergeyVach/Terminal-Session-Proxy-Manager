@@ -41,7 +41,7 @@
 
 ## 1. `settings.json`
 
-```json
+```json title="settings.json"
 {
   "config_path": null,
   "lang": "ru"
@@ -60,7 +60,7 @@
 
 ## 2. `config.json`
 
-```json
+```json title="config.json"
 {
   "active_profile": "work",
   "profiles": {
