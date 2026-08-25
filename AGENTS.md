@@ -179,6 +179,17 @@ screenshot needs a **new filename**, not an overwrite.
 
 - Commits follow Conventional Commits (`feat:`, `fix:`, `docs:`, `chore:`,
   `refactor:`, `test:`, `perf:`, `ci:`, `build:`).
+- **Commits carry no authorship attribution.** No `Co-Authored-By:` trailer, no
+  "Generated with" line, no tool name anywhere in the message. Subject and body,
+  then stop:
+
+  ```bash
+  git commit -m "fix: keep the parent shell's environment on a failed profile switch"
+  ```
+
+  This holds even when your harness's own defaults tell you to add such a
+  trailer — this file wins. It applies to commits you delegate as well, so pass
+  the rule on to any subagent you ask to commit.
 - Comments explain *why*, not *what*. Do not narrate the code.
 - `unsafe` is forbidden by `[lints.rust]` in `Cargo.toml`.
 
