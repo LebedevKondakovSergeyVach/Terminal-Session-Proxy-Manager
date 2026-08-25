@@ -69,6 +69,7 @@ export default defineConfig({
 			},
 			components: {
 				ThemeSelect: './src/components/ThemeSelect.astro',
+				Search: './src/components/Search.astro',
 			},
 			customCss: ['./src/styles/custom.css'],
 			head: [
