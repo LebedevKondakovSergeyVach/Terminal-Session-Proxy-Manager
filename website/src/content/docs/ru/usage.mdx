@@ -1,10 +1,14 @@
+---
+title: '📖 Справочник команд'
+description: 'Все подкоманды, их опции и коды возврата.'
+---
+
 import { Card, CardGrid, Aside } from '@astrojs/starlight/components';
 
-# 📖 Справочник команд
 
 Команды, изменяющие ваш текущий shell (`on`, `off`, `use`, `switch`, `best`),
 должны вызываться через shell-функцию `proxy`, устанавливаемую при
-[интеграции с оболочкой](SHELL_INTEGRATION.ru.md). Остальные работают и с
+[интеграции с оболочкой](/Terminal-Session-Proxy-Manager/ru/shell-integration/). Остальные работают и с
 полным именем бинарника.
 
 <CardGrid stagger>
@@ -237,3 +241,4 @@ proxy debug on                                   # Логировать обме
 
 Включайте `debug on`, если `proxy dash` не обновляет сессию: обмен пишется в
 `~/.terminal-session-proxy-manager-debug.log`.
+

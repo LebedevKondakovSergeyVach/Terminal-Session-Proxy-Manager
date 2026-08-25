@@ -8,6 +8,9 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 
 ### Added
+- **Docs**: Beautiful Starlight components (Steps, FileTree, CardGrid) across documentation pages for better readability and structure.
+- **Docs**: Styled custom colored alert Asides (Note, Tip, Caution) for documentation callouts.
+- **Docs**: Styled Tab components mimicking macOS segmented controls for installation instructions.
 - **CLI**: The interactive profile switcher (`proxy switch`) now shows the `[ON]` / `[OFF]` state and clears the selection menu on success.
 - **CLI**: The `ping` command output highlights HTTP 2XX responses in green and others in yellow for easier reading.
 - **Config**: Added OpenAI and Anthropic to the default `ping_targets`.

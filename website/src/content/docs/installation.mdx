@@ -1,6 +1,10 @@
+---
+title: '📦 Installation (macOS & Linux)'
+description: 'Installing on macOS and Linux via Homebrew, Cargo or a prebuilt binary.'
+---
+
 import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
 
-# 📦 Installation (macOS & Linux)
 
 <Tabs>
 <TabItem label="Homebrew">
@@ -94,7 +98,7 @@ which terminal-session-proxy-manager
 ## 🐚 Shell integration (required)
 
 <Aside type="caution">
-However you installed it, add the init script to your shell configuration so `proxy on` can change your environment. See [Shell Integration](SHELL_INTEGRATION.md).
+However you installed it, add the init script to your shell configuration so `proxy on` can change your environment. See [Shell Integration](/Terminal-Session-Proxy-Manager/shell-integration/).
 </Aside>
 
 **Zsh** (`~/.zshrc`):
@@ -110,7 +114,7 @@ eval "$(terminal-session-proxy-manager init bash)"
 ```
 
 Restart your terminal or run `source ~/.zshrc` to apply. Details and the full
-list of functions are in [SHELL_INTEGRATION.md](SHELL_INTEGRATION.md).
+list of functions are in [SHELL_INTEGRATION.md](/Terminal-Session-Proxy-Manager/shell-integration/).
 
 ---
 
@@ -148,3 +152,4 @@ rm -rf ~/Library/Application\ Support/terminal-session-proxy-manager
 # Linux
 rm -rf ~/.config/terminal-session-proxy-manager
 ```
+

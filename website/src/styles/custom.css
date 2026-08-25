@@ -417,3 +417,197 @@ header.header > .header {
 	border-start-end-radius: 0;
 	border-top-right-radius: 0;
 }
+
+/* --- STYLISH TABS --- */
+starlight-tabs {
+	display: block;
+	margin-top: 1.5rem;
+}
+
+starlight-tabs .tablist-wrapper {
+	padding: 0.25rem;
+	background: var(--sl-color-bg-nav);
+	border-radius: 0.75rem;
+	margin-bottom: 1.25rem;
+	border: 1px solid var(--sl-color-hairline);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+	overflow: hidden;
+}
+
+starlight-tabs ul[role="tablist"] {
+	display: flex;
+	gap: 0.25rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	overflow-x: auto;
+	border-bottom: none !important;
+}
+
+starlight-tabs ul[role="tablist"] li {
+    display: flex;
+    flex: 1 1 auto;
+}
+
+starlight-tabs a[role="tab"] {
+	display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+	padding: 0.5rem 1.25rem;
+	font-weight: 600;
+	font-size: 0.95rem;
+	color: var(--sl-color-text-dimmed);
+	text-decoration: none;
+	border-radius: 0.5rem;
+	border: none !important;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	position: relative;
+	white-space: nowrap;
+    background: transparent;
+}
+
+starlight-tabs a[role="tab"]:hover {
+	color: var(--sl-color-text);
+	background: var(--sl-color-bg-inline-code);
+}
+
+starlight-tabs a[role="tab"][aria-selected="true"] {
+	color: var(--sl-color-text-invert) !important;
+	background: var(--sl-color-text-accent) !important;
+	box-shadow: 0 4px 10px rgba(230, 110, 26, 0.35);
+}
+
+/* Add a subtle underline animation effect for unselected tabs on hover */
+starlight-tabs a[role="tab"]::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%) scaleX(0);
+    width: 40%;
+    height: 2px;
+    background: var(--sl-color-text-accent);
+    border-radius: 2px;
+    transition: transform 0.3s ease;
+}
+
+starlight-tabs a[role="tab"]:not([aria-selected="true"]):hover::after {
+    transform: translateX(-50%) scaleX(1);
+}
+
+starlight-tabs a[role="tab"][aria-selected="true"]::after {
+    display: none;
+}
+
+/* Tab Panel Fade Animation */
+starlight-tabs [role="tabpanel"] {
+	animation: tabFadeIn 0.35s ease-out forwards;
+    display: none;
+}
+
+starlight-tabs [role="tabpanel"]:not([hidden]) {
+    display: block;
+}
+
+@keyframes tabFadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(6px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* --- ENHANCED ASIDES (WARNINGS & NOTES) --- */
+.sl-markdown-content .starlight-aside {
+	border-radius: 0.75rem;
+	border: 1px solid var(--sl-color-hairline-shade);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+	margin-top: 1.5rem;
+	margin-bottom: 1.5rem;
+	position: relative;
+	overflow: hidden;
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sl-markdown-content .starlight-aside:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+
+
+.sl-markdown-content .starlight-aside__title {
+	font-weight: 700;
+	letter-spacing: 0.5px;
+	text-transform: uppercase;
+	font-size: 0.85rem;
+	margin-bottom: 0.5rem;
+}
+
+/* Force MD3 Asides to use explicit vibrant colors instead of generic surface tones */
+.sl-markdown-content .starlight-aside--note {
+	border-left: 4px solid #3b82f6 !important; /* Blue */
+	background-color: rgba(59, 130, 246, 0.05) !important;
+}
+.sl-markdown-content .starlight-aside--note .starlight-aside__title {
+	color: #3b82f6 !important;
+}
+.sl-markdown-content .starlight-aside--note .starlight-aside__title svg {
+	color: #3b82f6 !important;
+}
+
+.sl-markdown-content .starlight-aside--tip {
+	border-left: 4px solid #10b981 !important; /* Green */
+	background-color: rgba(16, 185, 129, 0.05) !important;
+}
+.sl-markdown-content .starlight-aside--tip .starlight-aside__title {
+	color: #10b981 !important;
+}
+.sl-markdown-content .starlight-aside--tip .starlight-aside__title svg {
+	color: #10b981 !important;
+}
+
+.sl-markdown-content .starlight-aside--caution,
+.sl-markdown-content .starlight-aside--warning {
+	border-left: 4px solid #eab308 !important; /* Yellow */
+	background-color: rgba(234, 179, 8, 0.05) !important;
+}
+.sl-markdown-content .starlight-aside--caution .starlight-aside__title,
+.sl-markdown-content .starlight-aside--warning .starlight-aside__title {
+	color: #ca8a04 !important; /* Slightly darker yellow for text readability */
+}
+.sl-markdown-content .starlight-aside--caution .starlight-aside__title svg,
+.sl-markdown-content .starlight-aside--warning .starlight-aside__title svg {
+	color: #eab308 !important;
+}
+
+.sl-markdown-content .starlight-aside--danger {
+	border-left: 4px solid #ef4444 !important; /* Red */
+	background-color: rgba(239, 68, 68, 0.05) !important;
+}
+.sl-markdown-content .starlight-aside--danger .starlight-aside__title {
+	color: #ef4444 !important;
+}
+.sl-markdown-content .starlight-aside--danger .starlight-aside__title svg {
+	color: #ef4444 !important;
+}
+
+/* Ensure dark mode has correct contrast */
+html[data-theme='dark'] .sl-markdown-content .starlight-aside--note { background-color: rgba(59, 130, 246, 0.1) !important; }
+html[data-theme='dark'] .sl-markdown-content .starlight-aside--note .starlight-aside__title { color: #60a5fa !important; }
+
+html[data-theme='dark'] .sl-markdown-content .starlight-aside--tip { background-color: rgba(16, 185, 129, 0.1) !important; }
+html[data-theme='dark'] .sl-markdown-content .starlight-aside--tip .starlight-aside__title { color: #34d399 !important; }
+
+html[data-theme='dark'] .sl-markdown-content .starlight-aside--caution,
+html[data-theme='dark'] .sl-markdown-content .starlight-aside--warning { background-color: rgba(234, 179, 8, 0.1) !important; }
+html[data-theme='dark'] .sl-markdown-content .starlight-aside--caution .starlight-aside__title,
+html[data-theme='dark'] .sl-markdown-content .starlight-aside--warning .starlight-aside__title { color: #facc15 !important; }
+
+html[data-theme='dark'] .sl-markdown-content .starlight-aside--danger { background-color: rgba(239, 68, 68, 0.1) !important; }
+html[data-theme='dark'] .sl-markdown-content .starlight-aside--danger .starlight-aside__title { color: #f87171 !important; }
+

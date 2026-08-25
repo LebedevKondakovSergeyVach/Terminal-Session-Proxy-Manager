@@ -1,10 +1,14 @@
+---
+title: '📖 Command Reference'
+description: 'Every subcommand, its flags and its exit codes.'
+---
+
 import { Card, CardGrid, Aside } from '@astrojs/starlight/components';
 
-# 📖 Command Reference
 
 Commands that change your current shell (`on`, `off`, `use`, `switch`, `best`)
 must go through the `proxy` shell function installed by
-[shell integration](SHELL_INTEGRATION.md). Everything else works with the full
+[shell integration](/Terminal-Session-Proxy-Manager/shell-integration/). Everything else works with the full
 binary name as well.
 
 <CardGrid stagger>
@@ -236,3 +240,4 @@ includes completions, so you only need one of the two.
 
 Turn `debug on` when `proxy dash` fails to update your shell; it logs the
 hand-off to `~/.terminal-session-proxy-manager-debug.log`.
+

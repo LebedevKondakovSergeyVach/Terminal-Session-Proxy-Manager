@@ -1,6 +1,10 @@
+---
+title: '📦 Установка (macOS и Linux)'
+description: 'Установка на macOS и Linux через Homebrew, Cargo или готовый бинарник.'
+---
+
 import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
 
-# 📦 Установка (macOS и Linux)
 
 <Tabs>
 <TabItem label="Homebrew">
@@ -95,7 +99,7 @@ which terminal-session-proxy-manager
 ## 🐚 Интеграция с shell (обязательно)
 
 <Aside type="caution">
-Независимо от способа установки, вам необходимо прописать скрипт инициализации в конфигурацию вашей оболочки, чтобы команда `proxy on` могла изменять переменные окружения. См. [Интеграция с оболочкой](SHELL_INTEGRATION.ru.md).
+Независимо от способа установки, вам необходимо прописать скрипт инициализации в конфигурацию вашей оболочки, чтобы команда `proxy on` могла изменять переменные окружения. См. [Интеграция с оболочкой](/Terminal-Session-Proxy-Manager/ru/shell-integration/).
 </Aside>
 
 **Zsh** (`~/.zshrc`):
@@ -112,7 +116,7 @@ eval "$(terminal-session-proxy-manager init bash)"
 
 Перезапустите терминал или выполните `source ~/.zshrc` для применения изменений.
 Подробности и полный список команд см. в
-[SHELL_INTEGRATION.ru.md](SHELL_INTEGRATION.ru.md).
+[SHELL_INTEGRATION.ru.md](/Terminal-Session-Proxy-Manager/ru/shell-integration/).
 
 ---
 
@@ -151,3 +155,4 @@ rm -rf ~/Library/Application\ Support/terminal-session-proxy-manager
 # Linux
 rm -rf ~/.config/terminal-session-proxy-manager
 ```
+

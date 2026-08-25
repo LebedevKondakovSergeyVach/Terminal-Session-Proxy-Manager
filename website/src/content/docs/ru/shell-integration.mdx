@@ -1,6 +1,10 @@
+---
+title: '🐚 Интеграция с оболочкой (Shell)'
+description: 'Подключение shell-функции в zsh и bash для смены окружения сессии.'
+---
+
 import { Steps, Badge, Aside } from '@astrojs/starlight/components';
 
-# 🐚 Интеграция с оболочкой (Shell)
 
 Процесс не может изменить окружение оболочки (shell), которая его запустила.
 Shell-функция `proxy` устраняет это ограничение: она вызывает бинарник, а затем
@@ -30,8 +34,8 @@ Shell-функция `proxy` устраняет это ограничение: �
 > Совместимо с instant prompt в Powerlevel10k — при запуске ничего не печатается.
 
 Если вы не хотите выполнять команду при старте оболочки, скопируйте
-[`shell/terminal-session-proxy-manager.zsh`](../shell/terminal-session-proxy-manager.zsh)
-или [`.bash`](../shell/terminal-session-proxy-manager.bash) и подключите через
+[`shell/terminal-session-proxy-manager.zsh`](https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/blob/main/shell/terminal-session-proxy-manager.zsh)
+или [`.bash`](https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/blob/main/shell/terminal-session-proxy-manager.bash) и подключите через
 `source`. Эти файлы сгенерированы из `init`, но форма с `eval` не устаревает
 никогда.
 
@@ -144,8 +148,9 @@ proxy debug off
 
 **`terminal-session-proxy-manager binary not found in PATH`** — функция
 установлена, но бинарник недоступен в `PATH`. См.
-[INSTALLATION.ru.md](INSTALLATION.ru.md).
+[INSTALLATION.ru.md](/Terminal-Session-Proxy-Manager/ru/installation/).
 
 **`proxy on` отрабатывает, но инструменты игнорируют прокси** — проверьте через
 `proxy diagnose`, который печатает переменные, реально установленные в сессии.
 Учтите, что уже открытые оболочки эти переменные не наследуют.
+

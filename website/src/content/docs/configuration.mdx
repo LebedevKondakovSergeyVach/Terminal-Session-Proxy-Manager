@@ -1,6 +1,10 @@
+---
+title: '⚙️ Configuration'
+description: 'Profiles, settings and the precedence rules for config file resolution.'
+---
+
 import { Steps } from '@astrojs/starlight/components';
 
-# ⚙️ Configuration
 
 Two JSON files. `proxy config path` and `proxy settings path` print exactly
 which ones are in use.
@@ -103,7 +107,7 @@ Edit it with `proxy settings set --config-path ~/proxies.json` or `proxy lang en
 ```
 
 A complete, current example ships as
-[`configs/config.default.json`](../configs/config.default.json).
+[`configs/config.default.json`](https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/blob/main/configs/config.default.json).
 
 ### Fields
 
@@ -137,3 +141,4 @@ end up in a proxy URL and in shell statements.
 
 > **Note for users upgrading from 2.1.x:** the unused top-level `enabled` field
 > was removed. Existing files keep working; the field is simply ignored.
+

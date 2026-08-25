@@ -1,6 +1,10 @@
+---
+title: '🐚 Shell Integration'
+description: 'Wiring the shell function into zsh and bash so the session environment changes.'
+---
+
 import { Steps, Badge, Aside } from '@astrojs/starlight/components';
 
-# 🐚 Shell Integration
 
 A process cannot change the environment of the shell that started it. The
 `proxy` shell function bridges that gap: it calls the binary, then evaluates
@@ -28,8 +32,8 @@ what the binary printed. Without it, `proxy on` cannot affect your session.
 > Compatible with Powerlevel10k instant prompt — nothing is printed at startup.
 
 If you would rather not run a command at shell startup, copy
-[`shell/terminal-session-proxy-manager.zsh`](../shell/terminal-session-proxy-manager.zsh)
-or [`.bash`](../shell/terminal-session-proxy-manager.bash) and source it. Those
+[`shell/terminal-session-proxy-manager.zsh`](https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/blob/main/shell/terminal-session-proxy-manager.zsh)
+or [`.bash`](https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/blob/main/shell/terminal-session-proxy-manager.bash) and source it. Those
 files are generated from `init`, but the `eval` form can never go stale.
 
 ---
@@ -141,8 +145,9 @@ you have not reloaded it. Check with `type proxy`.
 
 **`terminal-session-proxy-manager binary not found in PATH`** — the function is
 installed but the binary is not on `PATH`. See
-[INSTALLATION.md](INSTALLATION.md).
+[INSTALLATION.md](/Terminal-Session-Proxy-Manager/installation/).
 
 **`proxy on` runs but tools ignore the proxy** — confirm with
 `proxy diagnose`, which prints the variables actually set in your session. Note
 that variables are not inherited by shells that were already open.
+
