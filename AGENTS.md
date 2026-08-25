@@ -132,6 +132,15 @@ removed, a panic inside the draw loop leaves the user on the alternate screen in
 raw mode with no visible error. Any new early return from the dashboard must go
 through the guard.
 
+### 8. Gemini (Antigravity) Specific Rules
+
+The following directives apply specifically to Gemini agents operating in this workspace via Antigravity CLI:
+
+- **Follow all `.md` rules**: You must continuously follow all instructions in this `AGENTS.md` file and any `.agents/rules/*.md` files. They represent the ultimate source of truth for your behavior.
+- **Proactively use Workspace Customizations**: You are equipped with project-specific skills (in `.agents/skills/`), plugins, and MCP servers. Automatically invoke and utilize these skills when a task matches their description.
+- **Use Native Tools over Shell Commands**: Never use shell commands like `cat`, `grep`, `ls`, or `sed` to read or explore the codebase. Always use your native tool integrations (e.g., `view_file`, `grep_search`, `list_dir`, `find_by_name`).
+- **Prevent Hallucinations by Verifying Facts**: Do not assume the existence of files, APIs, variables, or functions. Before proposing code changes or answering architectural questions, you MUST verify their existence and implementation using `grep_search` and `find_by_name`.
+
 ## Testing expectations
 
 Tests are behavioural and named as sentences describing the guarantee
