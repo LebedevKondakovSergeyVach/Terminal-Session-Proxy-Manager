@@ -1,6 +1,6 @@
 use crate::cli::EnvMode;
 use crate::config::{AppConfig, I18n};
-use crate::proxy_env::{export_statements, shell_quote, unset_statement};
+use crate::proxy_env::{export_statements, unset_statement};
 use anyhow::{Result, anyhow};
 
 /// Prints the shell statements the caller's shell will evaluate.
@@ -25,17 +25,13 @@ pub fn print_env_commands(mode: &EnvMode, config: &AppConfig, i18n: &I18n) -> Re
                 println!("{statement}");
             }
 
-            if let Some(profile) = config.active_profile() {
-                let message = i18n.format(
-                    "env_on_msg",
-                    &[&profile.name, &profile.host, &profile.port.to_string()],
-                );
-                println!("echo {};", shell_quote(&message));
+            if let Some(_profile) = config.active_profile() {
+                // Previously this printed an echo confirmation. Suppressed by user request.
             }
         }
         EnvMode::Off => {
             println!("{}", unset_statement());
-            println!("echo {};", shell_quote(i18n.t("env_off_msg")));
+            // Previously this printed an echo confirmation. Suppressed by user request.
         }
     }
     Ok(())
