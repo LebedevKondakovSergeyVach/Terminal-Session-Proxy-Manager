@@ -15,12 +15,11 @@ import Default from '@astrojs/starlight/components/Search.astro';
 		// Listen for the dialog to open and internal changes
 		const observer = new MutationObserver((mutations) => {
 			mutations.forEach((mutation) => {
-				if (mutation.attributeName === 'open' && dialog.hasAttribute('open')) {
-					injectSuggestions(isRu, dialog);
-				}
-				
 				// Translate Pagefind messages dynamically when they are added/changed
 				if (mutation.type === 'childList' || mutation.type === 'characterData') {
+					if (!document.querySelector('.search-suggestions') && document.querySelector('.pagefind-ui__drawer')) {
+						injectSuggestions(isRu, dialog);
+					}
 					translatePagefindMessage(isRu);
 				}
 			});
@@ -204,13 +203,12 @@ import Default from '@astrojs/starlight/components/Search.astro';
 
 	/* Fix Clear Button Vertical Alignment */
 	#starlight__search .pagefind-ui__search-clear {
-		display: flex !important;
-		align-items: center !important;
-		justify-content: center !important;
-		top: 50% !important;
-		transform: translateY(-50%) !important;
+		position: absolute !important;
+		top: 0 !important;
+		bottom: 0 !important;
 		height: 24px !important;
 		margin: auto 0 !important;
+		padding: 0 !important;
 	}
 	
 	#starlight__search .pagefind-ui__search-clear::before {
