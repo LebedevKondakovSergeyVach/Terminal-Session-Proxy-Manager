@@ -27,6 +27,7 @@ jobs:
         with:
           path: ./website
           package-manager: npm
+          node-version: 22
 
   deploy:
     needs: build
