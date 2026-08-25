@@ -410,6 +410,28 @@ header.header > .header {
 	}
 }
 
+/*
+ * Increase rounding on search results to match the parent dialog.
+ *
+ * The dialog uses `--md3-comp-dialog-shape` (1.75rem). The theme paints result
+ * containers at `--md-sys-shape-corner-large` (1rem) via `:where()` selectors,
+ * which have zero specificity — a plain selector here wins without
+ * `!important`. Bumping them to `extra-large` (1.5rem) and keeping nested
+ * results at `large` (1rem) creates a visual hierarchy that sits inside the
+ * dialog's own curvature.
+ */
+#starlight__search .pagefind-ui__result-inner {
+	border-radius: var(--md-sys-shape-corner-extra-large);
+}
+
+#starlight__search .pagefind-ui__result-link {
+	border-radius: var(--md-sys-shape-corner-extra-large);
+}
+
+#starlight__search .pagefind-ui__result-nested {
+	border-radius: var(--md-sys-shape-corner-large);
+}
+
 /* 
  * Remove the top-right rounding on the sidebar container (Material style override)
  */

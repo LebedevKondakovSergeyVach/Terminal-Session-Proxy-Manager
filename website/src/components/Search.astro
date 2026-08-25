@@ -28,15 +28,7 @@ import Default from '@astrojs/starlight/components/Search.astro';
 		observer.observe(dialog, { attributes: true, childList: true, subtree: true, characterData: true });
 	};
 
-	// Event delegation for search input since it might be added dynamically
-	document.addEventListener('input', (e) => {
-		if (e.target && e.target.classList.contains('pagefind-ui__search-input')) {
-			const suggs = document.querySelector('.search-suggestions');
-			if (suggs) {
-				suggs.style.display = e.target.value.trim().length > 0 ? 'none' : 'block';
-			}
-		}
-	});
+	/* JS event listeners for suggestions removed in favor of pure CSS state management based on Pagefind's classes */
 
 	const injectSuggestions = (isRu, dialog) => {
 		const drawer = document.querySelector('.pagefind-ui__drawer');
@@ -83,6 +75,35 @@ import Default from '@astrojs/starlight/components/Search.astro';
 				}
 			});
 		});
+
+		// Use a MutationObserver to react to Svelte changing the drawer's classes,
+		// and use inline styles with !important to guarantee we beat Pagefind's CSS.
+		// We only need to force the drawer open; suggestions visibility is handled via CSS.
+		const drawerObserver = new MutationObserver((mutations) => {
+			for (const m of mutations) {
+				if (m.attributeName === 'class') {
+					const isHidden = drawer.classList.contains('pagefind-ui__hidden');
+					
+					if (isHidden) {
+						// Search is empty (Svelte hid the drawer). Force it open.
+						drawer.style.setProperty('display', 'flex', 'important');
+						drawer.style.setProperty('opacity', '1', 'important');
+						drawer.style.setProperty('visibility', 'visible', 'important');
+					} else {
+						// Search is active. Let Pagefind handle the drawer.
+						drawer.style.removeProperty('display');
+						drawer.style.removeProperty('opacity');
+						drawer.style.removeProperty('visibility');
+					}
+				}
+			}
+		});
+		drawerObserver.observe(drawer, { attributes: true, attributeFilter: ['class'] });
+		
+		// Trigger the initial state check
+		const currentIsHidden = drawer.classList.contains('pagefind-ui__hidden');
+		drawer.classList.toggle('pagefind-ui__hidden', !currentIsHidden);
+		drawer.classList.toggle('pagefind-ui__hidden', currentIsHidden);
 	};
 
 	const translatePagefindMessage = (isRu) => {
@@ -113,7 +134,11 @@ import Default from '@astrojs/starlight/components/Search.astro';
 		messageEl.dataset.original = newText;
 	};
 
-	document.addEventListener('DOMContentLoaded', setupSearchEnhancements);
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', setupSearchEnhancements);
+	} else {
+		setupSearchEnhancements();
+	}
 </script>
 
 <style is:global>
@@ -138,98 +163,128 @@ import Default from '@astrojs/starlight/components/Search.astro';
 
 	/* --- Enhanced Quick Links (Cards) --- */
 	.search-suggestions {
-		padding: 1.5rem 1rem 1rem 1rem;
-		border-bottom: 1px solid var(--sl-color-hairline);
-		margin-bottom: 1rem;
+		padding: 1rem 0;
+		width: 100%;
 	}
-	
+
 	.suggestions-header {
-		font-size: 0.8rem;
 		color: var(--sl-color-text-accent);
-		margin-bottom: 1rem;
-		font-weight: 700;
 		text-transform: uppercase;
 		letter-spacing: 1px;
+		margin-bottom: 1rem;
+		font-size: 0.8rem;
+		font-weight: 700;
 	}
-	
+
 	.suggestions-list {
 		display: flex;
 		flex-direction: column;
 		gap: 0.75rem;
+		width: 100%;
 	}
-	
+
 	.suggestion-card {
 		display: flex;
 		flex-direction: column;
+		width: 100%;
+		padding: 1rem;
+		text-decoration: none;
 		background: var(--md-sys-color-surface-container, var(--sl-color-bg-nav));
 		border: 1px solid var(--sl-color-hairline-shade);
-		padding: 1rem;
-		border-radius: 0.75rem;
-		text-decoration: none;
-		transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
-		width: 100%;
+		border-radius: 1rem;
+		transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.2s, background 0.2s, border-color 0.2s;
 	}
-	
+
 	.suggestion-title {
-		font-size: 0.95rem;
 		font-weight: 600;
+		font-size: 0.95rem;
 		color: var(--sl-color-text);
 		margin-bottom: 0.25rem;
-		transition: color 0.2s ease;
+		transition: color 0.2s;
 	}
-	
+
 	.suggestion-desc {
 		font-size: 0.8rem;
 		color: var(--sl-color-gray-3);
 		line-height: 1.4;
-		transition: color 0.2s ease;
+		transition: color 0.2s;
 	}
-	
-	.suggestion-card:hover {
+
+	.suggestion-card:hover,
+	.suggestion-card:focus-visible {
 		transform: translateY(-2px);
 		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 		background: var(--md-sys-color-surface-container-high, var(--sl-color-gray-6));
 		border-color: var(--sl-color-text-accent);
+		outline: none;
 	}
-	
-	.suggestion-card:hover .suggestion-title {
+	.suggestion-card:hover .suggestion-title,
+	.suggestion-card:focus-visible .suggestion-title {
 		color: var(--sl-color-text-accent);
 	}
-	
+
 	.suggestion-card:active {
 		transform: translateY(0) scale(0.98);
 		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 	}
 
-	/* Fix Clear Button Vertical Alignment */
 	#starlight__search .pagefind-ui__search-clear {
-		position: absolute !important;
-		top: 0 !important;
-		bottom: 0 !important;
-		height: 24px !important;
-		margin: auto 0 !important;
-		padding: 0 !important;
-	}
-	
-	#starlight__search .pagefind-ui__search-clear::before {
-		transform: translateY(1px); /* micro-adjustment if still needed */
+		display: flex !important;
+		align-items: center !important;
+		justify-content: center !important;
 	}
 
-	/* Hide suggestions when searching */
-	.pagefind-ui--searching .search-suggestions {
-		display: none;
+	/* --- Unified Interactive Behaviors for Search Results --- */
+	#starlight__search .pagefind-ui__result-title:not(:where(.pagefind-ui__result-nested *)),
+	#starlight__search .pagefind-ui__result-nested {
+		transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.2s, background-color 0.2s, border-color 0.2s;
+		border: 1px solid transparent !important;
 	}
 
-	/* --- Fix Search Results Outline --- */
+	#starlight__search .pagefind-ui__result-title:not(:where(.pagefind-ui__result-nested *)) {
+		border-radius: var(--md-sys-shape-corner-extra-large, 1.5rem) !important;
+	}
+
+	#starlight__search .pagefind-ui__result-nested {
+		border-radius: var(--md-sys-shape-corner-large, 1rem) !important;
+	}
+
 	#starlight__search .pagefind-ui__result-title:not(:where(.pagefind-ui__result-nested *)):hover,
 	#starlight__search .pagefind-ui__result-title:not(:where(.pagefind-ui__result-nested *)):focus-within,
 	#starlight__search .pagefind-ui__result-nested:hover,
 	#starlight__search .pagefind-ui__result-nested:focus-within {
-		outline: none !important;
 		background-color: var(--sl-color-gray-6) !important;
-		border-radius: var(--sl-search-corners) !important;
+		border-color: var(--sl-color-text-accent) !important;
+		outline: none !important;
+		transform: translateY(-2px);
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+	}
+
+	#starlight__search .pagefind-ui__result-title:not(:where(.pagefind-ui__result-nested *)):active,
+	#starlight__search .pagefind-ui__result-nested:active {
+		transform: translateY(0) scale(0.98);
+		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+	}
+
+	/* Text color change on hover/focus */
+	#starlight__search .pagefind-ui__result-title:not(:where(.pagefind-ui__result-nested *)) .pagefind-ui__result-link,
+	#starlight__search .pagefind-ui__result-nested .pagefind-ui__result-link {
+		transition: color 0.2s;
 	}
 	
+	/* Remove native square outline that clashes with the card border */
+	#starlight__search .pagefind-ui__result-title:not(:where(.pagefind-ui__result-nested *)) .pagefind-ui__result-link:focus-visible,
+	#starlight__search .pagefind-ui__result-nested .pagefind-ui__result-link:focus-visible {
+		outline: none !important;
+	}
+	
+	#starlight__search .pagefind-ui__result-title:not(:where(.pagefind-ui__result-nested *)):hover .pagefind-ui__result-link,
+	#starlight__search .pagefind-ui__result-title:not(:where(.pagefind-ui__result-nested *)):focus-within .pagefind-ui__result-link,
+	#starlight__search .pagefind-ui__result-nested:hover .pagefind-ui__result-link,
+	#starlight__search .pagefind-ui__result-nested:focus-within .pagefind-ui__result-link {
+		color: var(--sl-color-text-accent) !important;
+	}
+
 	#starlight__search .pagefind-ui__result {
 		padding: 0.5rem !important;
 		border-radius: calc(var(--sl-search-corners) + 0.25rem);
@@ -250,5 +305,25 @@ import Default from '@astrojs/starlight/components/Search.astro';
 		font-size: 1.05rem;
 		letter-spacing: 0.25px;
 		box-shadow: inset 0 2px 8px rgba(0,0,0,0.02);
+	}
+</style>
+
+<style is:global>
+	/* --- State Management for Quick Suggestions --- */
+	#starlight__search .pagefind-ui__drawer.pagefind-ui__hidden .search-suggestions {
+		display: block !important;
+	}
+	#starlight__search .pagefind-ui__drawer.pagefind-ui__hidden .pagefind-ui__results-area {
+		display: none !important;
+	}
+	#starlight__search .pagefind-ui__drawer:not(.pagefind-ui__hidden) .search-suggestions {
+		display: none !important;
+	}
+</style>
+
+<style is:global>
+	/* Prevent modal jittering when results are momentarily cleared during search */
+	#starlight__search .pagefind-ui__results-area {
+		min-height: 50vh;
 	}
 </style>
