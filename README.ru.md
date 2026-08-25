@@ -4,7 +4,7 @@
 
 # ⚡ Terminal Session Proxy Manager
 
-![Баннер проекта](assets/banner_new.jpg)
+![Баннер проекта](assets/banner.jpg)
 
 [![CI](https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/actions/workflows/ci.yml/badge.svg)](https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/actions/workflows/ci.yml)
 [![Rust](https://img.shields.io/badge/rust-1.88%2B-orange.svg)](https://www.rust-lang.org)
@@ -30,7 +30,7 @@
   JVM-сборок — с корректным экранированием для shell.
 - **Два языка.** Полностью русский и английский интерфейс.
 
-![Интерактивный дашборд](assets/proxy_dashboard_final.png)
+![Интерактивный дашборд](assets/proxy_dashboard.png)
 
 ---
 
@@ -40,19 +40,19 @@
 
 **Homebrew (macOS / Linux):**
 
-```bash
+```bash title="Terminal" frame="terminal"
 brew install LebedevKondakovSergeyVach/tap/terminal-session-proxy-manager
 ```
 
 **Cargo** (требуется Rust 1.88+):
 
-```bash
+```bash title="Terminal" frame="terminal"
 cargo install --git https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager.git
 ```
 
 **Из исходников:**
 
-```bash
+```bash title="Terminal" frame="terminal"
 git clone https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager.git
 cd Terminal-Session-Proxy-Manager
 cargo install --path .
@@ -66,13 +66,13 @@ cargo install --path .
 
 **Zsh** (`~/.zshrc`):
 
-```bash
+```bash title="Terminal" frame="terminal"
 eval "$(terminal-session-proxy-manager init zsh)"
 ```
 
 **Bash** (`~/.bashrc`):
 
-```bash
+```bash title="Terminal" frame="terminal"
 eval "$(terminal-session-proxy-manager init bash)"
 ```
 
@@ -81,7 +81,7 @@ eval "$(terminal-session-proxy-manager init bash)"
 
 ### Первый запуск
 
-```bash
+```bash title="Terminal" frame="terminal"
 proxy profile set home --name "Домашний" --host 127.0.0.1 --port 1080
 proxy on
 proxy status
@@ -162,7 +162,7 @@ proxy status
 Переменная `NO_COLOR` учитывается. Удобно для разделения нескольких наборов
 настроек:
 
-```bash
+```bash title="Terminal" frame="terminal"
 TSPM_CONFIG=~/work-proxies.json proxy best
 ```
 

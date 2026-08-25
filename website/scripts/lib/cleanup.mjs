@@ -35,7 +35,7 @@ function isBadgeLine(line) {
 }
 
 function isHeroImageLine(line) {
-	return /^!\[[^\]]*\]\(assets\/banner_new\.jpg\)\s*$/.test(line.trim());
+	return /^!\[[^\]]*\]\(assets\/banner\.jpg\)\s*$/.test(line.trim());
 }
 
 /**

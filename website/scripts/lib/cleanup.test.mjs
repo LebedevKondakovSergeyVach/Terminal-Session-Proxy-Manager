@@ -10,7 +10,7 @@ const README = [
 	'',
 	'# ⚡ Terminal Session Proxy Manager',
 	'',
-	'![Project Banner](assets/banner_new.jpg)',
+	'![Project Banner](assets/banner.jpg)',
 	'',
 	'[![CI](https://github.com/o/r/actions/workflows/ci.yml/badge.svg)](https://github.com/o/r/actions)',
 	'[![Rust](https://img.shields.io/badge/rust-1.88%2B-orange.svg)](https://www.rust-lang.org)',
@@ -45,7 +45,7 @@ test('the HTML preamble above the H1 is removed', () => {
 
 test('the banner image is removed', () => {
 	const out = applyCleanup(README, entry);
-	assert.equal(out.includes('banner_new.jpg'), false);
+	assert.equal(out.includes('banner.jpg'), false);
 });
 
 test('badge lines are removed but prose survives', () => {
@@ -62,7 +62,7 @@ test('a content image survives while a badge on the same document is removed', (
 		'',
 		'[![Rust](https://img.shields.io/badge/rust-1.88-orange.svg)](https://www.rust-lang.org)',
 		'',
-		'![Dashboard](assets/proxy_dashboard_final.png)',
+		'![Dashboard](assets/proxy_dashboard.png)',
 		'',
 		'Prose.',
 	].join('\n');
@@ -73,7 +73,7 @@ test('a content image survives while a badge on the same document is removed', (
 		stripHeroImage: false,
 	});
 	assert.equal(out.includes('img.shields.io'), false);
-	assert.equal(out.includes('proxy_dashboard_final.png'), true);
+	assert.equal(out.includes('proxy_dashboard.png'), true);
 });
 
 test('stripBadges throws when the flag is set but the document has no badges', () => {

@@ -66,18 +66,18 @@ test('an unknown internal target throws rather than producing a dead link', () =
 
 test('an image path is rewritten to the website asset directory, depth-aware', () => {
 	const en = rewriteLinks(
-		'![B](assets/proxy_dashboard_final.png)',
+		'![B](assets/proxy_dashboard.png)',
 		{ source: 'README.md', dest: 'overview.md' },
 		pageMap
 	);
-	assert.equal(en, '![B](../../assets/proxy_dashboard_final.png)');
+	assert.equal(en, '![B](../../assets/proxy_dashboard.png)');
 
 	const ru = rewriteLinks(
-		'![B](assets/proxy_dashboard_final.png)',
+		'![B](assets/proxy_dashboard.png)',
 		{ source: 'README.ru.md', dest: 'ru/overview.md' },
 		pageMap
 	);
-	assert.equal(ru, '![B](../../../assets/proxy_dashboard_final.png)');
+	assert.equal(ru, '![B](../../../assets/proxy_dashboard.png)');
 });
 
 test('rewriteLinks leaves link text untouched', () => {
@@ -117,13 +117,13 @@ test('a link whose display text is itself backtick-wrapped still has its href re
 
 test('a link wrapping an image rewrites both the image path and the outer href', () => {
 	const out = rewriteLinks(
-		'[![alt](assets/proxy_dashboard_final.png)](docs/USAGE.md)',
+		'[![alt](assets/proxy_dashboard.png)](docs/USAGE.md)',
 		{ source: 'README.md', dest: 'overview.md' },
 		pageMap
 	);
 	assert.equal(
 		out,
-		'[![alt](../../assets/proxy_dashboard_final.png)](/Terminal-Session-Proxy-Manager/usage/)'
+		'[![alt](../../assets/proxy_dashboard.png)](/Terminal-Session-Proxy-Manager/usage/)'
 	);
 });
 

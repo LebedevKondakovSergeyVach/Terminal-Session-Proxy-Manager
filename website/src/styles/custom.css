@@ -59,6 +59,15 @@ header.header {
 	border-radius: 0.5rem;
 }
 
+/* Make inline code scale correctly with its surrounding text.
+   Starlight defaults inline code to a fixed smaller size (rem-based) in paragraphs,
+   making it look too small, and `inherit` in headings, where the monospace font's
+   larger x-height makes it look too big next to the sans-serif text.
+   0.9em balances JetBrains Mono perfectly against Inter at any size. */
+.sl-markdown-content :not(pre) > code {
+	font-size: 0.9em;
+}
+
 /* Screenshots of the TUI need an edge too; the terminal's own background is
    dark and otherwise bleeds into a dark page. */
 .sl-markdown-content img[src*='proxy_dashboard'] {
@@ -138,4 +147,273 @@ header.header {
 	to {
 		opacity: 0;
 	}
+}
+
+
+
+/* Center Hero Section */
+.hero {
+	grid-template-columns: 1fr;
+	text-align: center;
+}
+.hero .stack {
+	text-align: center;
+	align-items: center;
+}
+.hero .copy {
+	align-items: center;
+}
+
+/* Tile Buttons for Hero Actions */
+.hero .actions {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 1.5rem;
+	justify-content: center;
+	width: 100%;
+	max-width: 700px;
+	margin: 2.5rem auto 0;
+}
+
+@media (max-width: 50rem) {
+	.hero .actions {
+		grid-template-columns: 1fr;
+	}
+}
+
+.hero .actions .sl-link-button {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 1.5rem;
+	border-radius: 1rem;
+	background-color: var(--md-sys-color-surface-container-low, var(--sl-color-bg-nav));
+	border: 1px solid var(--sl-color-hairline);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+	transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.2s cubic-bezier(0.2, 0, 0, 1), background-color 0.2s ease;
+	text-decoration: none;
+	color: var(--sl-color-text-accent);
+	font-weight: 600;
+	gap: 0.5rem;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.hero .actions .sl-link-button:hover {
+	transform: translateY(-4px);
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+	background-color: var(--md-sys-color-surface-container, var(--sl-color-bg-nav));
+}
+
+.hero .actions .sl-link-button:active {
+	transform: translateY(2px) scale(0.98);
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.hero .actions .sl-link-button svg {
+	width: 28px;
+	height: 28px;
+	margin: 0;
+	margin-bottom: 0.25rem;
+	order: -1; /* Move icon above text */
+}
+
+.hero .actions .sl-link-button::after {
+	content: attr(data-desc);
+	display: block;
+	font-size: 0.85rem;
+	font-weight: 400;
+	color: var(--sl-color-gray-3);
+	margin-top: 0.5rem;
+	text-align: center;
+	line-height: 1.4;
+	order: 1; /* Ensure it stays below text */
+}
+
+/* Reduce bottom padding on splash pages using Starlight's official CSS variable */
+:root[data-has-sidebar="false"] {
+	--sl-main-pad: 0 0 1rem 0;
+}
+
+/* Home Footer */
+.home-footer {
+	margin-top: 5rem;
+	padding-top: 1rem;
+	border-top: 1px solid var(--sl-color-hairline);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 1rem;
+	padding-bottom: 0rem;
+}
+
+.footer-links {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1.5rem;
+	justify-content: center;
+}
+
+.footer-links a {
+	color: var(--sl-color-text-accent);
+	text-decoration: none;
+	font-size: 0.9rem;
+	transition: opacity 0.2s;
+}
+
+.footer-links a:hover {
+	opacity: 0.8;
+}
+
+.footer-version a {
+	display: inline-flex;
+	align-items: center;
+	padding: 0.25rem 0.75rem;
+	background-color: var(--sl-color-bg-nav);
+	border: 1px solid var(--sl-color-hairline);
+	border-radius: 1rem;
+	font-family: var(--sl-font-mono);
+	font-size: 0.8rem;
+	color: var(--sl-color-gray-2);
+	text-decoration: none;
+	transition: border-color 0.2s, color 0.2s;
+}
+
+.footer-version a:hover {
+	border-color: var(--sl-color-text-accent);
+	color: var(--sl-color-text-accent);
+}
+
+/* Hero Background and Tagline Adjustment */
+.hero {
+	position: relative;
+	/* Pull behind the navbar so it sticks to the top */
+	margin-top: calc(-1 * var(--sl-nav-height));
+	padding-top: calc(var(--sl-nav-height) + 2.5rem);
+	padding-bottom: 5rem;
+	/* Add rounding to the bottom of the block */
+	border-bottom-left-radius: 4rem;
+	border-bottom-right-radius: 4rem;
+	overflow: hidden;
+}
+
+.hero::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-position: center top;
+	background-size: cover;
+	background-repeat: no-repeat;
+	z-index: 0;
+	pointer-events: none;
+	/* Perfect CSS mask that guarantees 100% transparency at left, right, and bottom borders */
+	-webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 20%, black 10%, transparent 100%);
+	mask-image: radial-gradient(ellipse 50% 50% at 50% 20%, black 10%, transparent 100%);
+}
+
+html[data-theme='light'] .hero::before {
+	background-image: url('../assets/hero_bg_light.svg');
+}
+
+html[data-theme='dark'] .hero::before {
+	background-image: url('../assets/hero_bg_dark.svg');
+}
+
+/* Ensure content stays above the background */
+.hero .stack,
+.hero .actions,
+.hero .copy {
+	position: relative;
+	z-index: 1;
+}
+
+/* Adjust tagline font size to be a bit smaller and add margin */
+.hero .tagline {
+	font-size: clamp(1rem, calc(0.125rem + 1.5vw), 1.25rem);
+	margin-top: 2.5rem;
+}
+
+/* 
+ * 1. Center and enlarge search bar on Desktop
+ * 2. Adaptive toolbar: Hide site title on mobile to fit the toolbar
+ */
+header.header > .header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: nowrap;
+	width: 100%;
+}
+
+/* On Desktop */
+@media (min-width: 50rem) {
+	header.header > .header {
+		gap: 1rem;
+	}
+
+	header.header > .header > .title-wrapper {
+		flex: 1 1 0%;
+		min-width: 0;
+	}
+	
+	header.header > .header > .title-wrapper + .sl-flex {
+		flex: 1 1 0%;
+		max-width: 24rem;
+		justify-content: center;
+	}
+	
+	site-search {
+		width: 100%;
+	}
+	
+	site-search button[data-open-modal] {
+		width: 100%;
+		justify-content: space-between;
+	}
+	
+	header.header > .header > .right-group {
+		flex: 1 1 0%;
+		justify-content: flex-end;
+	}
+}
+
+/* On Mobile */
+@media (max-width: 50rem) {
+	header.header > .header {
+		gap: 0.5rem;
+	}
+	
+	/* Hide the site title to save space for the toolbar */
+	header.header > .header > .title-wrapper .site-title {
+		display: none;
+	}
+	
+	header.header > .header > .title-wrapper {
+		flex: 0 0 auto;
+	}
+	
+	header.header > .header > .title-wrapper + .sl-flex {
+		flex: 1 1 auto;
+		justify-content: flex-start;
+	}
+	
+	/* Override the sl-hidden utility class to always show the toolbar */
+	header.header > .header > .right-group.sl-hidden {
+		display: flex;
+		flex: 0 0 auto;
+		justify-content: flex-end;
+		gap: 0.5rem;
+	}
+}
+
+/* 
+ * Remove the top-right rounding on the sidebar container (Material style override)
+ */
+#starlight__sidebar.sidebar-pane {
+	border-start-end-radius: 0;
+	border-top-right-radius: 0;
 }

@@ -4,7 +4,7 @@
 
 # ⚡ Terminal Session Proxy Manager
 
-![Project Banner](assets/banner_new.jpg)
+![Project Banner](assets/banner.jpg)
 
 [![CI](https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/actions/workflows/ci.yml/badge.svg)](https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/actions/workflows/ci.yml)
 [![Rust](https://img.shields.io/badge/rust-1.88%2B-orange.svg)](https://www.rust-lang.org)
@@ -30,7 +30,7 @@ environment variables your tools actually read — on **macOS** and **Linux**
   build tooling — with correct shell quoting.
 - **Bilingual.** Full English and Russian interface.
 
-![Interactive Dashboard](assets/proxy_dashboard_final.png)
+![Interactive Dashboard](assets/proxy_dashboard.png)
 
 ---
 
@@ -40,19 +40,19 @@ environment variables your tools actually read — on **macOS** and **Linux**
 
 **Homebrew (macOS / Linux):**
 
-```bash
+```bash title="Terminal" frame="terminal"
 brew install LebedevKondakovSergeyVach/tap/terminal-session-proxy-manager
 ```
 
 **Cargo** (requires Rust 1.88+):
 
-```bash
+```bash title="Terminal" frame="terminal"
 cargo install --git https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager.git
 ```
 
 **From source:**
 
-```bash
+```bash title="Terminal" frame="terminal"
 git clone https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager.git
 cd Terminal-Session-Proxy-Manager
 cargo install --path .
@@ -66,13 +66,13 @@ to your shell configuration:
 
 **Zsh** (`~/.zshrc`):
 
-```bash
+```bash title="Terminal" frame="terminal"
 eval "$(terminal-session-proxy-manager init zsh)"
 ```
 
 **Bash** (`~/.bashrc`):
 
-```bash
+```bash title="Terminal" frame="terminal"
 eval "$(terminal-session-proxy-manager init bash)"
 ```
 
@@ -81,7 +81,7 @@ Restart your terminal or run `source ~/.zshrc`. You now have `proxy on`,
 
 ### First run
 
-```bash
+```bash title="Terminal" frame="terminal"
 proxy profile set home --name "Home" --host 127.0.0.1 --port 1080
 proxy on
 proxy status
@@ -161,7 +161,7 @@ Available on every subcommand.
 
 `NO_COLOR` is honoured. Useful for keeping several setups apart:
 
-```bash
+```bash title="Terminal" frame="terminal"
 TSPM_CONFIG=~/work-proxies.json proxy best
 ```
 
