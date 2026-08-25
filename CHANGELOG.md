@@ -7,6 +7,11 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added
+- **CLI**: The interactive profile switcher (`proxy switch`) now shows the `[ON]` / `[OFF]` state and clears the selection menu on success.
+- **CLI**: The `ping` command output highlights HTTP 2XX responses in green and others in yellow for easier reading.
+- **Config**: Added OpenAI and Anthropic to the default `ping_targets`.
+
 ## [2.2.2] — 2026-08-21
 
 ### Fixed
