@@ -2,8 +2,8 @@ name: Deploy Astro site to GitHub Pages
 
 on:
   push:
-    # TODO: Revert this to `[main]` once testing on the release branch is finished.
-    branches: ["release/2.3.0"]
+    # TODO: TEMPORARY - Revert this to `[main]` after testing! This should ONLY be run on the `main` branch.
+    branches: ["release/2.3.0", "docs/website-content"]
   workflow_dispatch:
 
 permissions:
