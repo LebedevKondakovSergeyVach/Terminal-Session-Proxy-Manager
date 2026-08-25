@@ -5,40 +5,62 @@ import Default from '@astrojs/starlight/components/Search.astro';
 <Default {...Astro.props} />
 
 <script>
-	// Run when the dialog opens
-	const setupSuggestions = () => {
+	const setupSearchEnhancements = () => {
 		const dialog = document.querySelector('site-search dialog');
 		if (!dialog) return;
+		
+		const lang = document.documentElement.lang || 'en';
+		const isRu = lang === 'ru';
 
-		// Listen for the dialog to open
+		// Listen for the dialog to open and internal changes
 		const observer = new MutationObserver((mutations) => {
 			mutations.forEach((mutation) => {
 				if (mutation.attributeName === 'open' && dialog.hasAttribute('open')) {
-					injectSuggestions();
+					injectSuggestions(isRu);
+				}
+				
+				// Translate Pagefind messages dynamically when they are added/changed
+				if (mutation.type === 'childList' || mutation.type === 'characterData') {
+					translatePagefindMessage(isRu);
 				}
 			});
 		});
 
-		observer.observe(dialog, { attributes: true });
+		observer.observe(dialog, { attributes: true, childList: true, subtree: true, characterData: true });
 	};
 
-	const injectSuggestions = () => {
-		// Starlight's pagefind drawer
+	const injectSuggestions = (isRu) => {
 		const drawer = document.querySelector('.pagefind-ui__drawer');
 		if (!drawer || document.querySelector('.search-suggestions')) return;
 
 		const suggestions = document.createElement('div');
 		suggestions.className = 'search-suggestions';
 		
-		suggestions.innerHTML = `
-			<p>Быстрые ссылки:</p>
-			<div class="suggestions-list">
-				<a href="/Terminal-Session-Proxy-Manager/installation/">Установка</a>
-				<a href="/Terminal-Session-Proxy-Manager/configuration/">Конфигурация</a>
-				<a href="/Terminal-Session-Proxy-Manager/usage/">Использование</a>
-				<a href="/Terminal-Session-Proxy-Manager/shell-integration/">Shell Интеграция</a>
-			</div>
-		`;
+		const links = isRu ? [
+			{ title: 'Установка', desc: 'Как установить и запустить', url: '/Terminal-Session-Proxy-Manager/ru/installation/' },
+			{ title: 'Конфигурация', desc: 'Настройка профилей', url: '/Terminal-Session-Proxy-Manager/ru/configuration/' },
+			{ title: 'Использование', desc: 'Команды и запуск', url: '/Terminal-Session-Proxy-Manager/ru/usage/' },
+			{ title: 'Shell Интеграция', desc: 'Настройка zsh и bash', url: '/Terminal-Session-Proxy-Manager/ru/shell-integration/' }
+		] : [
+			{ title: 'Installation', desc: 'How to install and run', url: '/Terminal-Session-Proxy-Manager/installation/' },
+			{ title: 'Configuration', desc: 'Profiles and settings setup', url: '/Terminal-Session-Proxy-Manager/configuration/' },
+			{ title: 'Usage', desc: 'Running proxy and commands', url: '/Terminal-Session-Proxy-Manager/usage/' },
+			{ title: 'Shell Integration', desc: 'Setup for zsh and bash', url: '/Terminal-Session-Proxy-Manager/shell-integration/' }
+		];
+
+		const headerText = isRu ? 'Быстрые ссылки' : 'Quick Links';
+
+		let html = `<p class="suggestions-header">${headerText}</p><div class="suggestions-list">`;
+		links.forEach(link => {
+			html += `
+				<a href="${link.url}" class="suggestion-card">
+					<span class="suggestion-title">${link.title}</span>
+					<span class="suggestion-desc">${link.desc}</span>
+				</a>
+			`;
+		});
+		html += `</div>`;
+		suggestions.innerHTML = html;
 		
 		drawer.prepend(suggestions);
 
@@ -46,15 +68,40 @@ import Default from '@astrojs/starlight/components/Search.astro';
 		suggestions.querySelectorAll('a').forEach(a => {
 			a.addEventListener('click', () => {
 				const dialog = document.querySelector('site-search dialog');
-				if (dialog && typeof dialog.close === 'function') {
-					dialog.close();
-				}
+				if (dialog && typeof dialog.close === 'function') dialog.close();
 			});
 		});
 	};
 
-	// Initialize on first load and view transitions
-	document.addEventListener('DOMContentLoaded', setupSuggestions);
+	const translatePagefindMessage = (isRu) => {
+		const messageEl = document.querySelector('.pagefind-ui__message');
+		if (!messageEl) return;
+		
+		const text = messageEl.textContent;
+		// Prevent infinite loops by checking if we already translated it
+		if (messageEl.dataset.original === text) return;
+		
+		let newText = text;
+		if (isRu) {
+			if (text.startsWith('No results for')) {
+				newText = text.replace('No results for', 'Ничего не найдено по запросу');
+			} else if (text.includes('results for')) {
+				newText = text.replace(/(\d+)\s+results\s+for/, '$1 результатов по запросу');
+			} else if (text.includes('result for')) {
+				newText = text.replace(/(\d+)\s+result\s+for/, '$1 результат по запросу');
+			}
+			// Search string is usually wrapped in quotes by pagefind, we can leave it as is
+		} else {
+			// If English, just keep the default text but we still mark it so we don't loop
+		}
+
+		if (newText !== text) {
+			messageEl.textContent = newText;
+		}
+		messageEl.dataset.original = newText;
+	};
+
+	document.addEventListener('DOMContentLoaded', setupSearchEnhancements);
 </script>
 
 <style is:global>
@@ -64,71 +111,89 @@ import Default from '@astrojs/starlight/components/Search.astro';
 		background-color: color-mix(in srgb, var(--sl-color-backdrop-overlay) 70%, transparent);
 	}
 
-	/* Search Button Animations (Hover & Click) */
+	/* Search Button Animations */
 	site-search > button {
 		transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.2s cubic-bezier(0.2, 0, 0, 1), background-color 0.2s ease !important;
 	}
-
 	site-search > button:hover {
 		transform: translateY(-1px);
 		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 	}
-
 	site-search > button:active {
 		transform: translateY(1px) scale(0.98);
 		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 	}
 
-	/* Quick Links / Suggestions Styling */
+	/* --- Enhanced Quick Links (Cards) --- */
 	.search-suggestions {
-		padding: 1rem;
+		padding: 1.5rem 1rem 1rem 1rem;
 		border-bottom: 1px solid var(--sl-color-hairline);
-		margin-bottom: 0.5rem;
+		margin-bottom: 1rem;
 	}
 	
-	.search-suggestions p {
-		font-size: 0.85rem;
-		color: var(--sl-color-gray-3);
-		margin-bottom: 0.75rem;
-		font-weight: 600;
+	.suggestions-header {
+		font-size: 0.8rem;
+		color: var(--sl-color-text-accent);
+		margin-bottom: 1rem;
+		font-weight: 700;
 		text-transform: uppercase;
-		letter-spacing: 0.5px;
+		letter-spacing: 1px;
 	}
 	
 	.suggestions-list {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+		gap: 0.75rem;
+	}
+	
+	.suggestion-card {
 		display: flex;
-		gap: 0.5rem;
-		flex-wrap: wrap;
-	}
-	
-	.suggestions-list a {
-		font-size: 0.85rem;
+		flex-direction: column;
 		background: var(--md-sys-color-surface-container, var(--sl-color-bg-nav));
-		border: 1px solid var(--sl-color-hairline);
-		padding: 0.35rem 0.85rem;
-		border-radius: 2rem;
-		color: var(--sl-color-text-accent);
+		border: 1px solid var(--sl-color-hairline-shade);
+		padding: 1rem;
+		border-radius: 0.75rem;
 		text-decoration: none;
-		transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+		transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
 	}
 	
-	.suggestions-list a:hover {
-		transform: translateY(-1px);
-		background: var(--sl-color-text-accent);
-		color: var(--sl-color-text-invert);
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	.suggestion-title {
+		font-size: 0.95rem;
+		font-weight: 600;
+		color: var(--sl-color-text);
+		margin-bottom: 0.25rem;
+		transition: color 0.2s ease;
+	}
+	
+	.suggestion-desc {
+		font-size: 0.8rem;
+		color: var(--sl-color-gray-3);
+		line-height: 1.4;
+		transition: color 0.2s ease;
+	}
+	
+	.suggestion-card:hover {
+		transform: translateY(-3px);
+		box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+		background: var(--md-sys-color-surface-container-high, var(--sl-color-gray-6));
+		border-color: var(--sl-color-text-accent);
+	}
+	
+	.suggestion-card:hover .suggestion-title {
+		color: var(--sl-color-text-accent);
+	}
+	
+	.suggestion-card:active {
+		transform: translateY(0) scale(0.98);
+		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 	}
 
-	.suggestions-list a:active {
-		transform: translateY(1px) scale(0.98);
-	}
-
-	/* Hide suggestions when a search is actively being typed */
+	/* Hide suggestions when searching */
 	.pagefind-ui--searching .search-suggestions {
 		display: none;
 	}
 
-	/* Fix ugly square outline on hover in search results */
+	/* --- Fix Search Results Outline --- */
 	#starlight__search .pagefind-ui__result-title:not(:where(.pagefind-ui__result-nested *)):hover,
 	#starlight__search .pagefind-ui__result-title:not(:where(.pagefind-ui__result-nested *)):focus-within,
 	#starlight__search .pagefind-ui__result-nested:hover,
@@ -138,23 +203,25 @@ import Default from '@astrojs/starlight/components/Search.astro';
 		border-radius: var(--sl-search-corners) !important;
 	}
 	
-	/* Refined look for the search results container */
 	#starlight__search .pagefind-ui__result {
 		padding: 0.5rem !important;
 		border-radius: calc(var(--sl-search-corners) + 0.25rem);
 		transition: background-color 0.2s;
 	}
 
-	/* Stylize the "X results for Y" and "No results" messages */
+	/* --- Enhanced "Results for..." Message --- */
 	#starlight__search .pagefind-ui__message {
 		text-align: center;
-		padding: 2rem 1rem;
-		margin: 1rem 0;
+		padding: 1.5rem 1rem;
+		margin: 1.5rem 0;
 		background: var(--md-sys-color-surface-container-low, var(--sl-color-gray-6));
-		border-radius: 0.75rem;
+		border-radius: 1rem;
 		border: 1px dashed var(--sl-color-hairline);
 		color: var(--sl-color-text-accent);
-		font-weight: 500;
-		font-size: 0.95rem;
+		font-family: var(--sl-font);
+		font-weight: 600;
+		font-size: 1.05rem;
+		letter-spacing: 0.25px;
+		box-shadow: inset 0 2px 8px rgba(0,0,0,0.02);
 	}
 </style>
