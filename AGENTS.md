@@ -62,13 +62,13 @@ request that touches those paths.
 | `src/error.rs` | `ProxyError` — variants callers may want to match on. |
 | `locales/` | `en.json` and `ru.json`, embedded at compile time. |
 | `tests/cli.rs` | End-to-end tests that spawn the real binary. |
-| `docs/` | The canonical user documentation, in English and Russian. Also the site's source, page for page — except `docs/superpowers/`, which holds design plans and is not published. |
+| `docs/` | The canonical user documentation, in English and Russian. Also the site's source, page for page. |
 | `shell/` | The `proxy` shell function for zsh and bash. User-facing: a change here needs a changelog entry. |
 | `configs/` | `config.default.json`, which must match `AppConfig::default()`. Also user-facing. |
 | `assets/` | README screenshots. A new screenshot needs a new filename — GitHub caches these hard. |
 | `website/` | The Astro Starlight documentation site. Has its own [`AGENTS.md`](website/AGENTS.md); read it before changing anything there. |
 | `.github/workflows/` | `ci.yml`, `branch-policy.yml`, `website.yml`, `pages.yml`, `release.yml`. |
-| `.ai/` | Reference material: architecture, git workflow, verification. |
+| `.ai/` | Reference material: architecture, git workflow, verification. `.ai/archive/` holds design documents for work that has shipped — history, not guidance. |
 | `.agents/skills/` | Task-specific skills — releases, verification, the website, dependency audits. |
 
 Note there is no `best.rs`, `benchmark.rs`, or `git.rs`: benchmarking and

@@ -63,6 +63,9 @@ changes affect scripts — see **Changed**.
 - **Docs**: `docs/CONFIGURATION.md` lists the full default `ping_targets`.
 - **CLI**: `proxy use <key>` prints the same `[ON]` / `[OFF]` tag as
   `proxy switch`, so the line it emits has changed shape.
+- **Repo**: `docs/` holds only user documentation again. The website rebuild's
+  design notes moved to `.ai/archive/`, which is where shipped design documents
+  live from now on — they are history, not guidance, and each says so.
 - **Contributing**: a change to `docs/`, the READMEs, `CONTRIBUTING.md` or a
   changelog now also has to pass the site build
   (`cd website && npm ci && npm test && npm run build`), because those files

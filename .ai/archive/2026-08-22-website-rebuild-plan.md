@@ -1,5 +1,11 @@
 # Website Rebuild Implementation Plan
 
+> [!WARNING]
+> **Archived.** This document describes the project as it was on the date
+> below, and parts of it are no longer true. It is kept for its reasoning, not
+> as guidance — see [`README.md`](README.md) in this directory. The authority
+> for current behaviour is `AGENTS.md`, `website/AGENTS.md` and `.ai/`.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Turn `website/` from a scaffold that emits broken links into a correct, deployable Astro Starlight documentation site for a GitHub Pages project page.
@@ -8,7 +14,7 @@
 
 **Tech Stack:** Astro 7.2.4, `@astrojs/starlight` 0.41.7, Node 22+ (`node:test`, no test dependencies), `astro-vtbot`, `starlight-links-validator`, `starlight-image-zoom`, `starlight-llms-txt`, `@fontsource-variable/*`.
 
-**Spec:** `docs/superpowers/specs/2026-08-22-website-rebuild-design.md`
+**Spec:** [`2026-08-22-website-rebuild-design.md`](2026-08-22-website-rebuild-design.md)
 
 ## Global Constraints
 

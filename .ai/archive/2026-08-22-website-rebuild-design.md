@@ -1,5 +1,11 @@
 # Website rebuild — design
 
+> [!WARNING]
+> **Archived.** This document describes the project as it was on the date
+> below, and parts of it are no longer true. It is kept for its reasoning, not
+> as guidance — see [`README.md`](README.md) in this directory. The authority
+> for current behaviour is `AGENTS.md`, `website/AGENTS.md` and `.ai/`.
+
 Date: 2026-08-22
 Scope: `website/` only. Deployment wiring, root docs and CI are deliberately out of scope.
 
