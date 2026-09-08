@@ -83,7 +83,9 @@ A change to commands or configuration is not done until these agree:
 
 - `README.md` and `README.ru.md` — always updated together
 - the matching file in `docs/` and its `.ru.md` twin
-- `CHANGELOG.md`, under `Unreleased`, in Keep a Changelog format
+- `CHANGELOG.md` **and** `CHANGELOG.ru.md`, under `Unreleased`, in Keep a
+  Changelog format — CI rejects a one-sided changelog, and both are published
+  pages on the site
 
 If the TUI changes materially, say so in your summary: the README screenshot
 needs retaking. GitHub's image proxy caches aggressively, so a new screenshot

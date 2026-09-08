@@ -86,7 +86,10 @@
   },
   "ping_targets": [
     { "name": "Google", "url": "https://www.google.com" },
-    { "name": "GitHub", "url": "https://github.com" }
+    { "name": "GitHub", "url": "https://github.com" },
+    { "name": "OpenAI", "url": "https://status.openai.com/api/v2/status.json" },
+    { "name": "Anthropic", "url": "https://www.anthropic.com" },
+    { "name": "Cloudflare", "url": "https://1.1.1.1" }
   ],
   "diagnose_endpoints": [
     { "name": "GitHub API", "url": "https://api.github.com" }

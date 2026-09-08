@@ -24,7 +24,7 @@ cargo test                                     # all tests: unit + integration
 cargo test --lib                               # unit tests only (fast)
 cargo test --test cli                          # end-to-end binary tests
 cargo fmt --all                                # apply formatting
-cargo clippy --all-targets -- -D warnings      # lint, exactly as CI does
+cargo clippy --all-targets -- -D warnings      # lint; CI adds --all-features
 cargo run -- <subcommand>                      # run locally
 ```
 
@@ -62,8 +62,14 @@ request that touches those paths.
 | `src/error.rs` | `ProxyError` — variants callers may want to match on. |
 | `locales/` | `en.json` and `ru.json`, embedded at compile time. |
 | `tests/cli.rs` | End-to-end tests that spawn the real binary. |
-| `docs/` | The canonical user documentation, in English and Russian. Also the site's source — see below. |
+| `docs/` | The canonical user documentation, in English and Russian. Also the site's source, page for page — except `docs/superpowers/`, which holds design plans and is not published. |
+| `shell/` | The `proxy` shell function for zsh and bash. User-facing: a change here needs a changelog entry. |
+| `configs/` | `config.default.json`, which must match `AppConfig::default()`. Also user-facing. |
+| `assets/` | README screenshots. A new screenshot needs a new filename — GitHub caches these hard. |
 | `website/` | The Astro Starlight documentation site. Has its own [`AGENTS.md`](website/AGENTS.md); read it before changing anything there. |
+| `.github/workflows/` | `ci.yml`, `branch-policy.yml`, `website.yml`, `pages.yml`, `release.yml`. |
+| `.ai/` | Reference material: architecture, git workflow, verification. |
+| `.agents/skills/` | Task-specific skills — releases, verification, the website, dependency audits. |
 
 Note there is no `best.rs`, `benchmark.rs`, or `git.rs`: benchmarking and
 best-profile selection live in `src/cmd/profile.rs`, and Git integration is
@@ -149,7 +155,7 @@ through the guard.
 
 The following directives apply specifically to Gemini agents operating in this workspace via Antigravity CLI:
 
-- **Follow all `.md` rules**: You must continuously follow all instructions in this `AGENTS.md` file and any `.agents/rules/*.md` files. They represent the ultimate source of truth for your behavior.
+- **Follow all `.md` rules**: You must continuously follow all instructions in this `AGENTS.md` file, and in `website/AGENTS.md` when working under `website/`. They represent the ultimate source of truth for your behavior.
 - **Proactively use Workspace Customizations**: You are equipped with project-specific skills (in `.agents/skills/`), plugins, and MCP servers. Automatically invoke and utilize these skills when a task matches their description.
 - **Use Native Tools over Shell Commands**: Never use shell commands like `cat`, `grep`, `ls`, or `sed` to read or explore the codebase. Always use your native tool integrations (e.g., `view_file`, `grep_search`, `list_dir`, `find_by_name`).
 - **Prevent Hallucinations by Verifying Facts**: Do not assume the existence of files, APIs, variables, or functions. Before proposing code changes or answering architectural questions, you MUST verify their existence and implementation using `grep_search` and `find_by_name`.
@@ -191,7 +197,7 @@ A change to commands or configuration is incomplete until these agree:
 
 - `README.md` **and** `README.ru.md` (kept in lockstep)
 - the relevant file in `docs/` and its `.ru.md` twin
-- `CHANGELOG.md`, under `Unreleased`
+- `CHANGELOG.md` **and** `CHANGELOG.ru.md`, under `Unreleased`
 
 If you materially change the TUI, say so in your summary — the screenshot in the
 README will need retaking. GitHub caches images aggressively, so a new
@@ -245,5 +251,7 @@ main  <--  release/X.Y.Z  <--  feat/… fix/… docs/…
   and publishes to Homebrew, so an unintended merge ships a release.
 - Check `git branch --show-current` before committing. If it says `main`, stop
   and branch.
-- Every pull request touching `src/`, `locales/` or `Cargo.toml` needs a
-  `CHANGELOG.md` entry under `## [Unreleased]`.
+- Every pull request touching `src/`, `locales/`, `shell/`, `configs/` or
+  `Cargo.toml` needs a `CHANGELOG.md` entry under `## [Unreleased]` **and the
+  matching entry in `CHANGELOG.ru.md`** — CI fails a one-sided changelog,
+  because both files are published pages.

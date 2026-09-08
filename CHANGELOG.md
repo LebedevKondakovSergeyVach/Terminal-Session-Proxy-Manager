@@ -7,26 +7,71 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [2.3.0] — 2026-09-08
+
+A documentation release. The project gains a published website, and the CLI's
+output is reworked for terminals and scripts that do not want decoration. Two
+changes affect scripts — see **Changed**.
+
 ### Added
-- **Docs**: Beautiful Starlight components (Steps, FileTree, CardGrid) across documentation pages for better readability and structure.
-- **Docs**: Styled custom colored alert Asides (Note, Tip, Caution) for documentation callouts.
-- **Docs**: Styled Tab components mimicking macOS segmented controls for installation instructions.
-- **CLI**: The interactive profile switcher (`proxy switch`) now shows the `[ON]` / `[OFF]` state and clears the selection menu on success.
-- **CLI**: The `ping` command output highlights HTTP 2XX responses in green and others in yellow for easier reading.
-- **Config**: Added OpenAI and Anthropic to the default `ping_targets`.
-- **Docs**: A pull-request gate for the documentation site (`.github/workflows/website.yml`) runs the generator's tests, builds the site and validates every internal link.
+
+- **Docs**: A documentation website, published at
+  [lebedevkondakovsergeyvach.github.io/Terminal-Session-Proxy-Manager](https://lebedevkondakovsergeyvach.github.io/Terminal-Session-Proxy-Manager/),
+  in English and Russian. Its pages are generated from this repository's own
+  Markdown, so the site and the files on GitHub cannot drift apart. Full-text
+  search, tabbed install instructions, stepped guides and colour-coded
+  callouts, plus `llms.txt` for machine readers.
+- **Docs**: `CHANGELOG.ru.md` — the release history in Russian, published at
+  `/ru/changelog/`. `README.ru.md` now links to it rather than to the English
+  file.
 - **Docs**: A custom 404 page, in both languages.
-- **Docs**: Russian translations for the search UI, through Starlight's `pagefind.*` i18n collection.
+- **Docs**: `docs/SHELL_INTEGRATION.md` explains *why* the shell function is
+  needed, with a sequence diagram; `docs/USAGE.md` opens with the subcommands
+  grouped into four categories.
+- **Docs**: The search interface is translated into Russian, through
+  Starlight's `pagefind.*` translation collection.
+- **CI**: `website.yml` gates every pull request touching the site or the
+  documents it is built from — it runs the generator's tests, builds the site
+  and fails on a dead internal link. `pages.yml` publishes from `main`.
+- **CI**: Dependabot now watches the website's npm dependencies as well as
+  Cargo and the GitHub Actions.
+- **Config**: OpenAI and Anthropic joined the default `ping_targets`.
+- **CLI**: `proxy switch` shows each profile's `[ON]` / `[OFF]` state and
+  clears the selection menu when it closes, whether you chose or cancelled.
+- **CLI**: `proxy ping` prints HTTP 2XX responses in green and everything else
+  in yellow.
 
 ### Changed
-- **CLI**: `proxy on` and `proxy off` no longer print a confirmation line. They emit only the shell statements to be evaluated, so `eval "$(proxy env on)"` stays silent. Scripts that parsed that confirmation need updating.
-- **CLI**: Emoji were removed from the command and dashboard output; the `ping` status labels are now localised rather than fixed English.
-- **CLI**: The section separator printed between report blocks is a plain rule instead of a bold cyan one.
-- **Docs**: The canonical documents in `docs/` and `CONTRIBUTING.md` are plain CommonMark again. The site's interactive components are expressed as `<!--site:…-->` comments that GitHub ignores and the generator expands, so the same file reads correctly in both places.
-- **CI**: GitHub Pages deploys from `main` only, and no longer from a release or task branch.
+
+- **CLI**: `proxy on` and `proxy off` no longer print a confirmation line.
+  They emit only the shell statements to be evaluated, so
+  `eval "$(proxy env on)"` is now silent. **A script that parsed that
+  confirmation needs updating.**
+- **CLI**: Emoji are gone from the translation strings and from the headers of
+  the reporting commands — `ping`, `diagnose`, `monitor`, `git`, `import`,
+  `benchmark`, `speedtest` — and from the dashboard's port indicator. The
+  prompt marker and the dashboard's title bar keep theirs. The status labels
+  `proxy ping` prints are localised now, rather than fixed English.
+- **CLI**: The rule printed between report blocks is a plain line instead of a
+  bold cyan one.
+- **Docs**: `docs/*.md` and `CONTRIBUTING.md` are plain CommonMark. The site's
+  tabs, cards, steps and callouts are written as `<!--site:…-->` comments,
+  which GitHub renders as nothing and the site generator expands — so one file
+  reads correctly in both places. An intermediate version of this release put
+  the components directly in those documents, which cost them their headings
+  on GitHub.
+- **Docs**: `docs/CONFIGURATION.md` lists the full default `ping_targets`.
+- **CLI**: `proxy use <key>` prints the same `[ON]` / `[OFF]` tag as
+  `proxy switch`, so the line it emits has changed shape.
+- **Contributing**: a change to `docs/`, the READMEs, `CONTRIBUTING.md` or a
+  changelog now also has to pass the site build
+  (`cd website && npm ci && npm test && npm run build`), because those files
+  are the site's content.
 
 ### Removed
-- **CLI**: The unused `env_on_msg` and `env_off_msg` translation keys.
+
+- **CLI**: The `env_on_msg` and `env_off_msg` translation keys, unused since
+  `proxy on` and `proxy off` stopped printing a confirmation.
 
 ## [2.2.2] — 2026-08-21
 
@@ -189,6 +234,9 @@ Also changed:
 
 - Default configuration uses safe generic profiles.
 
-[Unreleased]: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/compare/v2.2.0...HEAD
+[Unreleased]: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/compare/v2.3.0...HEAD
+[2.3.0]: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/compare/v2.2.2...v2.3.0
+[2.2.2]: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/compare/v2.2.1...v2.2.2
+[2.2.1]: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/compare/v2.2.0...v2.2.1
 [2.2.0]: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/compare/v2.1.1...v2.2.0
 [2.1.1]: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/releases/tag/v2.1.1

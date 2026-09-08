@@ -10,10 +10,13 @@ GitHub Pages project page at `/Terminal-Session-Proxy-Manager/`.
 
 ## Read the contract first
 
-[`website/AGENTS.md`](../../../website/AGENTS.md) is the authority: nine rules
-covering generated content, the manifest, the `<!--site:…-->` directives, links
-under `base`, i18n, styling and the pinned Markdown processor. Read it before
+[`website/AGENTS.md`](../../../website/AGENTS.md) is the authority. It covers
+generated content, the manifest, the `<!--site:…-->` directives, links under
+`base`, i18n, styling and the pinned Markdown processor. Read it before
 changing anything.
+
+Deliberately not "the N rules" here: that count went stale the first time a
+rule was added, which is the same failure this file was rewritten to avoid.
 
 This file deliberately does not repeat those rules. It used to, and every copy
 went stale — it described a theme that had been removed, MCP servers that were
@@ -41,8 +44,8 @@ of `astro dev`, so `astro --help` does not list them — `astro dev --help` does
 **1. Editing a generated page.** Everything under `src/content/docs/` — `.md`
 and `.mdx` alike — is produced by `scripts/sync-docs.mjs` from the repository's
 canonical Markdown and is Git-ignored. Your edit is erased by the next build.
-The sources are listed in `scripts/docs-manifest.mjs`. Only `index.mdx` and
-`ru/index.mdx` are hand-authored.
+The sources are listed in `scripts/docs-manifest.mjs`. Only four pages are
+hand-authored: `index.mdx`, `ru/index.mdx`, `404.md` and `ru/404.md`.
 
 **2. Writing a relative internal link.** The site is served from a sub-path and
 `starlight-links-validator` runs with `errorOnRelativeLinks: true`, so a relative

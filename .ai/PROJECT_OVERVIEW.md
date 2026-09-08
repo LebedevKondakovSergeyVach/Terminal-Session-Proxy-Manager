@@ -125,7 +125,7 @@ It is **generated**, not written. `website/scripts/sync-docs.mjs` builds every
 page from the repository's own Markdown — `README*.md`, `docs/*.md`,
 `CONTRIBUTING.md`, `CHANGELOG*.md` — listed in `scripts/docs-manifest.mjs`.
 The generated pages are Git-ignored, so the site cannot drift from its sources.
-Only `index.mdx` and `ru/index.mdx` are hand-authored.
+Only four pages are hand-authored: the two home pages and the two 404 pages.
 
 The constraint that shapes the design: those sources are read on GitHub too, so
 they stay plain CommonMark. Anything the site needs and GitHub does not — tabs,

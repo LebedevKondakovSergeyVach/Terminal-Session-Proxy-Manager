@@ -47,8 +47,9 @@ The sources are the repository's canonical Markdown — `README.md`,
 `README.ru.md`, `docs/*.md`, `CONTRIBUTING.md`, `CHANGELOG*.md` — listed in
 `scripts/docs-manifest.mjs`.
 
-Hand-authored pages are the exception, and the `.gitignore` names them
-explicitly: `index.mdx` and `ru/index.mdx`.
+Hand-authored pages are the exception, and the `.gitignore` names each one
+explicitly: `index.mdx`, `ru/index.mdx`, `404.md` and `ru/404.md`. If you add
+another, add its negation there too — otherwise the ignore rule swallows it.
 
 If you find a generated page tracked in Git, that is the bug — not a licence
 to edit it. The ignore rule used to read `**/*.md`, which matched none of the
@@ -157,6 +158,10 @@ the element — one piece of state with two owners, a `MutationObserver` to keep
 them in step, and a class toggled off-and-on to synthesise an event for that
 observer. All of it was replaceable by one `:has()` rule.
 
+The `MutationObserver` still in `Search.astro` is a different one: it waits for
+Pagefind to insert the drawer so the panel can be injected once. That one is
+load-bearing — the state-syncing observer is the one that went.
+
 Pagefind's UI strings are translated through Starlight's supported path: the
 `i18n` collection in `src/content.config.ts`, with `pagefind.*` keys in
 `src/content/i18n/`. Do not regex-rewrite the rendered message — the version
@@ -170,9 +175,14 @@ with any numeral.
 `astro-vtbot` here drives **native cross-document** view transitions —
 `@view-transition { navigation: auto }` — not a client-side router. There is no
 `ClientRouter` in this project. Every navigation is therefore a full document
-load, scripts run normally on each page, and **`astro:page-load` never fires**
-(it appears zero times in the built HTML). Do not write initialisation that
-waits for it; it will simply never run.
+load, scripts run normally on each page, and **`astro:page-load` never fires**.
+Do not write initialisation that waits for it; it will simply never run.
+
+Checking this yourself: the event appears zero times in the built *HTML*. It
+does appear in two bundles under `dist/_astro/` — Expressive Code and
+Starlight's own runtime — which is library code that stays dormant without a
+`ClientRouter`. Grep `dist` with `--include='*.html'` or you will read those
+hits as a contradiction.
 
 `ThemeSelect.astro` animates `::view-transition-*(root)`, the same
 pseudo-elements astro-vtbot uses. Its overrides are scoped behind

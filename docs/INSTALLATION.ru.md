@@ -29,7 +29,7 @@ cargo install --git https://github.com/LebedevKondakovSergeyVach/Terminal-Sessio
 ваш `PATH`. Если после этого утилита не найдена, см. раздел
 [Настройка PATH](#-настройка-path) ниже.
 
-## Binary
+## Готовая сборка
 
 Скачайте архив для вашей платформы со
 [страницы релизов](https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/releases).

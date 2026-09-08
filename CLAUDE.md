@@ -10,6 +10,9 @@ Reference material it links to:
 - [`.ai/GIT_WORKFLOW.md`](.ai/GIT_WORKFLOW.md) — branching, pull requests and releases
 - [`.ai/WORKFLOW_GUIDE.md`](.ai/WORKFLOW_GUIDE.md) — verification process
 
+Working in `website/`? That directory has its own contract:
+[`website/AGENTS.md`](website/AGENTS.md).
+
 The short version, if you read nothing else:
 
 ```bash
@@ -21,5 +24,8 @@ cargo fmt --all -- --check && cargo clippy --all-targets --locked -- -D warnings
 - Never overwrite a config file that failed to parse.
 - Everything a shell will `eval` goes through `proxy_env::shell_quote`.
 - A failing command returns `Err`, never a printed message with exit code 0.
+- `README*.md`, `docs/*.md`, `CONTRIBUTING.md` and `CHANGELOG*.md` are also the
+  documentation site's content. Keep them plain CommonMark — no JSX, no
+  `import` line — and verify with `cd website && npm test && npm run build`.
 - Work on a task branch off the open `release/X.Y.Z`. Never push to `main`,
   never create a tag — merging a release branch into `main` publishes.

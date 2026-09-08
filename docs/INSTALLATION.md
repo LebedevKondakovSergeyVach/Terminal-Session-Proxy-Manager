@@ -29,7 +29,7 @@ This puts the binary in `~/.cargo/bin`, which rustup normally adds to your
 `PATH`. If `terminal-session-proxy-manager` is not found afterwards, see
 [PATH setup](#-path-setup) below.
 
-## Binary
+## Prebuilt binary
 
 Download an archive for your platform from the
 [releases page](https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/releases).

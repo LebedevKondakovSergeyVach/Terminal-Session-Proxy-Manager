@@ -178,8 +178,15 @@ why this fix over another.
 | `ci.yml` | Every pull request; pushes to `main`, `release/**`, `hotfix/**`; weekly | fmt, clippy, docs, tests on Linux and macOS, MSRV, `cargo audit` |
 | `branch-policy.yml` | Every pull request | Branch naming, head/base pairing, changelog entry, release readiness |
 | `release.yml` | Merge into `main`; a pushed `v*` tag | Re-verifies, tags, builds four targets, publishes, bumps Homebrew |
-| `website.yml` | Pull requests and pushes touching `website/`, `docs/`, `assets/`, the READMEs, `CONTRIBUTING.md` or `CHANGELOG*.md` | Generator tests, full site build, internal-link validation, `npm audit` |
+| `website.yml` | Pull requests, and pushes to `main`/`release/**`/`hotfix/**`, touching `website/`, `docs/`, `assets/`, the READMEs, `CONTRIBUTING.md` or `CHANGELOG*.md` | Generator tests, full site build, internal-link validation, a check that **no generated page is tracked**, `npm audit` |
 | `pages.yml` | Pushes to **`main`** touching those same paths | Rebuilds and publishes the site to GitHub Pages |
+
+The "no generated page is tracked" step is the one that catches a committed
+`.mdx`: everything under `website/src/content/docs/` is generated and ignored,
+bar the two home pages and the two 404 pages.
+
+Both also accept `workflow_dispatch`. That is the one way to publish from a ref
+other than `main`, so treat a manual dispatch as a deliberate act.
 
 Warnings are failures: CI sets `RUSTFLAGS: -D warnings`.
 
