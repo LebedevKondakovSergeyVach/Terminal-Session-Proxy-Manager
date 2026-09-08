@@ -15,6 +15,8 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - **CLI**: The `ping` command output highlights HTTP 2XX responses in green and others in yellow for easier reading.
 - **Config**: Added OpenAI and Anthropic to the default `ping_targets`.
 - **Docs**: A pull-request gate for the documentation site (`.github/workflows/website.yml`) runs the generator's tests, builds the site and validates every internal link.
+- **Docs**: A custom 404 page, in both languages.
+- **Docs**: Russian translations for the search UI, through Starlight's `pagefind.*` i18n collection.
 
 ### Changed
 - **CLI**: `proxy on` and `proxy off` no longer print a confirmation line. They emit only the shell statements to be evaluated, so `eval "$(proxy env on)"` stays silent. Scripts that parsed that confirmation need updating.

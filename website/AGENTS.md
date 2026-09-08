@@ -140,13 +140,30 @@ unlayered CSS outranks everything Starlight and `starlight-theme-md3` put in
 is aimed at the wrong thing: set the token the theme itself reads
 (`--sl-color-asides-border`, say) instead of the property it paints.
 
-**Known exception, and it is debt, not licence:** `Search.astro` still carries
-17 `!important` declarations plus a JS `style.setProperty(…, 'important')` that
-forces Pagefind's drawer open while leaving `pagefind-ui__hidden` on the
-element — two sources of truth for one piece of state. The fix is to render the
-quick-links panel as a *sibling* of `.pagefind-ui__drawer` and toggle it with
-`#starlight__search:has(.pagefind-ui__drawer.pagefind-ui__hidden)`. Do not copy
-this pattern anywhere else.
+This holds for component styles too. `Search.astro` overrides Pagefind, whose
+stylesheet Starlight imports with
+`@import url('@pagefind/default-ui/css/ui.css') layer(starlight.core)` — also a
+layer, so an unlayered `<style is:global>` block already wins.
+
+### 6a. Read Pagefind's state; never write it
+
+The quick-links panel is a **sibling** of `.pagefind-ui__drawer`, shown by
+`#starlight__search:has(.pagefind-ui__drawer.pagefind-ui__hidden)`. Pagefind
+stays the only writer of `pagefind-ui__hidden`; the stylesheet only reads it.
+
+An earlier version put the panel *inside* the drawer and then forced the drawer
+open with `style.setProperty(…, 'important')` while leaving the hidden class on
+the element — one piece of state with two owners, a `MutationObserver` to keep
+them in step, and a class toggled off-and-on to synthesise an event for that
+observer. All of it was replaceable by one `:has()` rule.
+
+Pagefind's UI strings are translated through Starlight's supported path: the
+`i18n` collection in `src/content.config.ts`, with `pagefind.*` keys in
+`src/content/i18n/`. Do not regex-rewrite the rendered message — the version
+that did mapped every count ≥ 2 to `результатов`, which is wrong for 2–4.
+Note that Pagefind has only `one_result` and `many_results`, so the Russian
+`many_results` is worded (`Найдено результатов: [COUNT]`) to read correctly
+with any numeral.
 
 ### 7. Client scripts and page transitions
 

@@ -1,0 +1,10 @@
+{
+	"pagefind.clear_search": "Clear",
+	"pagefind.load_more": "Load more",
+	"pagefind.search_label": "Search this site",
+	"pagefind.filters_label": "Filters",
+	"pagefind.zero_results": "No results for “[SEARCH_TERM]”",
+	"pagefind.many_results": "[COUNT] results for “[SEARCH_TERM]”",
+	"pagefind.one_result": "1 result for “[SEARCH_TERM]”",
+	"pagefind.searching": "Searching for “[SEARCH_TERM]”…"
+}

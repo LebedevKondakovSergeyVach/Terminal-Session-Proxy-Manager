@@ -48,7 +48,7 @@ import '../../assets/zigzag.css';
   <div class="zigzag-section">
     <div class="zigzag-text">
       <h2>Interactive Profile Switcher</h2>
-      <p>Profiles, not exports. Name your proxies once, then switch with a single command or use the interactive picker. The <code>switch</code> command opens a TUI where you can navigate your predefined proxy profiles using arrow keys. Once selected, it instantly injects the correct <code>HTTP_PROXY</code>, <code>HTTPS_PROXY</code>, and <code>ALL_PROXY</code> variables directly into your active shell session, supporting both <code>zsh</code> and <code>bash</code>.</p>
+      <p>Profiles, not exports. Name your proxies once, then switch with a single command or use the interactive picker. The <code>switch</code> command opens a TUI where you can navigate your predefined proxy profiles using arrow keys. Once selected, it instantly injects <code>HTTP_PROXY</code>, <code>HTTPS_PROXY</code> and <code>ALL_PROXY</code> — plus <code>GRADLE_OPTS</code> and <code>JAVA_TOOL_OPTIONS</code> for JVM tooling — directly into your active shell session, in both <code>zsh</code> and <code>bash</code>.</p>
     </div>
     <div class="zigzag-image">
       <div class="theme-light-only"><Image src={switchLight} alt="The proxy switch command showing an interactive list of proxy profiles in the terminal" width={1200} /></div>
@@ -84,7 +84,7 @@ import '../../assets/zigzag.css';
   <div class="zigzag-section">
     <div class="zigzag-text">
       <h2>Diagnostics & Auto-Healing</h2>
-      <p>Measure the real-world performance of your active route. The <code>ping</code> and <code>benchmark</code> commands test connectivity in parallel and can automatically select the best profile. They measure TCP handshake times and overall latency. Additionally, the <code>monitor</code> command provides auto-healing by performing health checks and automatically failing over when the active proxy dies.</p>
+      <p>Measure the real-world performance of your active route. The <code>ping</code> and <code>benchmark</code> commands issue real requests in parallel and report the latency of each, so you can pick the fastest server — or let <code>best</code> pick it for you. For unattended use, <code>monitor</code> runs health checks and fails over automatically when the active proxy dies.</p>
     </div>
     <div class="zigzag-image">
       <div class="theme-light-only"><Image src={pingLight} alt="The proxy ping command listing latency in milliseconds for each configured endpoint" width={1200} /></div>
@@ -103,7 +103,7 @@ import '../../assets/zigzag.css';
   <div class="zigzag-section zigzag-reverse">
     <div class="zigzag-text">
       <h2>Zero-Dependency Rust CLI</h2>
-      <p>Distributed as a single standalone binary compiled from Rust, requiring no heavy runtimes. It features instant startup times, robust JSON configuration, and strict error handling. Need to share settings? Use the <code>export</code> command to generate configurations for Docker, cURL, Git, <code>.env</code> files, and JVM build tooling—with correct shell quoting.</p>
+      <p>A single standalone binary compiled from Rust, with no heavy runtime to install — no Node.js, no Python. Instant startup, a plain JSON configuration and strict error handling. Need to share settings? The <code>export</code> command generates configuration for Docker, cURL, Git, <code>.env</code> files and JVM build tooling — with correct shell quoting.</p>
     </div>
     <div class="zigzag-image">
       <div class="theme-light-only"><Image src={helpLight} alt="The proxy --help output listing every subcommand and its description" width={1200} /></div>

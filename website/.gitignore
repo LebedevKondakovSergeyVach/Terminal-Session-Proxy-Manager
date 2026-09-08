@@ -32,6 +32,9 @@ pnpm-debug.log*
 src/content/docs/**/*.md
 src/content/docs/**/*.mdx
 
-# …except the two pages that are genuinely hand-authored.
+# …except the pages that are genuinely hand-authored. Nothing in the manifest
+# writes to these paths, so they are ours to keep.
 !src/content/docs/index.mdx
 !src/content/docs/ru/index.mdx
+!src/content/docs/404.md
+!src/content/docs/ru/404.md

@@ -77,10 +77,23 @@ export default defineConfig({
 				Search: './src/components/Search.astro',
 			},
 			customCss: ['./src/styles/custom.css'],
+			// Starlight already emits og:title/description/type/site_name and
+			// twitter:card=summary_large_image. Only the image is ours, and it
+			// is 1200x630 because that is the ratio that card crops to — the
+			// 1376x384 banner used before was letterboxed by every consumer.
 			head: [
 				{
 					tag: 'meta',
 					attrs: { property: 'og:image', content: `${SITE}${BASE}/og.jpg` },
+				},
+				{ tag: 'meta', attrs: { property: 'og:image:width', content: '1200' } },
+				{ tag: 'meta', attrs: { property: 'og:image:height', content: '630' } },
+				{
+					tag: 'meta',
+					attrs: {
+						property: 'og:image:alt',
+						content: 'Terminal Session Proxy Manager',
+					},
 				},
 				{
 					tag: 'meta',
