@@ -19,6 +19,12 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Least privilege, declared rather than inherited. Without a block here the
+# token takes whatever the repository default happens to be, which is a setting
+# outside this file and can change under you.
+permissions:
+  contents: read
+
 env:
   CARGO_TERM_COLOR: always
   # Fail on warnings everywhere, not only in the clippy step.
@@ -91,6 +97,12 @@ jobs:
   audit:
     name: Security advisories
     runs-on: ubuntu-latest
+    # The action reports through the Checks API, which needs more than the
+    # read-only default. Without this the run fails with "Resource not
+    # accessible by integration" even when the audit itself found nothing.
+    permissions:
+      contents: read
+      checks: write
     steps:
       - uses: actions/checkout@v4
 
