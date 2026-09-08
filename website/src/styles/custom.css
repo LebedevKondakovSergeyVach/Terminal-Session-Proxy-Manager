@@ -1,0 +1,632 @@
+/*
+ * A thin layer on top of `starlight-theme-md3`.
+ *
+ * The theme owns colour, shape, elevation and motion — it derives all of them
+ * from the `seed` set in astro.config.mjs. Nothing here may restate them. What
+ * is left is what the theme does not claim: typography, scrollbars, and the one
+ * screenshot rule.
+ *
+ * There is no `!important` in this file, and there must not be. Two earlier
+ * versions had them — fifteen, then twenty-eight — every one repainting a
+ * token the theme derives. An `!important` here means the two are fighting
+ * again, and the fix is never the specificity: this file is unlayered, and
+ * unlayered CSS already outranks everything Starlight and the theme put in
+ * `@layer`. If a rule seems to need forcing, it is aimed at the wrong thing.
+ */
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/jetbrains-mono';
+
+:root {
+	--sl-font: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+	--sl-font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, monospace;
+
+	/* The selected sidebar item, in the brand orange rather than the theme's
+	   default. MD3 paints a selected navigation item with the *secondary*
+	   container, which is a deliberate contrast role — but this site has one
+	   colour identity and the highlight should carry it, so point both tokens
+	   at the primary pair instead. They stay a matched pair: swapping the
+	   container without its `on-` colour is how highlights lose their contrast.
+
+	   The theme declares these in `@layer md3.tokens`, and this file is
+	   unlayered, so a plain `:root` wins. This is the one place we deliberately
+	   redirect a theme token — everything else is configured through the
+	   plugin's options. */
+	--md3-comp-nav-item-selected-container-color: var(--md-sys-color-primary-container);
+	--md3-comp-nav-item-selected-label-color: var(--md-sys-color-on-primary-container);
+}
+
+/* Translucent header, so content stays visible scrolling under it. The theme
+   paints it opaque from `.page > .header` inside `@layer md3.layout`, and offers
+   no option for this. Unlayered CSS outranks layered CSS whatever the
+   specificity, so this plain selector wins on its own — no `!important`, and no
+   escalating selector war. The colour still comes from the theme's own nav
+   surface token, so it follows the palette in both light and dark.
+
+   `backdrop-filter` is declared unprefixed only, and ships that way — the
+   bundler adds no `-webkit-` twin. Writing the twin by hand is worse than
+   leaving it out: the minifier then collapses the pair down to *just* the
+   prefixed form, losing the blur in Firefox. The theme's own stylesheet makes
+   the same choice. On a browser old enough to need the prefix the header is
+   simply translucent without the blur, which is a fine thing to degrade to. */
+header.header {
+	background-color: color-mix(in srgb, var(--sl-color-bg-nav) 45%, transparent);
+	backdrop-filter: blur(18px) saturate(1.6);
+}
+
+/* The theme ships no `img` rules at all, so rounding content images is ours to
+   do. Checked before assuming otherwise: an earlier revision dropped this rule
+   claiming the theme handled it, and every screenshot went square-cornered. */
+.sl-markdown-content img {
+	border-radius: 0.5rem;
+}
+
+/* Make inline code scale correctly with its surrounding text.
+   Starlight defaults inline code to a fixed smaller size (rem-based) in paragraphs,
+   making it look too small, and `inherit` in headings, where the monospace font's
+   larger x-height makes it look too big next to the sans-serif text.
+   0.9em balances JetBrains Mono perfectly against Inter at any size. */
+.sl-markdown-content :not(pre) > code {
+	font-size: 0.9em;
+}
+
+/* Screenshots of the TUI need an edge too; the terminal's own background is
+   dark and otherwise bleeds into a dark page. */
+.sl-markdown-content img[src*='proxy_dashboard'] {
+	border: 1px solid var(--sl-color-hairline);
+}
+
+::-webkit-scrollbar {
+	width: 10px;
+	height: 10px;
+}
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+::-webkit-scrollbar-thumb {
+	background: var(--sl-color-gray-5);
+	border: 2px solid var(--sl-color-bg);
+	border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+	background: var(--sl-color-gray-4);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	html {
+		scroll-behavior: smooth;
+	}
+
+	/*
+	 * Page transitions.
+	 *
+	 * astro-vtbot drives these with native cross-document view transitions —
+	 * `@view-transition { navigation: auto }`, not a client-side router. It
+	 * already names the groups (`main`, `title`, `header`, `current-page`) and
+	 * supplies a directional clip-path wipe, and it pins the header and the
+	 * mobile ToC so they never flicker. None of that is re-declared here; this
+	 * only sets how the motion feels.
+	 *
+	 * Everything sits inside `prefers-reduced-motion: no-preference`, and vtbot
+	 * gates `@view-transition` on the same query, so a reader who asks for less
+	 * motion gets a plain swap.
+	 */
+
+	/* MD3's emphasised-decelerate curve, so navigation matches the motion the
+	   theme uses everywhere else. */
+	::view-transition-group(*) {
+		animation-duration: 320ms;
+		animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
+	}
+
+	/* The outgoing page otherwise sits still underneath the incoming wipe.
+	   Fading it softens the edge without weakening the direction cue. */
+	:active-view-transition-type(forward, backward)::view-transition-old(main) {
+		animation: tspm-page-fade-out 320ms cubic-bezier(0.4, 0, 1, 1) both;
+	}
+
+	/*
+	 * There is deliberately no page-enter animation here.
+	 *
+	 * The theme already provides one: `motion.css` animates
+	 * `main > .content-panel` in from `opacity: 0; translateY(16px)`, paired
+	 * with a matching leave animation, and its `route-bootstrap` script clears
+	 * the state after two frames.
+	 *
+	 * An earlier version of this file added a second entrance on `main`,
+	 * suppressed during a navigation via
+	 * `:active-view-transition-type(forward, backward) main { animation: none }`.
+	 * That suppression is only true *while* the transition runs. The moment it
+	 * ends the selector stops matching, the entrance animation applies for the
+	 * first time, and it starts at its first keyframe — so the content blanked
+	 * and faded back in, looking like a reload. Any animation toggled by that
+	 * pseudo-class has the same flaw: it fires when the transition ends, not
+	 * when the page arrives.
+	 */
+}
+
+@keyframes tspm-page-fade-out {
+	to {
+		opacity: 0;
+	}
+}
+
+
+
+/* Center Hero Section */
+.hero {
+	grid-template-columns: 1fr;
+	text-align: center;
+}
+.hero .stack {
+	text-align: center;
+	align-items: center;
+}
+.hero .copy {
+	align-items: center;
+}
+
+/* Tile Buttons for Hero Actions */
+.hero .actions {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 1.5rem;
+	justify-content: center;
+	width: 100%;
+	max-width: 700px;
+	margin: 2.5rem auto 0;
+}
+
+@media (max-width: 50rem) {
+	.hero .actions {
+		grid-template-columns: 1fr;
+	}
+}
+
+.hero .actions .sl-link-button {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 1.5rem;
+	border-radius: 1rem;
+	background-color: var(--md-sys-color-surface-container-low, var(--sl-color-bg-nav));
+	border: 1px solid var(--sl-color-hairline);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+	transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.2s cubic-bezier(0.2, 0, 0, 1), background-color 0.2s ease;
+	text-decoration: none;
+	color: var(--sl-color-text-accent);
+	font-weight: 600;
+	gap: 0.5rem;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.hero .actions .sl-link-button:hover {
+	transform: translateY(-4px);
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+	background-color: var(--md-sys-color-surface-container, var(--sl-color-bg-nav));
+}
+
+.hero .actions .sl-link-button:active {
+	transform: translateY(2px) scale(0.98);
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.hero .actions .sl-link-button svg {
+	width: 28px;
+	height: 28px;
+	margin: 0;
+	margin-bottom: 0.25rem;
+	order: -1; /* Move icon above text */
+}
+
+.hero .actions .sl-link-button::after {
+	content: attr(data-desc);
+	display: block;
+	font-size: 0.85rem;
+	font-weight: 400;
+	color: var(--sl-color-gray-3);
+	margin-top: 0.5rem;
+	text-align: center;
+	line-height: 1.4;
+	order: 1; /* Ensure it stays below text */
+}
+
+/* Reduce bottom padding on splash pages.
+ *
+ * Starlight emits `data-has-sidebar` as a boolean presence attribute, never
+ * `="false"` — a splash page simply omits it. Matching on its absence is the
+ * only form that selects anything; the `="false"` version matched nothing. */
+:root:not([data-has-sidebar]) {
+	--sl-main-pad: 0 0 1rem 0;
+}
+
+/* Home Footer */
+.home-footer {
+	margin-top: 5rem;
+	padding-top: 1rem;
+	border-top: 1px solid var(--sl-color-hairline);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 1rem;
+	padding-bottom: 0rem;
+}
+
+.footer-links {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1.5rem;
+	justify-content: center;
+}
+
+.footer-links a {
+	color: var(--sl-color-text-accent);
+	text-decoration: none;
+	font-size: 0.9rem;
+	transition: opacity 0.2s;
+}
+
+.footer-links a:hover {
+	opacity: 0.8;
+}
+
+.footer-version a {
+	display: inline-flex;
+	align-items: center;
+	padding: 0.25rem 0.75rem;
+	background-color: var(--sl-color-bg-nav);
+	border: 1px solid var(--sl-color-hairline);
+	border-radius: 1rem;
+	font-family: var(--sl-font-mono);
+	font-size: 0.8rem;
+	color: var(--sl-color-gray-2);
+	text-decoration: none;
+	transition: border-color 0.2s, color 0.2s;
+}
+
+.footer-version a:hover {
+	border-color: var(--sl-color-text-accent);
+	color: var(--sl-color-text-accent);
+}
+
+/* Hero Background and Tagline Adjustment */
+.hero {
+	position: relative;
+	/* Pull behind the navbar so it sticks to the top */
+	margin-top: calc(-1 * var(--sl-nav-height));
+	padding-top: calc(var(--sl-nav-height) + 2.5rem);
+	padding-bottom: 5rem;
+	/* Add rounding to the bottom of the block */
+	border-bottom-left-radius: 4rem;
+	border-bottom-right-radius: 4rem;
+	overflow: hidden;
+}
+
+.hero::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-position: center top;
+	background-size: cover;
+	background-repeat: no-repeat;
+	z-index: 0;
+	pointer-events: none;
+	/* Perfect CSS mask that guarantees 100% transparency at left, right, and bottom borders */
+	-webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 20%, black 10%, transparent 100%);
+	mask-image: radial-gradient(ellipse 50% 50% at 50% 20%, black 10%, transparent 100%);
+}
+
+html[data-theme='light'] .hero::before {
+	background-image: url('../assets/hero_bg_light.svg');
+}
+
+html[data-theme='dark'] .hero::before {
+	background-image: url('../assets/hero_bg_dark.svg');
+}
+
+/* Ensure content stays above the background */
+.hero .stack,
+.hero .actions,
+.hero .copy {
+	position: relative;
+	z-index: 1;
+}
+
+/* Adjust tagline font size to be a bit smaller and add margin */
+.hero .tagline {
+	font-size: clamp(1rem, calc(0.125rem + 1.5vw), 1.25rem);
+	margin-top: 2.5rem;
+}
+
+/* 
+ * 1. Center and enlarge search bar on Desktop
+ * 2. Adaptive toolbar: Hide site title on mobile to fit the toolbar
+ */
+header.header > .header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: nowrap;
+	width: 100%;
+}
+
+/* On Desktop */
+@media (min-width: 50rem) {
+	header.header > .header {
+		gap: 1rem;
+	}
+
+	header.header > .header > .title-wrapper {
+		flex: 1 1 0%;
+		min-width: 0;
+	}
+	
+	header.header > .header > .title-wrapper + .sl-flex {
+		flex: 1 1 0%;
+		max-width: 24rem;
+		justify-content: center;
+	}
+	
+	site-search {
+		width: 100%;
+	}
+	
+	site-search button[data-open-modal] {
+		width: 100%;
+		justify-content: space-between;
+	}
+	
+	header.header > .header > .right-group {
+		flex: 1 1 0%;
+		justify-content: flex-end;
+	}
+}
+
+/* On Mobile */
+@media (max-width: 50rem) {
+	header.header > .header {
+		gap: 0.5rem;
+	}
+	
+	/* Hide the site title to save space for the toolbar */
+	header.header > .header > .title-wrapper .site-title {
+		display: none;
+	}
+	
+	header.header > .header > .title-wrapper {
+		flex: 0 0 auto;
+	}
+	
+	header.header > .header > .title-wrapper + .sl-flex {
+		flex: 1 1 auto;
+		justify-content: flex-start;
+	}
+	
+	/* Override the sl-hidden utility class to always show the toolbar */
+	header.header > .header > .right-group.sl-hidden {
+		display: flex;
+		flex: 0 0 auto;
+		justify-content: flex-end;
+		gap: 0.5rem;
+	}
+}
+
+/*
+ * Increase rounding on search results to match the parent dialog.
+ *
+ * The dialog uses `--md3-comp-dialog-shape` (1.75rem). The theme paints result
+ * containers at `--md-sys-shape-corner-large` (1rem) via `:where()` selectors,
+ * which have zero specificity — a plain selector here wins without
+ * `!important`. Bumping them to `extra-large` (1.5rem) and keeping nested
+ * results at `large` (1rem) creates a visual hierarchy that sits inside the
+ * dialog's own curvature.
+ */
+#starlight__search .pagefind-ui__result-inner {
+	border-radius: var(--md-sys-shape-corner-extra-large);
+}
+
+#starlight__search .pagefind-ui__result-link {
+	border-radius: var(--md-sys-shape-corner-extra-large);
+}
+
+#starlight__search .pagefind-ui__result-nested {
+	border-radius: var(--md-sys-shape-corner-large);
+}
+
+/* 
+ * Remove the top-right rounding on the sidebar container (Material style override)
+ */
+#starlight__sidebar.sidebar-pane {
+	border-start-end-radius: 0;
+	border-top-right-radius: 0;
+}
+
+/* --- STYLISH TABS --- */
+starlight-tabs {
+	display: block;
+	margin-top: 1.5rem;
+}
+
+starlight-tabs .tablist-wrapper {
+	padding: 0.25rem;
+	background: var(--sl-color-bg-nav);
+	border-radius: 0.75rem;
+	margin-bottom: 1.25rem;
+	border: 1px solid var(--sl-color-hairline);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+	overflow: hidden;
+}
+
+starlight-tabs ul[role="tablist"] {
+	display: flex;
+	gap: 0.25rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	overflow-x: auto;
+	border-bottom: none;
+}
+
+starlight-tabs ul[role="tablist"] li {
+    display: flex;
+    flex: 1 1 auto;
+}
+
+starlight-tabs a[role="tab"] {
+	display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+	padding: 0.5rem 1.25rem;
+	font-weight: 600;
+	font-size: 0.95rem;
+	color: var(--sl-color-gray-3);
+	text-decoration: none;
+	border-radius: 0.5rem;
+	border: none;
+	transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+		background 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+		box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	position: relative;
+	white-space: nowrap;
+    background: transparent;
+}
+
+starlight-tabs a[role="tab"]:hover {
+	color: var(--sl-color-text);
+	background: var(--sl-color-bg-inline-code);
+}
+
+starlight-tabs a[role="tab"][aria-selected="true"] {
+	color: var(--sl-color-text-invert);
+	background: var(--sl-color-text-accent);
+	box-shadow: 0 4px 10px color-mix(in srgb, var(--sl-color-text-accent) 35%, transparent);
+}
+
+/* Add a subtle underline animation effect for unselected tabs on hover */
+starlight-tabs a[role="tab"]::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%) scaleX(0);
+    width: 40%;
+    height: 2px;
+    background: var(--sl-color-text-accent);
+    border-radius: 2px;
+    transition: transform 0.3s ease;
+}
+
+starlight-tabs a[role="tab"]:not([aria-selected="true"]):hover::after {
+    transform: translateX(-50%) scaleX(1);
+}
+
+starlight-tabs a[role="tab"][aria-selected="true"]::after {
+    display: none;
+}
+
+/* Tab Panel Fade Animation */
+starlight-tabs [role="tabpanel"] {
+	animation: tabFadeIn 0.35s ease-out forwards;
+    display: none;
+}
+
+starlight-tabs [role="tabpanel"]:not([hidden]) {
+    display: block;
+}
+
+@keyframes tabFadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(6px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* --- ENHANCED ASIDES (WARNINGS & NOTES) --- */
+.sl-markdown-content .starlight-aside {
+	border-radius: 0.75rem;
+	border: 1px solid var(--sl-color-hairline-shade);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+	margin-top: 1.5rem;
+	margin-bottom: 1.5rem;
+	position: relative;
+	overflow: hidden;
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sl-markdown-content .starlight-aside:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+
+
+.sl-markdown-content .starlight-aside__title {
+	font-weight: 700;
+	letter-spacing: 0.5px;
+	text-transform: uppercase;
+	font-size: 0.85rem;
+	margin-bottom: 0.5rem;
+}
+
+/*
+ * Asides: one hue per variant.
+ *
+ * The md3 theme repaints all four from the same seed-derived surface tones,
+ * which leaves note, tip, caution and danger nearly indistinguishable. These
+ * rules put a distinct hue back.
+ *
+ * No `!important`, and no hex literals. The theme's aside rules live in
+ * `@layer md3.components`, and unlayered CSS outranks every layer whatever its
+ * specificity — the same mechanism used further up this file. And the values
+ * are Starlight's own `--sl-color-<hue>` tokens, which already flip between
+ * light and dark, so this needs no `[data-theme]` fork. The previous version
+ * had one, plus nine hardcoded hex values and twenty `!important`s.
+ */
+.sl-markdown-content .starlight-aside--note {
+	--sl-color-asides-text-accent: var(--sl-color-blue-high);
+	--sl-color-asides-border: var(--sl-color-blue);
+}
+
+.sl-markdown-content .starlight-aside--tip {
+	--sl-color-asides-text-accent: var(--sl-color-green-high);
+	--sl-color-asides-border: var(--sl-color-green);
+}
+
+.sl-markdown-content .starlight-aside--caution {
+	--sl-color-asides-text-accent: var(--sl-color-orange-high);
+	--sl-color-asides-border: var(--sl-color-orange);
+}
+
+.sl-markdown-content .starlight-aside--danger {
+	--sl-color-asides-text-accent: var(--sl-color-red-high);
+	--sl-color-asides-border: var(--sl-color-red);
+}
+
+/*
+ * Starlight 0.41.7's aside variants are exactly note, tip, caution and danger
+ * (integrations/aside-utils.ts). There is no `--warning`; `warning` is the
+ * icon name caution uses, and the selectors written for it matched nothing.
+ */
+.sl-markdown-content .starlight-aside {
+	border: 1px solid var(--sl-color-asides-border);
+	border-inline-start: 4px solid var(--sl-color-asides-border);
+	background-color: color-mix(in srgb, var(--sl-color-asides-border) 7%, transparent);
+	color: var(--sl-color-text);
+}
+
+.sl-markdown-content .starlight-aside__title,
+.sl-markdown-content .starlight-aside__title svg {
+	color: var(--sl-color-asides-border);
+}
+
+
+

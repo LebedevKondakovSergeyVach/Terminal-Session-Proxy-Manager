@@ -1,0 +1,74 @@
+name: Deploy Astro site to GitHub Pages
+
+# Only main publishes. The site is generated from the repository's canonical
+# Markdown, so a deploy from a task or release branch would put unreviewed,
+# unreleased documentation on the public URL — and, because the build job holds
+# the Pages and OIDC tokens, would run that branch's `npm ci` lifecycle scripts
+# with them. Pull requests are gated by website.yml instead.
+on:
+  push:
+    branches: [main]
+    # The site's content comes from these paths, not just from website/.
+    paths:
+      - 'website/**'
+      - 'docs/**'
+      - 'assets/**'
+      - 'README.md'
+      - 'README.ru.md'
+      - 'CHANGELOG.md'
+      - 'CHANGELOG.ru.md'
+      - 'CONTRIBUTING.md'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+# Scoped per job below rather than here: only `deploy` needs to write.
+permissions:
+  contents: read
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout your repository
+        uses: actions/checkout@v4
+
+      # The generator's own tests are not run by withastro/action, and a
+      # deploy is the last place to discover they fail.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: website/package-lock.json
+
+      - name: Test the content generator
+        run: npm ci && npm test
+        working-directory: website
+
+      - name: Install, build, and upload your site
+        uses: withastro/action@v3
+        with:
+          path: ./website
+          package-manager: npm
+          node-version: 22
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

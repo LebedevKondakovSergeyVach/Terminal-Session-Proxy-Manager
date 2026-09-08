@@ -17,3 +17,14 @@ updates:
       action-dependencies:
         patterns:
           - "*"
+
+  # The documentation site. Without this entry nothing ever updates Astro,
+  # Starlight or sharp — `rustsec/audit-check` in ci.yml covers Cargo only.
+  - package-ecosystem: npm
+    directory: /website
+    schedule:
+      interval: weekly
+    groups:
+      npm-dependencies:
+        patterns:
+          - "*"

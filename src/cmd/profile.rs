@@ -77,16 +77,29 @@ pub fn use_profile(config: &mut AppConfig, i18n: &I18n, key: &str) -> Result<()>
     config.active_profile = key.to_string();
     config.save()?;
 
+    Ok(())
+}
+
+/// Prints a confirmation that the profile was switched.
+pub fn print_profile_switched(config: &AppConfig, i18n: &I18n) {
     if let Some(p) = config.active_profile() {
+        let is_on =
+            std::env::var_os("ALL_PROXY").is_some() || std::env::var_os("all_proxy").is_some();
+        let state_tag = if is_on {
+            format!("[{}]", i18n.t("proxy_state_on")).green().bold()
+        } else {
+            format!("[{}]", i18n.t("proxy_state_off")).dimmed()
+        };
+
         println!(
-            "{} {} ({}:{})",
+            "{} {} ({}:{}) {}",
             i18n.t("profile_switched"),
             p.name.green().bold(),
             p.host,
-            p.port
+            p.port,
+            state_tag
         );
     }
-    Ok(())
 }
 
 /// Creates or updates a profile in the configuration.
@@ -204,10 +217,15 @@ pub fn select_profile_interactive(config: &mut AppConfig, i18n: &I18n) -> Result
         .with_prompt(i18n.t("prompt_choice"))
         .default(default_idx)
         .items(&items)
+        .clear(true)
+        .report(false)
         .interact_opt();
 
     match selection {
-        Ok(Some(choice)) => use_profile(config, i18n, &profile_keys[choice])?,
+        Ok(Some(choice)) => {
+            use_profile(config, i18n, &profile_keys[choice])?;
+            print_profile_switched(config, i18n);
+        }
         // The user pressed Esc; leaving the active profile alone is correct.
         Ok(None) => {}
         // No usable TTY (piped or non-interactive): fall back to printing the
@@ -312,12 +330,7 @@ pub(crate) fn spinner(message: &str) -> ProgressBar {
 
 /// Prints the shared section rule used by the report-style commands.
 pub(crate) fn rule() {
-    println!(
-        "{}",
-        "=========================================================="
-            .cyan()
-            .bold()
-    );
+    println!("----------------------------------------------------------");
 }
 
 /// Runs the benchmark and displays a ranking table.
@@ -326,7 +339,7 @@ pub(crate) fn rule() {
 /// Currently infallible; returns `Result` for symmetry with the other commands.
 pub async fn run_benchmark(config: &AppConfig, i18n: &I18n) -> Result<()> {
     rule();
-    println!("   🚀  {}", i18n.t("benchmark_header").white().bold());
+    println!("{}", i18n.t("benchmark_header").white().bold());
     rule();
 
     let results = benchmark_profiles(config, i18n).await;

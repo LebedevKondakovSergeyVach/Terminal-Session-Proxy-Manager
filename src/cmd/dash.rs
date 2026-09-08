@@ -593,8 +593,8 @@ fn draw_profiles_tab(
     };
 
     let port_span = match snapshot.is_local_listening {
-        Some(true) => styled(format!("{} 🟢", i18n.t("dash_port_active")), Color::Green),
-        Some(false) => styled(format!("{} 🔴", i18n.t("dash_port_dead")), Color::Red),
+        Some(true) => styled(i18n.t("dash_port_active").to_string(), Color::Green),
+        Some(false) => styled(i18n.t("dash_port_dead").to_string(), Color::Red),
         None => Span::styled(
             i18n.t("dash_checking").to_string(),
             Style::default().fg(Color::DarkGray),

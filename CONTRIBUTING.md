@@ -6,12 +6,25 @@ Thanks for taking the time. This is a small project, so the process is short.
 
 Requires Rust 1.88 or newer (edition 2024). Install via [rustup](https://rustup.rs).
 
-```bash
-git clone https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager.git
-cd Terminal-Session-Proxy-Manager
-cargo build
-cargo test
-```
+<!--site:steps-->
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager.git
+   cd Terminal-Session-Proxy-Manager
+   ```
+
+2. **Build the project**
+   ```bash
+   cargo build
+   ```
+
+3. **Run the tests**
+   ```bash
+   cargo test
+   ```
+
+<!--site:/steps-->
 
 To try your build without installing it:
 
@@ -53,6 +66,27 @@ error and returning `Ok` — people write `proxy profile use "$p" || fallback`.
 **No private data in defaults.** `AppConfig::default` may reference only
 loopback addresses and well-known public endpoints.
 
+## Project Structure
+
+<!--site:filetree-->
+
+- docs/ Documentation markdown files
+- locales/
+  - en.json English translation keys
+  - ru.json Russian translation keys
+- src/
+  - cmd/ Subcommands logic (ping, monitor, etc.)
+  - config/ Config loading and defaults
+  - cli.rs CLI parsing tree (clap)
+  - main.rs Entry point
+- tests/
+  - cli.rs End-to-end binary tests
+- website/ Astro Starlight documentation site
+- AGENTS.md Rules for AI agents
+- Cargo.toml
+
+<!--site:/filetree-->
+
 ## Tests
 
 Name tests as sentences describing the guarantee — `using_an_unknown_profile_exits_non_zero`
@@ -71,7 +105,24 @@ When fixing a bug, add the test that fails without the fix.
 
 If you change commands or configuration, update `README.md` **and**
 `README.ru.md`, the matching file in `docs/` and its `.ru.md` twin, and add a
-`CHANGELOG.md` entry under `Unreleased`.
+`CHANGELOG.md` entry under `Unreleased` plus its `CHANGELOG.ru.md` twin.
+
+Those same files are the documentation website. `website/` holds an Astro
+Starlight site whose pages are generated from them, so editing one is editing
+the other. Two things follow:
+
+- Keep them plain CommonMark. They are read on GitHub as well as on the site,
+  so no JSX and no `import` line. Site-only structure — tabs, cards, steps,
+  asides — is written as `<!--site:...-->` comments, which GitHub renders as
+  nothing and the generator expands. `website/AGENTS.md` documents the syntax.
+- Verify the site still builds:
+
+  ```bash
+  cd website && npm ci && npm test && npm run build
+  ```
+
+  The build regenerates every page and fails on a dead internal link, so a
+  link to a document that has no page will stop it.
 
 ## Branching
 

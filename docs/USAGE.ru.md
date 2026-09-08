@@ -1,9 +1,33 @@
 # 📖 Справочник команд
 
-Команды, изменяющие текущую сессию (`on`, `off`, `use`, `switch`, `best`),
-работают только через shell-функцию `proxy`, которую устанавливает
-[интеграция с shell](SHELL_INTEGRATION.ru.md). Остальные доступны и по полному
-имени бинарника.
+Команды, изменяющие ваш текущий shell (`on`, `off`, `use`, `switch`, `best`),
+должны вызываться через shell-функцию `proxy`, устанавливаемую при
+[интеграции с оболочкой](SHELL_INTEGRATION.ru.md). Остальные работают и с
+полным именем бинарника.
+
+<!--site:cards stagger-->
+
+## Управление сессией
+<!--site:item icon="laptop"-->
+
+`proxy on` / `proxy off` / `proxy env`
+
+## Профили и TUI
+<!--site:item icon="list-format"-->
+
+`proxy switch` / `proxy use` / `proxy dash`
+
+## Измерения
+<!--site:item icon="rocket"-->
+
+`proxy benchmark` / `proxy best` / `proxy speedtest`
+
+## Диагностика
+<!--site:item icon="magnifier"-->
+
+`proxy status` / `proxy diagnose` / `proxy monitor`
+
+<!--site:/cards-->
 
 ## Глобальные опции
 
@@ -19,7 +43,7 @@
 
 Переменная `NO_COLOR` (любое непустое значение) отключает цветной вывод.
 
-```bash
+```bash title="Terminal" frame="terminal"
 # Рабочие и личные прокси в разных файлах
 TSPM_CONFIG=~/work-proxies.json proxy best
 terminal-session-proxy-manager --config-file ~/work-proxies.json profile list
@@ -29,7 +53,7 @@ terminal-session-proxy-manager --config-file ~/work-proxies.json profile list
 
 ## 1. Управление сессией (`on`, `off`, `env`)
 
-```bash
+```bash title="Terminal" frame="terminal"
 proxy on                     # Экспортировать переменные прокси в эту сессию
 proxy off                    # Убрать их
 terminal-session-proxy-manager env on   # Показать команды, не применяя их
@@ -47,14 +71,14 @@ terminal-session-proxy-manager env on   # Показать команды, не 
 
 ## 2. Состояние сети (`status`)
 
-```bash
+```bash title="Terminal" frame="terminal"
 proxy status         # Состояние прокси, IPv4, IPv6 и геолокация
 proxy status --json  # То же самое в машиночитаемом виде
 ```
 
 JSON пригоден для скриптов:
 
-```bash
+```bash title="Terminal" frame="terminal"
 proxy status --json | jq -r .ipv4
 ```
 
@@ -62,7 +86,7 @@ proxy status --json | jq -r .ipv4
 
 ## 3. Профили (`profile`, `use`, `switch`)
 
-```bash
+```bash title="Terminal" frame="terminal"
 proxy profile list                 # Все профили, активный отмечен
 proxy switch                       # Интерактивный выбор стрелками
 proxy use work                     # Переключение по ключу
@@ -83,13 +107,13 @@ proxy profile remove work          # Удалить
 IP, порт — ненулевым, протокол — поддерживаемым. Неизвестный ключ профиля даёт
 ненулевой код возврата, поэтому такая конструкция работает как ожидается:
 
-```bash
+```bash title="Terminal" frame="terminal"
 proxy use work || proxy best
 ```
 
 ### Импорт
 
-```bash
+```bash title="Terminal" frame="terminal"
 proxy import ./proxies.json
 proxy import https://example.com/subscription.txt
 ```
@@ -103,7 +127,7 @@ proxy import https://example.com/subscription.txt
 
 ## 4. Измерения (`benchmark`, `best`, `ping`, `speedtest`)
 
-```bash
+```bash title="Terminal" frame="terminal"
 proxy benchmark            # Задержка и доступность всех профилей
 proxy best                 # Замерить и переключиться на самый быстрый
 proxy ping                 # Задержка до эндпоинтов из config.json
@@ -118,7 +142,7 @@ proxy speedtest            # Реальная скорость загрузки
 
 ## 5. Дашборд (`dash`)
 
-```bash
+```bash title="Terminal" frame="terminal"
 proxy dash
 ```
 
@@ -141,7 +165,7 @@ shell — запускайте `proxy dash`, а не бинарник напря
 
 ## 6. Диагностика (`diagnose`, `monitor`)
 
-```bash
+```bash title="Terminal" frame="terminal"
 proxy diagnose  # Локальный сокет, переменные сессии и доступность эндпоинтов
 proxy monitor   # Проверка состояния с переключением на лучший при сбое
 ```
@@ -154,7 +178,7 @@ proxy monitor   # Проверка состояния с переключени�
 
 ## 7. Запуск одной команды (`run`)
 
-```bash
+```bash title="Terminal" frame="terminal"
 proxy run curl https://example.com
 proxy run -- curl -sS https://example.com
 proxy run npm install
@@ -168,20 +192,21 @@ proxy run npm install
 
 ## 8. Интеграция с Git (`git`)
 
-```bash
-proxy git status  # Показать текущий глобальный прокси git
-proxy git on      # Направить git на активный профиль
-proxy git off     # Убрать
+```bash title="Terminal" frame="terminal"
+proxy git status  # Показать текущий глобальный прокси для git
+proxy git on      # Направить git через активный профиль
+proxy git off     # Отключить проксирование git
 ```
 
-Записывает `http.proxy` и `https.proxy` в **глобальный** конфиг git. В отличие
-от команд сессии, это сохраняется до выполнения `git off`.
+<!--site:aside type="tip"-->
+Команда прописывает `http.proxy` и `https.proxy` в ваш **глобальный** конфигурационный файл git. В отличие от команд управления сессией, эти настройки сохраняются даже после перезапуска терминала, пока вы не выполните `proxy git off`.
+<!--site:/aside-->
 
 ---
 
 ## 9. Экспорт (`export`)
 
-```bash
+```bash title="Terminal" frame="terminal"
 proxy export envfile > .env
 proxy export docker    # Флаги --build-arg
 proxy export curl      # Флаг -x
@@ -194,7 +219,7 @@ proxy export curl      # Флаг -x
 
 ## 10. Конфигурация (`config`, `settings`, `lang`)
 
-```bash
+```bash title="Terminal" frame="terminal"
 proxy config path        # Какой config.json используется
 proxy config show        # Показать его
 proxy settings path
@@ -207,7 +232,7 @@ proxy lang ru            # Сохранить язык интерфейса
 
 ## 11. Настройка shell (`init`, `completions`, `prompt`, `debug`)
 
-```bash
+```bash title="Terminal" frame="terminal"
 terminal-session-proxy-manager init zsh          # Скрипт интеграции
 terminal-session-proxy-manager completions zsh   # Только автодополнение
 proxy prompt                                     # Индикатор для приглашения

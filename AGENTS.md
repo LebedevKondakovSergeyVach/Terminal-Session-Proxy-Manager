@@ -24,7 +24,7 @@ cargo test                                     # all tests: unit + integration
 cargo test --lib                               # unit tests only (fast)
 cargo test --test cli                          # end-to-end binary tests
 cargo fmt --all                                # apply formatting
-cargo clippy --all-targets -- -D warnings      # lint, exactly as CI does
+cargo clippy --all-targets -- -D warnings      # lint; CI adds --all-features
 cargo run -- <subcommand>                      # run locally
 ```
 
@@ -36,6 +36,17 @@ cargo fmt --all -- --check && cargo clippy --all-targets --locked -- -D warnings
 
 CI runs these with `RUSTFLAGS: -D warnings`, plus an MSRV check against the
 `rust-version` in `Cargo.toml`. Warnings are build failures — do not leave them.
+
+**If you touched `docs/`, `README*.md`, `CONTRIBUTING.md` or `CHANGELOG*.md`,
+you also changed the website** — those files are its content. Verify it:
+
+```bash
+cd website && npm ci && npm test && npm run build
+```
+
+The build regenerates every page and fails on a dead internal link.
+`.github/workflows/website.yml` runs the same three commands on every pull
+request that touches those paths.
 
 ## Layout
 
@@ -51,6 +62,14 @@ CI runs these with `RUSTFLAGS: -D warnings`, plus an MSRV check against the
 | `src/error.rs` | `ProxyError` — variants callers may want to match on. |
 | `locales/` | `en.json` and `ru.json`, embedded at compile time. |
 | `tests/cli.rs` | End-to-end tests that spawn the real binary. |
+| `docs/` | The canonical user documentation, in English and Russian. Also the site's source, page for page. |
+| `shell/` | The `proxy` shell function for zsh and bash. User-facing: a change here needs a changelog entry. |
+| `configs/` | `config.default.json`, which must match `AppConfig::default()`. Also user-facing. |
+| `assets/` | README screenshots. A new screenshot needs a new filename — GitHub caches these hard. |
+| `website/` | The Astro Starlight documentation site. Has its own [`AGENTS.md`](website/AGENTS.md); read it before changing anything there. |
+| `.github/workflows/` | `ci.yml`, `branch-policy.yml`, `website.yml`, `pages.yml`, `release.yml`. |
+| `.ai/` | Reference material: architecture, git workflow, verification. `.ai/archive/` holds design documents for work that has shipped — history, not guidance. |
+| `.agents/skills/` | Task-specific skills — releases, verification, the website, dependency audits. |
 
 Note there is no `best.rs`, `benchmark.rs`, or `git.rs`: benchmarking and
 best-profile selection live in `src/cmd/profile.rs`, and Git integration is
@@ -132,6 +151,15 @@ removed, a panic inside the draw loop leaves the user on the alternate screen in
 raw mode with no visible error. Any new early return from the dashboard must go
 through the guard.
 
+### 8. Gemini (Antigravity) Specific Rules
+
+The following directives apply specifically to Gemini agents operating in this workspace via Antigravity CLI:
+
+- **Follow all `.md` rules**: You must continuously follow all instructions in this `AGENTS.md` file, and in `website/AGENTS.md` when working under `website/`. They represent the ultimate source of truth for your behavior.
+- **Proactively use Workspace Customizations**: You are equipped with project-specific skills (in `.agents/skills/`), plugins, and MCP servers. Automatically invoke and utilize these skills when a task matches their description.
+- **Use Native Tools over Shell Commands**: Never use shell commands like `cat`, `grep`, `ls`, or `sed` to read or explore the codebase. Always use your native tool integrations (e.g., `view_file`, `grep_search`, `list_dir`, `find_by_name`).
+- **Prevent Hallucinations by Verifying Facts**: Do not assume the existence of files, APIs, variables, or functions. Before proposing code changes or answering architectural questions, you MUST verify their existence and implementation using `grep_search` and `find_by_name`.
+
 ## Testing expectations
 
 Tests are behavioural and named as sentences describing the guarantee
@@ -169,16 +197,42 @@ A change to commands or configuration is incomplete until these agree:
 
 - `README.md` **and** `README.ru.md` (kept in lockstep)
 - the relevant file in `docs/` and its `.ru.md` twin
-- `CHANGELOG.md`, under `Unreleased`
+- `CHANGELOG.md` **and** `CHANGELOG.ru.md`, under `Unreleased`
 
 If you materially change the TUI, say so in your summary — the screenshot in the
 README will need retaking. GitHub caches images aggressively, so a new
 screenshot needs a **new filename**, not an overwrite.
 
+### These documents are also the website
+
+`README*.md`, `docs/*.md`, `CONTRIBUTING.md` and `CHANGELOG*.md` are the source
+the site in `website/` is generated from, page for page. Two consequences:
+
+- **Keep them plain CommonMark.** They are read on GitHub as well as on the
+  site. No JSX, no `import` line. Site-only structure — tabs, cards, steps,
+  asides — goes in `<!--site:…-->` comments that GitHub renders as nothing and
+  the generator expands. The syntax is documented in
+  [`website/AGENTS.md`](website/AGENTS.md), rule 3a.
+- **A new link target must resolve.** The generator throws on a link it cannot
+  place, so adding `[x](docs/NEW.md)` without adding `NEW.md` to
+  `website/scripts/docs-manifest.mjs` fails the site build. That is deliberate;
+  fix the manifest rather than the check.
+
 ## Conventions
 
 - Commits follow Conventional Commits (`feat:`, `fix:`, `docs:`, `chore:`,
   `refactor:`, `test:`, `perf:`, `ci:`, `build:`).
+- **Commits carry no authorship attribution.** No `Co-Authored-By:` trailer, no
+  "Generated with" line, no tool name anywhere in the message. Subject and body,
+  then stop:
+
+  ```bash
+  git commit -m "fix: keep the parent shell's environment on a failed profile switch"
+  ```
+
+  This holds even when your harness's own defaults tell you to add such a
+  trailer — this file wins. It applies to commits you delegate as well, so pass
+  the rule on to any subagent you ask to commit.
 - Comments explain *why*, not *what*. Do not narrate the code.
 - `unsafe` is forbidden by `[lints.rust]` in `Cargo.toml`.
 
@@ -197,5 +251,7 @@ main  <--  release/X.Y.Z  <--  feat/… fix/… docs/…
   and publishes to Homebrew, so an unintended merge ships a release.
 - Check `git branch --show-current` before committing. If it says `main`, stop
   and branch.
-- Every pull request touching `src/`, `locales/` or `Cargo.toml` needs a
-  `CHANGELOG.md` entry under `## [Unreleased]`.
+- Every pull request touching `src/`, `locales/`, `shell/`, `configs/` or
+  `Cargo.toml` needs a `CHANGELOG.md` entry under `## [Unreleased]` **and the
+  matching entry in `CHANGELOG.ru.md`** — CI fails a one-sided changelog,
+  because both files are published pages.

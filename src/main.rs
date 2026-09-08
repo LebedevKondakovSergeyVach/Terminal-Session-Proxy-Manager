@@ -221,7 +221,10 @@ async fn dispatch(cli: Cli, config: &mut AppConfig, i18n: &I18n) -> Result<ExitC
         Commands::Profile(profile_cmd) => match profile_cmd {
             ProfileCommands::List => profile::list_profiles(config, i18n),
             ProfileCommands::Select => profile::select_profile_interactive(config, i18n)?,
-            ProfileCommands::Use { key } => profile::use_profile(config, i18n, &key)?,
+            ProfileCommands::Use { key } => {
+                profile::use_profile(config, i18n, &key)?;
+                profile::print_profile_switched(config, i18n);
+            }
             ProfileCommands::Set {
                 key,
                 name,

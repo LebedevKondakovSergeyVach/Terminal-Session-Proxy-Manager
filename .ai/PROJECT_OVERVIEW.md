@@ -116,7 +116,28 @@ probe is reported as a failure rather than crashing the command.
 **Exit codes are interface.** Failure means a non-zero exit, because these
 commands are used inside shell conditionals.
 
-## 5. Configuration precedence
+## 5. The documentation website
+
+`website/` holds an Astro Starlight site, published to GitHub Pages as a
+project page at `/Terminal-Session-Proxy-Manager/`, bilingual like the CLI.
+
+It is **generated**, not written. `website/scripts/sync-docs.mjs` builds every
+page from the repository's own Markdown — `README*.md`, `docs/*.md`,
+`CONTRIBUTING.md`, `CHANGELOG*.md` — listed in `scripts/docs-manifest.mjs`.
+The generated pages are Git-ignored, so the site cannot drift from its sources.
+Only four pages are hand-authored: the two home pages and the two 404 pages.
+
+The constraint that shapes the design: those sources are read on GitHub too, so
+they stay plain CommonMark. Anything the site needs and GitHub does not — tabs,
+cards, steps, asides — is written as a `<!--site:…-->` comment that GitHub
+renders as nothing and the generator expands into a Starlight component. An
+earlier attempt put the JSX straight in the documents; GitHub rendered the
+`import` line as body text and stripped the components, losing the labels held
+in their attributes.
+
+Rules for working there are in `website/AGENTS.md`.
+
+## 6. Configuration precedence
 
 - `config.json` — `--config-file` → `TSPM_CONFIG` → `config_path` from
   `settings.json` → OS config directory.
