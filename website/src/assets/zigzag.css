@@ -1,0 +1,117 @@
+.zigzag-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  margin-top: 4rem;
+}
+.zigzag-section {
+  display: flex;
+  align-items: center;
+  gap: 3rem;
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  margin-top: 0;
+  margin-bottom: 0;
+  position: relative;
+  z-index: 1;
+}
+.zigzag-reverse {
+  flex-direction: row-reverse;
+}
+.zigzag-text {
+  flex: 1;
+}
+.zigzag-text h2 {
+  font-size: 1.8rem;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: var(--sl-color-text-accent);
+}
+.zigzag-text p {
+  font-size: 1.1rem;
+  color: var(--sl-color-text);
+  line-height: 1.6;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+.zigzag-text p code {
+  font-size: 0.95em;
+}
+.zigzag-image {
+  flex: 1.4;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--sl-color-hairline);
+  display: grid;
+  grid-template-areas: "overlap";
+}
+.zigzag-image > div {
+  grid-area: overlap;
+  width: 100%;
+  line-height: 0;
+  margin: 0;
+  padding: 0;
+}
+.zigzag-image starlight-image-zoom-zoomable {
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+.zigzag-image img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+html[data-theme='light'] .theme-dark-only { 
+  opacity: 0; 
+  pointer-events: none; 
+  visibility: hidden; 
+}
+html[data-theme='dark'] .theme-light-only { 
+  opacity: 0; 
+  pointer-events: none; 
+  visibility: hidden; 
+}
+
+.connector-path {
+  width: 100%;
+  max-width: 1000px;
+  height: 80px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  margin: 20px auto;
+  z-index: 0;
+}
+.connector-svg {
+  width: 100%;
+  height: 100%;
+  stroke: var(--sl-color-text-accent);
+  fill: none;
+  stroke-width: 3;
+  stroke-dasharray: 8 8;
+  opacity: 0.6;
+}
+
+@media (max-width: 50rem) {
+  .zigzag-section, .zigzag-reverse {
+    flex-direction: column;
+    text-align: center;
+    gap: 1.5rem;
+  }
+  .connector-path {
+    height: 40px;
+  }
+  /* `preserveAspectRatio` is an SVG attribute, not a CSS property — it is set
+     on the element in index.mdx. A declaration here is dropped by the parser. */
+  .connector-svg {
+    width: 2px;
+  }
+}

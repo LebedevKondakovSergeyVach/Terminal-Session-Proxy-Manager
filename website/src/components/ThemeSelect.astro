@@ -1,16 +1,21 @@
 ---
 import { Icon } from '@astrojs/starlight/components';
+
+// The icons render `aria-hidden`, so these labels are the buttons' only
+// accessible name. They were hard-coded Russian, which an English screen-reader
+// user heard verbatim. Starlight already ships `themeSelect.*` in both locales.
+const t = Astro.locals.t;
 ---
 
 <starlight-theme-switch>
-	<div class="theme-switch-container">
-		<button data-theme-value="light" aria-label="Светлая тема" title="Светлая">
+	<div class="theme-switch-container" role="group" aria-label={t('themeSelect.accessibleLabel')}>
+		<button data-theme-value="light" aria-label={t('themeSelect.light')} title={t('themeSelect.light')}>
 			<Icon name="sun" />
 		</button>
-		<button data-theme-value="auto" aria-label="Системная тема" title="Авто">
+		<button data-theme-value="auto" aria-label={t('themeSelect.auto')} title={t('themeSelect.auto')}>
 			<Icon name="laptop" />
 		</button>
-		<button data-theme-value="dark" aria-label="Тёмная тема" title="Тёмная">
+		<button data-theme-value="dark" aria-label={t('themeSelect.dark')} title={t('themeSelect.dark')}>
 			<Icon name="moon" />
 		</button>
 	</div>
@@ -57,18 +62,23 @@ import { Icon } from '@astrojs/starlight/components';
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 	}
 	:global([data-theme='light']) button[aria-pressed="true"] {
-		background-color: white;
+		background-color: var(--sl-color-bg);
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 	}
-	:global(::view-transition-old(root)),
-	:global(::view-transition-new(root)) {
+	/*
+	 * These pseudo-elements are shared with astro-vtbot's page transitions.
+	 * Scoping the override to an attribute set only while the theme changes
+	 * keeps the circular reveal without killing navigation animations.
+	 */
+	:global([data-theme-transition]::view-transition-old(root)),
+	:global([data-theme-transition]::view-transition-new(root)) {
 		animation: none;
 		mix-blend-mode: normal;
 	}
-	:global(::view-transition-old(root)) {
+	:global([data-theme-transition]::view-transition-old(root)) {
 		z-index: 1;
 	}
-	:global(::view-transition-new(root)) {
+	:global([data-theme-transition]::view-transition-new(root)) {
 		z-index: 9999;
 	}
 </style>
@@ -113,8 +123,13 @@ import { Icon } from '@astrojs/starlight/components';
 			this.querySelectorAll('button').forEach((btn) => {
 				btn.addEventListener('click', (e) => {
 					const newTheme = btn.dataset.themeValue;
-					
-					if (!document.startViewTransition) {
+
+					// A 500ms full-viewport wipe is exactly what a reduced-motion
+					// setting asks us not to do. custom.css gates every other
+					// animation on this; the toggle used to be the exception.
+					const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+					if (!document.startViewTransition || reduceMotion) {
 						setTheme(newTheme);
 						return;
 					}
@@ -126,8 +141,13 @@ import { Icon } from '@astrojs/starlight/components';
 						Math.max(y, innerHeight - y)
 					);
 
+					document.documentElement.dataset.themeTransition = '';
 					const transition = document.startViewTransition(() => {
 						setTheme(newTheme);
+					});
+
+					transition.finished.finally(() => {
+						delete document.documentElement.dataset.themeTransition;
 					});
 
 					transition.ready.then(() => {
@@ -144,7 +164,12 @@ import { Icon } from '@astrojs/starlight/components';
 								pseudoElement: '::view-transition-new(root)',
 							}
 						);
-					});
+					})
+					// `ready` rejects whenever the transition is skipped — a
+					// hidden document, or a second click before the first
+					// settles. Nothing to do about it, but it must not surface
+					// as an unhandled rejection.
+					.catch(() => {});
 				});
 			});
 			
@@ -154,5 +179,7 @@ import { Icon } from '@astrojs/starlight/components';
 			});
 		}
 	}
-	customElements.define('starlight-theme-switch', StarlightThemeSwitch);
+	if (!customElements.get('starlight-theme-switch')) {
+		customElements.define('starlight-theme-switch', StarlightThemeSwitch);
+	}
 </script>

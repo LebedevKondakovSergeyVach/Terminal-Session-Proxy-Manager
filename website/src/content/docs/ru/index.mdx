@@ -1,34 +1,123 @@
 ---
-title: Terminal Session Proxy Manager
-description: Управление SOCKS/HTTP прокси-профилями для терминальных сессий.
+title: Добро пожаловать в Terminal Session Proxy Manager
+description: Быстрое и удобное управление прокси для вашего терминала.
 template: splash
 hero:
-  tagline: Легкое переключение прокси, профили, тестирование скорости и экспорт окружения для терминала.
+  tagline: Бесшовное управление прокси в терминале через единый бинарный файл на Rust. Выбирайте профили в интерактивном TUI-дашборде, анализируйте задержку в реальном времени и автоматически направляйте трафик через самый быстрый узел.
   actions:
     - text: Быстрый старт
-      link: /ru/guides/example/
+      link: /Terminal-Session-Proxy-Manager/ru/overview/
       icon: right-arrow
-    - text: GitHub Repository
-      link: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager
-      icon: external
+      attrs:
+        data-desc: Начало работы и базовые команды
+    - text: Документация
+      link: /Terminal-Session-Proxy-Manager/ru/installation/
       variant: minimal
+      icon: document
+      attrs:
+        data-desc: Установка и настройка
+    - text: Список изменений
+      link: /Terminal-Session-Proxy-Manager/ru/changelog/
+      variant: minimal
+      icon: list-format
+      attrs:
+        data-desc: Обновления и релизы
+    - text: GitHub
+      link: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager
+      icon: github
+      variant: minimal
+      attrs:
+        data-desc: Исходный код и баг-трекер
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
+import { Image } from 'astro:assets';
+import switchLight from '../../../assets/images/switch_light_ru.png';
+import switchDark from '../../../assets/images/switch_dark_ru.png';
+import statusLight from '../../../assets/images/status_light_ru.png';
+import statusDark from '../../../assets/images/status_dark_ru.png';
+import pingLight from '../../../assets/images/ping_light_ru.png';
+import pingDark from '../../../assets/images/ping_dark_ru.png';
+import helpLight from '../../../assets/images/help_light_ru.png';
+import helpDark from '../../../assets/images/help_dark_ru.png';
 
-## Возможности
+import '../../../assets/zigzag.css';
 
-<CardGrid>
-	<Card title="Менеджер профилей" icon="setting">
-		Создавайте, импортируйте и переключайте прокси-профили в один клик.
-	</Card>
-	<Card title="Встроенные утилиты" icon="magnifier">
-		Тестируйте скорость соединения (speedtest) и проверяйте доступность (ping).
-	</Card>
-	<Card title="Поддержка Shell" icon="laptop">
-		Автоматический экспорт переменных среды (`HTTP_PROXY`, `ALL_PROXY`) для bash и zsh.
-	</Card>
-	<Card title="TUI Интерфейс" icon="monitor">
-		Красивый терминальный интерфейс для управления профилями в интерактивном режиме.
-	</Card>
-</CardGrid>
+<div class="zigzag-container">
+
+  {/* 1. Switch */}
+  <div class="zigzag-section">
+    <div class="zigzag-text">
+      <h2>Интерактивный выбор профилей</h2>
+      <p>Профили, а не экспорты. Настройте прокси один раз, затем переключайтесь одной командой или через интерактивный выбор. Команда <code>switch</code> открывает TUI-интерфейс, где можно выбрать профиль стрелками. При нажатии Enter утилита мгновенно прокидывает <code>HTTP_PROXY</code>, <code>HTTPS_PROXY</code> и <code>ALL_PROXY</code> — а также <code>GRADLE_OPTS</code> и <code>JAVA_TOOL_OPTIONS</code> для JVM-инструментов — прямо в вашу сессию <code>zsh</code> или <code>bash</code>.</p>
+    </div>
+    <div class="zigzag-image">
+      <div class="theme-light-only"><Image src={switchLight} alt="Команда proxy switch с интерактивным списком прокси-профилей в терминале" width={1200} /></div>
+      <div class="theme-dark-only"><Image src={switchDark} alt="Команда proxy switch с интерактивным списком прокси-профилей в терминале" width={1200} /></div>
+    </div>
+  </div>
+
+  <div class="connector-path">
+    <svg class="connector-svg" viewBox="0 0 1000 80" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M 720 0 C 720 40, 280 40, 280 80" vector-effect="non-scaling-stroke" />
+    </svg>
+  </div>
+
+  {/* 2. Status */}
+  <div class="zigzag-section zigzag-reverse">
+    <div class="zigzag-text">
+      <h2>Сетевой статус и дашборд</h2>
+      <p>Проверяйте фактическую маршрутизацию трафика одной командой. Утилита <code>status</code> показывает ваши реальные внешние IPv4 и IPv6 адреса, а также провайдера и геолокацию. Для полного контроля используйте команду <code>dash</code> — интерактивный TUI-дашборд, объединяющий текущий IP, геолокацию, график задержки и переключение профилей на одном экране.</p>
+    </div>
+    <div class="zigzag-image">
+      <div class="theme-light-only"><Image src={statusLight} alt="Команда proxy status показывает внешний IP-адрес, провайдера и геолокацию" width={1200} /></div>
+      <div class="theme-dark-only"><Image src={statusDark} alt="Команда proxy status показывает внешний IP-адрес, провайдера и геолокацию" width={1200} /></div>
+    </div>
+  </div>
+
+  <div class="connector-path">
+    <svg class="connector-svg" viewBox="0 0 1000 80" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M 280 0 C 280 40, 720 40, 720 80" vector-effect="non-scaling-stroke" />
+    </svg>
+  </div>
+
+  {/* 3. Ping */}
+  <div class="zigzag-section">
+    <div class="zigzag-text">
+      <h2>Диагностика и автовосстановление</h2>
+      <p>Измеряйте реальную производительность активного маршрута. Утилиты <code>ping</code> и <code>benchmark</code> делают реальные параллельные запросы и показывают задержку каждого, так что лучший сервер видно сразу, — а команда <code>best</code> выберет его за вас. Для работы без присмотра используйте <code>monitor</code>: проверки состояния с автопереключением при отказе активного прокси.</p>
+    </div>
+    <div class="zigzag-image">
+      <div class="theme-light-only"><Image src={pingLight} alt="Команда proxy ping выводит задержку в миллисекундах для каждой цели" width={1200} /></div>
+      <div class="theme-dark-only"><Image src={pingDark} alt="Команда proxy ping выводит задержку в миллисекундах для каждой цели" width={1200} /></div>
+    </div>
+  </div>
+
+  <div class="connector-path">
+    <svg class="connector-svg" viewBox="0 0 1000 80" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M 720 0 C 720 40, 280 40, 280 80" vector-effect="non-scaling-stroke" />
+    </svg>
+  </div>
+
+
+  {/* 4. Help */}
+  <div class="zigzag-section zigzag-reverse">
+    <div class="zigzag-text">
+      <h2>Автономная утилита на Rust</h2>
+      <p>Единый бинарный файл на Rust, не требующий тяжёлых сред выполнения — ни Node.js, ни Python. Мгновенный запуск, простая конфигурация в JSON и строгая обработка ошибок. Нужно передать настройки другим инструментам? Команда <code>export</code> подготовит конфиги для Docker, cURL, Git, <code>.env</code> и JVM-сборок — с корректным экранированием для shell.</p>
+    </div>
+    <div class="zigzag-image">
+      <div class="theme-light-only"><Image src={helpLight} alt="Вывод proxy --help со списком всех подкоманд и их описаний" width={1200} /></div>
+      <div class="theme-dark-only"><Image src={helpDark} alt="Вывод proxy --help со списком всех подкоманд и их описаний" width={1200} /></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="home-footer">
+  <div class="footer-links">
+    <p style="color: var(--sl-color-gray-3); margin: 0; font-size: 0.9rem;">Распространяется под лицензией <a href="https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/blob/main/LICENSE">AGPL-3.0</a>. Разработано <a href="https://github.com/LebedevKondakovSergeyVach">Lebedev-Kondakov Sergey</a>.</p>
+  </div>
+  <div class="footer-version">
+    <a href={`https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/releases/tag/v${import.meta.env.PUBLIC_TSPM_VERSION}`}>Terminal Session Proxy Manager v{import.meta.env.PUBLIC_TSPM_VERSION}</a>
+  </div>
+</div>

@@ -110,6 +110,8 @@ impl Default for AppConfig {
         let ping_targets = [
             ("Google", "https://www.google.com"),
             ("GitHub", "https://github.com"),
+            ("OpenAI", "https://status.openai.com/api/v2/status.json"),
+            ("Anthropic", "https://www.anthropic.com"),
             ("Cloudflare", "https://1.1.1.1"),
         ]
         .map(|(name, url)| PingTarget {

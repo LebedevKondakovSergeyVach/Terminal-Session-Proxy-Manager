@@ -15,7 +15,7 @@ const ASSUMED_PAYLOAD_BYTES: u64 = 2 * 1024 * 1024;
 /// Returns an error if the HTTP client cannot be constructed.
 pub async fn run_speedtest(config: &AppConfig, i18n: &I18n) -> Result<()> {
     rule();
-    println!("   🚀  {}", i18n.t("speedtest_header").white().bold());
+    println!("{}", i18n.t("speedtest_header").white().bold());
     rule();
 
     let proxy_env = env::var("ALL_PROXY")

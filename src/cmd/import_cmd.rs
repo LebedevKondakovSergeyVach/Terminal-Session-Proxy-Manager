@@ -14,7 +14,7 @@ use url::Url;
 /// Returns an error if the source cannot be read, parsed, or saved.
 pub async fn import_profiles(config: &mut AppConfig, i18n: &I18n, source: &str) -> Result<()> {
     rule();
-    println!("   📥 {}", i18n.t("import_header").white().bold());
+    println!("{}", i18n.t("import_header").white().bold());
     rule();
     println!("{} {}", i18n.t("import_source"), source.yellow());
     println!();

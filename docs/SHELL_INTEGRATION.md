@@ -6,20 +6,22 @@ what the binary printed. Without it, `proxy on` cannot affect your session.
 
 ## Setup
 
-**Zsh** (`~/.zshrc`):
+<!--site:steps-->
 
-```zsh
-eval "$(terminal-session-proxy-manager init zsh)"
-```
+1. **Add the init script to Zsh** (`~/.zshrc`):
+   ```zsh
+   eval "$(terminal-session-proxy-manager init zsh)"
+   ```
 
-**Bash** (`~/.bashrc`):
+2. **Or to Bash** (`~/.bashrc`):
+   ```bash
+   eval "$(terminal-session-proxy-manager init bash)"
+   ```
 
-```bash
-eval "$(terminal-session-proxy-manager init bash)"
-```
+3. **Restart your terminal** or `source` the file. This also installs tab
+   completion, so a separate `completions` step is unnecessary.
 
-Then restart your terminal or `source` the file. This also installs tab
-completion, so a separate `completions` step is unnecessary.
+<!--site:/steps-->
 
 > Compatible with Powerlevel10k instant prompt — nothing is printed at startup.
 
@@ -30,7 +32,32 @@ files are generated from `init`, but the `eval` form can never go stale.
 
 ---
 
-## What you get
+## How it works
+
+<!--site:aside type="note"-->
+A background process cannot modify its parent shell's environment. This is why running the binary directly cannot export variables into your active session.
+<!--site:/aside-->
+
+To solve this, the `proxy` shell function wraps the Rust binary:
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Shell as Zsh / Bash
+    participant Proxy as Rust Binary
+    
+    User->>Shell: proxy switch
+    Shell->>Proxy: Execute binary
+    Proxy-->>Shell: Prints "export HTTP_PROXY=..."
+    Shell->>Shell: eval() applies variables
+    Shell-->>User: Environment Updated
+```
+
+This ensures that your terminal session receives the environment variables immediately.
+
+---
+
+## What you get <!--site:badge text="Core" variant="tip"-->
 
 The `proxy` function forwards anything it does not handle itself to the binary,
 so `proxy <anything>` works.

@@ -14,18 +14,25 @@ which ones are in use.
 
 **`config.json`**
 
+<!--site:steps-->
+
 1. `--config-file <PATH>`
 2. `TSPM_CONFIG`
-3. `config_path` in `settings.json` — a relative value is resolved against the
-   directory holding `settings.json`, not your working directory
+3. `config_path` in `settings.json` — a relative value is resolved against the directory holding `settings.json`, not your working directory
 4. The OS config directory above
 
+<!--site:/steps-->
+
 **`settings.json`**
+
+<!--site:steps-->
 
 1. `--settings-file <PATH>`
 2. `TSPM_SETTINGS`
 3. The OS config directory above
 4. `./settings.json` in the working directory
+
+<!--site:/steps-->
 
 The working-directory entry is last on purpose. `settings.json` is a common
 filename, and letting any directory you happen to be in outrank your own
@@ -40,7 +47,7 @@ overwritten, so a typo cannot cost you your profiles.
 
 ## 1. `settings.json`
 
-```json
+```json title="settings.json"
 {
   "config_path": null,
   "lang": "ru"
@@ -58,7 +65,7 @@ Edit it with `proxy settings set --config-path ~/proxies.json` or `proxy lang en
 
 ## 2. `config.json`
 
-```json
+```json title="config.json"
 {
   "active_profile": "work",
   "profiles": {

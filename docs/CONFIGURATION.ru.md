@@ -1,31 +1,38 @@
-# ⚙️ Конфигурация
+# ⚙️ Настройки
 
-Два JSON-файла. Точные используемые пути покажут `proxy config path` и
-`proxy settings path`.
+Два файла JSON. Команды `proxy config path` и `proxy settings path` точно
+показывают, какие именно файлы используются в данный момент.
 
-## Расположение файлов
+## Где хранятся файлы
 
-| ОС | Каталог |
+| ОС | Директория |
 | :--- | :--- |
 | macOS | `~/Library/Application Support/terminal-session-proxy-manager/` |
-| Linux | `~/.config/terminal-session-proxy-manager/` (учитывает `XDG_CONFIG_HOME`) |
+| Linux | `~/.config/terminal-session-proxy-manager/` (учитывается `XDG_CONFIG_HOME`) |
 
-### Порядок разрешения
+### Порядок разрешения путей
 
 **`config.json`**
 
-1. `--config-file <ПУТЬ>`
-2. `TSPM_CONFIG`
-3. `config_path` из `settings.json` — относительный путь разрешается
-   относительно каталога с `settings.json`, а не текущего рабочего каталога
-4. Системный каталог конфигурации выше
+<!--site:steps-->
+
+1. Флаг `--config-file <ПУТЬ>`
+2. Переменная `TSPM_CONFIG`
+3. Поле `config_path` в `settings.json` — относительный путь разрешается относительно директории, в которой находится `settings.json`, а не относительно текущей рабочей директории.
+4. Системная директория настроек (см. выше)
+
+<!--site:/steps-->
 
 **`settings.json`**
 
-1. `--settings-file <ПУТЬ>`
-2. `TSPM_SETTINGS`
-3. Системный каталог конфигурации выше
-4. `./settings.json` в текущем рабочем каталоге
+<!--site:steps-->
+
+1. Флаг `--settings-file <ПУТЬ>`
+2. Переменная `TSPM_SETTINGS`
+3. Системная директория настроек (см. выше)
+4. Файл `./settings.json` в текущей рабочей директории
+
+<!--site:/steps-->
 
 Рабочий каталог намеренно стоит последним. `settings.json` — распространённое
 имя файла, и если бы любой каталог, в котором вы оказались, имел приоритет над
@@ -41,7 +48,7 @@
 
 ## 1. `settings.json`
 
-```json
+```json title="settings.json"
 {
   "config_path": null,
   "lang": "ru"
@@ -60,7 +67,7 @@
 
 ## 2. `config.json`
 
-```json
+```json title="config.json"
 {
   "active_profile": "work",
   "profiles": {

@@ -11,7 +11,7 @@ use std::time::Duration;
 /// Returns an error if the replacement profile cannot be saved.
 pub async fn run_monitor(config: &mut AppConfig, i18n: &I18n) -> Result<()> {
     rule();
-    println!("   🛡️  {}", i18n.t("monitor_header").white().bold());
+    println!("{}", i18n.t("monitor_header").white().bold());
     rule();
 
     let pb = spinner(i18n.t("spinner_monitor"));

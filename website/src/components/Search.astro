@@ -1,0 +1,288 @@
+---
+import Default from '@astrojs/starlight/components/Search.astro';
+---
+
+<Default {...Astro.props} />
+
+<script>
+	// Quick links shown while the search box is empty.
+	//
+	// The panel is a SIBLING of Pagefind's drawer, not a child of it. Pagefind
+	// owns the drawer and hides it (`pagefind-ui__hidden`) whenever the query is
+	// empty — which is exactly when these links should show. An earlier version
+	// injected the panel inside the drawer and then forced the drawer open with
+	// `style.setProperty(..., 'important')` while leaving the hidden class on the
+	// element, so the same piece of state had two owners and a MutationObserver
+	// to keep them in step. As a sibling it needs neither: one `:has()` rule in
+	// the stylesheet below does the whole job.
+	const setupSearchEnhancements = () => {
+		const dialog = document.querySelector('site-search dialog');
+		if (!dialog) return;
+
+		const isRu = (document.documentElement.lang || 'en') === 'ru';
+
+		const observer = new MutationObserver(() => {
+			if (!document.querySelector('.search-suggestions') && document.querySelector('.pagefind-ui__drawer')) {
+				injectSuggestions(isRu, dialog);
+			}
+		});
+
+		observer.observe(dialog, { childList: true, subtree: true });
+	};
+
+	const injectSuggestions = (isRu, dialog) => {
+		const drawer = document.querySelector('.pagefind-ui__drawer');
+		if (!drawer || document.querySelector('.search-suggestions')) return;
+
+		// `BASE_URL` carries a trailing slash and comes from the same `base` as
+		// everything else. The base literal is spelled out in hand-authored
+		// `.mdx` because starlight-links-validator re-checks those and fails the
+		// build if it drifts — it never sees a bundled client script, so here the
+		// literal would 404 silently instead.
+		const base = import.meta.env.BASE_URL;
+		const links = isRu
+			? [
+					{ title: 'Установка', desc: 'Как установить и запустить', url: `${base}ru/installation/` },
+					{ title: 'Конфигурация', desc: 'Настройка профилей', url: `${base}ru/configuration/` },
+					{ title: 'Использование', desc: 'Команды и запуск', url: `${base}ru/usage/` },
+					{ title: 'Shell Интеграция', desc: 'Настройка zsh и bash', url: `${base}ru/shell-integration/` },
+				]
+			: [
+					{ title: 'Installation', desc: 'How to install and run', url: `${base}installation/` },
+					{ title: 'Configuration', desc: 'Profiles and settings setup', url: `${base}configuration/` },
+					{ title: 'Usage', desc: 'Running proxy and commands', url: `${base}usage/` },
+					{ title: 'Shell Integration', desc: 'Setup for zsh and bash', url: `${base}shell-integration/` },
+				];
+
+		const suggestions = document.createElement('nav');
+		suggestions.className = 'search-suggestions';
+		suggestions.setAttribute('aria-label', isRu ? 'Быстрые ссылки' : 'Quick links');
+
+		const heading = document.createElement('p');
+		heading.className = 'suggestions-header';
+		heading.textContent = isRu ? 'Быстрые ссылки' : 'Quick Links';
+		suggestions.append(heading);
+
+		const list = document.createElement('div');
+		list.className = 'suggestions-list';
+		for (const link of links) {
+			const card = document.createElement('a');
+			card.className = 'suggestion-card';
+			card.href = link.url;
+
+			const title = document.createElement('span');
+			title.className = 'suggestion-title';
+			title.textContent = link.title;
+
+			const desc = document.createElement('span');
+			desc.className = 'suggestion-desc';
+			desc.textContent = link.desc;
+
+			// Built as nodes rather than an innerHTML string: these titles are
+			// ordinary text and must stay text, whatever ends up in the list.
+			card.append(title, desc);
+			card.addEventListener('click', () => {
+				if (typeof dialog.close === 'function') dialog.close();
+				const input = document.querySelector('.pagefind-ui__search-input');
+				if (input) input.value = '';
+			});
+			list.append(card);
+		}
+
+		suggestions.append(list);
+		drawer.after(suggestions);
+	};
+
+	// Astro compiles this to a deferred module script, so it runs after parsing
+	// and `readyState` is never 'loading' — a DOMContentLoaded branch here would
+	// be dead code.
+	setupSearchEnhancements();
+</script>
+
+<style is:global>
+	/* Background blur for the search modal */
+	site-search dialog::backdrop {
+		backdrop-filter: blur(8px) saturate(1.2);
+		background-color: color-mix(in srgb, var(--sl-color-backdrop-overlay) 70%, transparent);
+	}
+
+	/* Search Button Animations */
+	site-search > button {
+		transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.2s cubic-bezier(0.2, 0, 0, 1), background-color 0.2s ease;
+	}
+	site-search > button:hover {
+		transform: translateY(-1px);
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+	}
+	site-search > button:active {
+		transform: translateY(1px) scale(0.98);
+		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+	}
+
+	/* --- Enhanced Quick Links (Cards) --- */
+	.search-suggestions {
+		padding: 1rem 0;
+		width: 100%;
+	}
+
+	.suggestions-header {
+		color: var(--sl-color-text-accent);
+		text-transform: uppercase;
+		letter-spacing: 1px;
+		margin-bottom: 1rem;
+		font-size: 0.8rem;
+		font-weight: 700;
+	}
+
+	.suggestions-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+		width: 100%;
+	}
+
+	.suggestion-card {
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+		padding: 1rem;
+		text-decoration: none;
+		background: var(--md-sys-color-surface-container, var(--sl-color-bg-nav));
+		border: 1px solid var(--sl-color-hairline-shade);
+		border-radius: 1rem;
+		transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.2s, background 0.2s, border-color 0.2s;
+	}
+
+	.suggestion-title {
+		font-weight: 600;
+		font-size: 0.95rem;
+		color: var(--sl-color-text);
+		margin-bottom: 0.25rem;
+		transition: color 0.2s;
+	}
+
+	.suggestion-desc {
+		font-size: 0.8rem;
+		color: var(--sl-color-gray-3);
+		line-height: 1.4;
+		transition: color 0.2s;
+	}
+
+	.suggestion-card:hover,
+	.suggestion-card:focus-visible {
+		transform: translateY(-2px);
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+		background: var(--md-sys-color-surface-container-high, var(--sl-color-gray-6));
+		border-color: var(--sl-color-text-accent);
+		outline: none;
+	}
+	.suggestion-card:hover .suggestion-title,
+	.suggestion-card:focus-visible .suggestion-title {
+		color: var(--sl-color-text-accent);
+	}
+
+	.suggestion-card:active {
+		transform: translateY(0) scale(0.98);
+		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+	}
+
+	#starlight__search .pagefind-ui__search-clear {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	/* --- Unified Interactive Behaviors for Search Results --- */
+	#starlight__search .pagefind-ui__result-title:not(:where(.pagefind-ui__result-nested *)),
+	#starlight__search .pagefind-ui__result-nested {
+		transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.2s, background-color 0.2s, border-color 0.2s;
+		border: 1px solid transparent;
+	}
+
+	#starlight__search .pagefind-ui__result-title:not(:where(.pagefind-ui__result-nested *)) {
+		border-radius: var(--md-sys-shape-corner-extra-large, 1.5rem);
+	}
+
+	#starlight__search .pagefind-ui__result-nested {
+		border-radius: var(--md-sys-shape-corner-large, 1rem);
+	}
+
+	#starlight__search .pagefind-ui__result-title:not(:where(.pagefind-ui__result-nested *)):hover,
+	#starlight__search .pagefind-ui__result-title:not(:where(.pagefind-ui__result-nested *)):focus-within,
+	#starlight__search .pagefind-ui__result-nested:hover,
+	#starlight__search .pagefind-ui__result-nested:focus-within {
+		background-color: var(--sl-color-gray-6);
+		border-color: var(--sl-color-text-accent);
+		outline: none;
+		transform: translateY(-2px);
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+	}
+
+	#starlight__search .pagefind-ui__result-title:not(:where(.pagefind-ui__result-nested *)):active,
+	#starlight__search .pagefind-ui__result-nested:active {
+		transform: translateY(0) scale(0.98);
+		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+	}
+
+	/* Text color change on hover/focus */
+	#starlight__search .pagefind-ui__result-title:not(:where(.pagefind-ui__result-nested *)) .pagefind-ui__result-link,
+	#starlight__search .pagefind-ui__result-nested .pagefind-ui__result-link {
+		transition: color 0.2s;
+	}
+	
+	/* Remove native square outline that clashes with the card border */
+	#starlight__search .pagefind-ui__result-title:not(:where(.pagefind-ui__result-nested *)) .pagefind-ui__result-link:focus-visible,
+	#starlight__search .pagefind-ui__result-nested .pagefind-ui__result-link:focus-visible {
+		outline: none;
+	}
+	
+	#starlight__search .pagefind-ui__result-title:not(:where(.pagefind-ui__result-nested *)):hover .pagefind-ui__result-link,
+	#starlight__search .pagefind-ui__result-title:not(:where(.pagefind-ui__result-nested *)):focus-within .pagefind-ui__result-link,
+	#starlight__search .pagefind-ui__result-nested:hover .pagefind-ui__result-link,
+	#starlight__search .pagefind-ui__result-nested:focus-within .pagefind-ui__result-link {
+		color: var(--sl-color-text-accent);
+	}
+
+	#starlight__search .pagefind-ui__result {
+		padding: 0.5rem;
+		border-radius: calc(var(--sl-search-corners) + 0.25rem);
+		transition: background-color 0.2s;
+	}
+
+	/* --- Enhanced "Results for..." Message --- */
+	#starlight__search .pagefind-ui__message {
+		text-align: center;
+		padding: 1.5rem 1rem;
+		margin: 1.5rem 0;
+		background: var(--md-sys-color-surface-container-low, var(--sl-color-gray-6));
+		border-radius: 1rem;
+		border: 1px dashed var(--sl-color-hairline);
+		color: var(--sl-color-text-accent);
+		font-family: var(--sl-font);
+		font-weight: 600;
+		font-size: 1.05rem;
+		letter-spacing: 0.25px;
+		box-shadow: inset 0 2px 8px rgba(0,0,0,0.02);
+	}
+</style>
+
+<style is:global>
+	/*
+	 * Quick links are visible exactly while Pagefind has the drawer hidden,
+	 * i.e. while the query is empty. Pagefind remains the only writer of that
+	 * class; this only reads it.
+	 */
+	#starlight__search .search-suggestions {
+		display: none;
+	}
+	#starlight__search:has(.pagefind-ui__drawer.pagefind-ui__hidden) .search-suggestions {
+		display: block;
+	}
+</style>
+
+<style is:global>
+	/* Prevent modal jittering when results are momentarily cleared during search */
+	#starlight__search .pagefind-ui__results-area {
+		min-height: 50vh;
+	}
+</style>

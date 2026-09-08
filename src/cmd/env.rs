@@ -1,13 +1,15 @@
 use crate::cli::EnvMode;
 use crate::config::{AppConfig, I18n};
-use crate::proxy_env::{export_statements, shell_quote, unset_statement};
+use crate::proxy_env::{export_statements, unset_statement};
 use anyhow::{Result, anyhow};
 
 /// Prints the shell statements the caller's shell will evaluate.
 ///
-/// Everything printed here is executed by that shell, so every interpolated
-/// value goes through [`shell_quote`] — including the status message, which
-/// embeds a profile name straight from `config.json`.
+/// Everything printed here is executed by that shell. Nothing is interpolated
+/// at this level: the statements come from [`export_statements`], which quotes
+/// every profile field through `proxy_env::shell_quote` before it can reach a
+/// shell. This function prints them and nothing else — no status line, so no
+/// second path a profile name could travel down unquoted.
 ///
 /// # Errors
 /// Returns an error when no profile is active. Exiting zero here would let
@@ -24,18 +26,9 @@ pub fn print_env_commands(mode: &EnvMode, config: &AppConfig, i18n: &I18n) -> Re
             for statement in statements {
                 println!("{statement}");
             }
-
-            if let Some(profile) = config.active_profile() {
-                let message = i18n.format(
-                    "env_on_msg",
-                    &[&profile.name, &profile.host, &profile.port.to_string()],
-                );
-                println!("echo {};", shell_quote(&message));
-            }
         }
         EnvMode::Off => {
             println!("{}", unset_statement());
-            println!("echo {};", shell_quote(i18n.t("env_off_msg")));
         }
     }
     Ok(())
