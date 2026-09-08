@@ -1,5 +1,3 @@
-import { Steps } from '@astrojs/starlight/components';
-
 # ⚙️ Настройки
 
 Два файла JSON. Команды `proxy config path` и `proxy settings path` точно
@@ -16,25 +14,25 @@ import { Steps } from '@astrojs/starlight/components';
 
 **`config.json`**
 
-<Steps>
+<!--site:steps-->
 
 1. Флаг `--config-file <ПУТЬ>`
 2. Переменная `TSPM_CONFIG`
 3. Поле `config_path` в `settings.json` — относительный путь разрешается относительно директории, в которой находится `settings.json`, а не относительно текущей рабочей директории.
 4. Системная директория настроек (см. выше)
 
-</Steps>
+<!--site:/steps-->
 
 **`settings.json`**
 
-<Steps>
+<!--site:steps-->
 
 1. Флаг `--settings-file <ПУТЬ>`
 2. Переменная `TSPM_SETTINGS`
 3. Системная директория настроек (см. выше)
 4. Файл `./settings.json` в текущей рабочей директории
 
-</Steps>
+<!--site:/steps-->
 
 Рабочий каталог намеренно стоит последним. `settings.json` — распространённое
 имя файла, и если бы любой каталог, в котором вы оказались, имел приоритет над

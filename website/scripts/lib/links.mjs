@@ -41,14 +41,14 @@ function isExternal(href) {
  * Throws on anything unrecognised. The generator this replaces fell through to
  * the original text, which is how `href="CHANGELOG.md"` reached production.
  *
- * The root documents (`README.ru.md` and friends) link to their targets by
- * the English filename regardless of the source's own locale — there is no
- * `CHANGELOG.ru.md`-shaped link in the Markdown, just `CHANGELOG.md`. So a
- * Russian source resolving to a page that also exists in Russian prefers that
- * Russian twin (matched by slug); a target with no Russian twin — like
- * `contributing`, where only `CONTRIBUTING.md` exists — still resolves to the
- * English page via Starlight's own locale fallback. An English source always
- * resolves to the page the map already names, unchanged.
+ * A Russian source that resolves to an English page prefers that page's
+ * Russian twin, matched by slug. Both link spellings occur in the sources —
+ * `README.ru.md` links `docs/USAGE.ru.md` directly, but `CONTRIBUTING.md` and
+ * the changelogs are linked by their English filename — so the preference
+ * makes the two behave the same. A target with no Russian twin, like
+ * `contributing`, still resolves to the English page via Starlight's own
+ * locale fallback. An English source always resolves to the page the map
+ * already names, unchanged.
  */
 export function resolveLink(href, sourcePath, pageMap) {
 	if (href.startsWith('#') || isExternal(href)) return href;
@@ -93,7 +93,7 @@ export function resolveLink(href, sourcePath, pageMap) {
  * the same character at least as long. An unterminated fence runs to the end
  * of the document — code, not a truncation to fix up here.
  */
-function splitFencedBlocks(markdown) {
+export function splitFencedBlocks(markdown) {
 	const segments = [];
 	const fenceStartRe = /^ {0,3}(`{3,}|~{3,})[^\n]*$/;
 	const len = markdown.length;
@@ -240,6 +240,16 @@ function rewriteTextRun(text, entry, pageMap, assetPrefix) {
 	let i = 0;
 
 	while (i < text.length) {
+		// `\[` is literal text, not a link opener. findMatchingBracket already
+		// honours the escape; without the same rule here a documented Markdown
+		// example (`\[Unreleased\]`) reaches resolveLink and fails the build
+		// with "add it to the manifest" for something that is not a link.
+		if (text[i] === '\\') {
+			out += text.slice(i, i + 2);
+			i += 2;
+			continue;
+		}
+
 		const codeEnd = matchInlineCode(text, i);
 		if (codeEnd !== -1) {
 			out += text.slice(i, codeEnd);

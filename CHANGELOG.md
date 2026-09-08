@@ -14,6 +14,17 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - **CLI**: The interactive profile switcher (`proxy switch`) now shows the `[ON]` / `[OFF]` state and clears the selection menu on success.
 - **CLI**: The `ping` command output highlights HTTP 2XX responses in green and others in yellow for easier reading.
 - **Config**: Added OpenAI and Anthropic to the default `ping_targets`.
+- **Docs**: A pull-request gate for the documentation site (`.github/workflows/website.yml`) runs the generator's tests, builds the site and validates every internal link.
+
+### Changed
+- **CLI**: `proxy on` and `proxy off` no longer print a confirmation line. They emit only the shell statements to be evaluated, so `eval "$(proxy env on)"` stays silent. Scripts that parsed that confirmation need updating.
+- **CLI**: Emoji were removed from the command and dashboard output; the `ping` status labels are now localised rather than fixed English.
+- **CLI**: The section separator printed between report blocks is a plain rule instead of a bold cyan one.
+- **Docs**: The canonical documents in `docs/` and `CONTRIBUTING.md` are plain CommonMark again. The site's interactive components are expressed as `<!--site:…-->` comments that GitHub ignores and the generator expands, so the same file reads correctly in both places.
+- **CI**: GitHub Pages deploys from `main` only, and no longer from a release or task branch.
+
+### Removed
+- **CLI**: The unused `env_on_msg` and `env_off_msg` translation keys.
 
 ## [2.2.2] — 2026-08-21
 

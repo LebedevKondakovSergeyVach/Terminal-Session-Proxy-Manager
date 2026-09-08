@@ -8,7 +8,12 @@ import starlightLinksValidator from 'starlight-links-validator';
 import starlightImageZoom from 'starlight-image-zoom';
 import starlightLlmsTxt from 'starlight-llms-txt';
 
-import { SITE, BASE } from './site.config.mjs';
+import { SITE, BASE, readVersion } from './site.config.mjs';
+
+// Read here, in Node, and hand it to the pages as an env var: `site.config.mjs`
+// is also imported by bundled `.mdx`, where a relative file read would resolve
+// against the bundle rather than the source tree.
+process.env.PUBLIC_TSPM_VERSION = readVersion();
 
 // https://astro.build/config
 export default defineConfig({

@@ -51,13 +51,13 @@ import '../../assets/zigzag.css';
       <p>Profiles, not exports. Name your proxies once, then switch with a single command or use the interactive picker. The <code>switch</code> command opens a TUI where you can navigate your predefined proxy profiles using arrow keys. Once selected, it instantly injects the correct <code>HTTP_PROXY</code>, <code>HTTPS_PROXY</code>, and <code>ALL_PROXY</code> variables directly into your active shell session, supporting both <code>zsh</code> and <code>bash</code>.</p>
     </div>
     <div class="zigzag-image">
-      <div class="theme-light-only"><Image src={switchLight} alt="Switch Light" /></div>
-      <div class="theme-dark-only"><Image src={switchDark} alt="Switch Dark" /></div>
+      <div class="theme-light-only"><Image src={switchLight} alt="The proxy switch command showing an interactive list of proxy profiles in the terminal" width={1200} /></div>
+      <div class="theme-dark-only"><Image src={switchDark} alt="The proxy switch command showing an interactive list of proxy profiles in the terminal" width={1200} /></div>
     </div>
   </div>
 
   <div class="connector-path">
-    <svg class="connector-svg" viewBox="0 0 1000 80" preserveAspectRatio="none">
+    <svg class="connector-svg" viewBox="0 0 1000 80" preserveAspectRatio="none" aria-hidden="true">
       <path d="M 720 0 C 720 40, 280 40, 280 80" vector-effect="non-scaling-stroke" />
     </svg>
   </div>
@@ -69,13 +69,13 @@ import '../../assets/zigzag.css';
       <p>Verify your traffic routing with a single command. The <code>status</code> tool displays your actual external IPv4 and IPv6 addresses, along with your ISP and geolocation data. For a complete overview, the interactive <code>dash</code> command combines live IP, geolocation, a latency sparkline, and profile switching into a single TUI screen.</p>
     </div>
     <div class="zigzag-image">
-      <div class="theme-light-only"><Image src={statusLight} alt="Status Light" /></div>
-      <div class="theme-dark-only"><Image src={statusDark} alt="Status Dark" /></div>
+      <div class="theme-light-only"><Image src={statusLight} alt="The proxy status command reporting the external IP address, ISP and geolocation" width={1200} /></div>
+      <div class="theme-dark-only"><Image src={statusDark} alt="The proxy status command reporting the external IP address, ISP and geolocation" width={1200} /></div>
     </div>
   </div>
 
   <div class="connector-path">
-    <svg class="connector-svg" viewBox="0 0 1000 80" preserveAspectRatio="none">
+    <svg class="connector-svg" viewBox="0 0 1000 80" preserveAspectRatio="none" aria-hidden="true">
       <path d="M 280 0 C 280 40, 720 40, 720 80" vector-effect="non-scaling-stroke" />
     </svg>
   </div>
@@ -87,13 +87,13 @@ import '../../assets/zigzag.css';
       <p>Measure the real-world performance of your active route. The <code>ping</code> and <code>benchmark</code> commands test connectivity in parallel and can automatically select the best profile. They measure TCP handshake times and overall latency. Additionally, the <code>monitor</code> command provides auto-healing by performing health checks and automatically failing over when the active proxy dies.</p>
     </div>
     <div class="zigzag-image">
-      <div class="theme-light-only"><Image src={pingLight} alt="Ping Light" /></div>
-      <div class="theme-dark-only"><Image src={pingDark} alt="Ping Dark" /></div>
+      <div class="theme-light-only"><Image src={pingLight} alt="The proxy ping command listing latency in milliseconds for each configured endpoint" width={1200} /></div>
+      <div class="theme-dark-only"><Image src={pingDark} alt="The proxy ping command listing latency in milliseconds for each configured endpoint" width={1200} /></div>
     </div>
   </div>
 
   <div class="connector-path">
-    <svg class="connector-svg" viewBox="0 0 1000 80" preserveAspectRatio="none">
+    <svg class="connector-svg" viewBox="0 0 1000 80" preserveAspectRatio="none" aria-hidden="true">
       <path d="M 720 0 C 720 40, 280 40, 280 80" vector-effect="non-scaling-stroke" />
     </svg>
   </div>
@@ -106,8 +106,8 @@ import '../../assets/zigzag.css';
       <p>Distributed as a single standalone binary compiled from Rust, requiring no heavy runtimes. It features instant startup times, robust JSON configuration, and strict error handling. Need to share settings? Use the <code>export</code> command to generate configurations for Docker, cURL, Git, <code>.env</code> files, and JVM build tooling—with correct shell quoting.</p>
     </div>
     <div class="zigzag-image">
-      <div class="theme-light-only"><Image src={helpLight} alt="Help Light" /></div>
-      <div class="theme-dark-only"><Image src={helpDark} alt="Help Dark" /></div>
+      <div class="theme-light-only"><Image src={helpLight} alt="The proxy --help output listing every subcommand and its description" width={1200} /></div>
+      <div class="theme-dark-only"><Image src={helpDark} alt="The proxy --help output listing every subcommand and its description" width={1200} /></div>
     </div>
   </div>
 
@@ -118,6 +118,6 @@ import '../../assets/zigzag.css';
     <p style="color: var(--sl-color-gray-3); margin: 0; font-size: 0.9rem;">Released under the <a href="https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/blob/main/LICENSE">AGPL-3.0 License</a>. Developed by <a href="https://github.com/LebedevKondakovSergeyVach">Lebedev-Kondakov Sergey</a>.</p>
   </div>
   <div class="footer-version">
-    <a href="https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/releases/tag/v2.2.2" id="version-link" data-version="v2.2.2">Terminal Session Proxy Manager v2.2.2</a>
+    <a href={`https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/releases/tag/v${import.meta.env.PUBLIC_TSPM_VERSION}`}>Terminal Session Proxy Manager v{import.meta.env.PUBLIC_TSPM_VERSION}</a>
   </div>
 </div>

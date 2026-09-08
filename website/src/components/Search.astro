@@ -25,10 +25,16 @@ import Default from '@astrojs/starlight/components/Search.astro';
 			});
 		});
 
-		observer.observe(dialog, { attributes: true, childList: true, subtree: true, characterData: true });
+		observer.observe(dialog, { childList: true, subtree: true, characterData: true });
 	};
 
 	/* JS event listeners for suggestions removed in favor of pure CSS state management based on Pagefind's classes */
+
+	// Module-scoped so a re-injection can disconnect the previous observer.
+	// Pagefind re-renders the drawer, which removes `.search-suggestions` and
+	// re-triggers injection; without this each pass leaked another observer
+	// holding a reference to the detached node.
+	let drawerObserver = null;
 
 	const injectSuggestions = (isRu, dialog) => {
 		const drawer = document.querySelector('.pagefind-ui__drawer');
@@ -37,16 +43,22 @@ import Default from '@astrojs/starlight/components/Search.astro';
 		const suggestions = document.createElement('div');
 		suggestions.className = 'search-suggestions';
 		
+		// `BASE_URL` carries a trailing slash and comes from the same `base` as
+		// everything else. The base literal is spelled out in hand-authored
+		// `.mdx` because starlight-links-validator re-checks those and fails the
+		// build if it drifts — it never sees a bundled client script, so here the
+		// literal would 404 silently instead.
+		const base = import.meta.env.BASE_URL;
 		const links = isRu ? [
-			{ title: 'Установка', desc: 'Как установить и запустить', url: '/Terminal-Session-Proxy-Manager/ru/installation/' },
-			{ title: 'Конфигурация', desc: 'Настройка профилей', url: '/Terminal-Session-Proxy-Manager/ru/configuration/' },
-			{ title: 'Использование', desc: 'Команды и запуск', url: '/Terminal-Session-Proxy-Manager/ru/usage/' },
-			{ title: 'Shell Интеграция', desc: 'Настройка zsh и bash', url: '/Terminal-Session-Proxy-Manager/ru/shell-integration/' }
+			{ title: 'Установка', desc: 'Как установить и запустить', url: `${base}ru/installation/` },
+			{ title: 'Конфигурация', desc: 'Настройка профилей', url: `${base}ru/configuration/` },
+			{ title: 'Использование', desc: 'Команды и запуск', url: `${base}ru/usage/` },
+			{ title: 'Shell Интеграция', desc: 'Настройка zsh и bash', url: `${base}ru/shell-integration/` }
 		] : [
-			{ title: 'Installation', desc: 'How to install and run', url: '/Terminal-Session-Proxy-Manager/installation/' },
-			{ title: 'Configuration', desc: 'Profiles and settings setup', url: '/Terminal-Session-Proxy-Manager/configuration/' },
-			{ title: 'Usage', desc: 'Running proxy and commands', url: '/Terminal-Session-Proxy-Manager/usage/' },
-			{ title: 'Shell Integration', desc: 'Setup for zsh and bash', url: '/Terminal-Session-Proxy-Manager/shell-integration/' }
+			{ title: 'Installation', desc: 'How to install and run', url: `${base}installation/` },
+			{ title: 'Configuration', desc: 'Profiles and settings setup', url: `${base}configuration/` },
+			{ title: 'Usage', desc: 'Running proxy and commands', url: `${base}usage/` },
+			{ title: 'Shell Integration', desc: 'Setup for zsh and bash', url: `${base}shell-integration/` }
 		];
 
 		const headerText = isRu ? 'Быстрые ссылки' : 'Quick Links';
@@ -79,7 +91,8 @@ import Default from '@astrojs/starlight/components/Search.astro';
 		// Use a MutationObserver to react to Svelte changing the drawer's classes,
 		// and use inline styles with !important to guarantee we beat Pagefind's CSS.
 		// We only need to force the drawer open; suggestions visibility is handled via CSS.
-		const drawerObserver = new MutationObserver((mutations) => {
+		drawerObserver?.disconnect();
+		drawerObserver = new MutationObserver((mutations) => {
 			for (const m of mutations) {
 				if (m.attributeName === 'class') {
 					const isHidden = drawer.classList.contains('pagefind-ui__hidden');

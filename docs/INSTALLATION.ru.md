@@ -1,9 +1,8 @@
-import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
-
 # 📦 Установка (macOS и Linux)
 
-<Tabs>
-<TabItem label="Homebrew">
+<!--site:tabs-->
+
+## Homebrew
 
 Самый простой способ для macOS и Linux:
 
@@ -17,8 +16,7 @@ brew install LebedevKondakovSergeyVach/tap/terminal-session-proxy-manager
 brew upgrade terminal-session-proxy-manager
 ```
 
-</TabItem>
-<TabItem label="Cargo">
+## Cargo
 
 Требуется Rust **1.88 или новее** (проект использует редакцию 2024 года).
 Установите тулчейн с [rustup.rs](https://rustup.rs), затем выполните:
@@ -31,8 +29,7 @@ cargo install --git https://github.com/LebedevKondakovSergeyVach/Terminal-Sessio
 ваш `PATH`. Если после этого утилита не найдена, см. раздел
 [Настройка PATH](#-настройка-path) ниже.
 
-</TabItem>
-<TabItem label="Binary">
+## Binary
 
 Скачайте архив для вашей платформы со
 [страницы релизов](https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/releases).
@@ -46,8 +43,8 @@ shasum -a 256 -c terminal-session-proxy-manager-macos-arm64.tar.gz.sha256
 tar -xzf terminal-session-proxy-manager-macos-arm64.tar.gz
 sudo mv terminal-session-proxy-manager /usr/local/bin/
 ```
-</TabItem>
-</Tabs>
+
+<!--site:/tabs-->
 
 В macOS Gatekeeper может поместить скачанный файл в карантин. Чтобы снять его:
 
@@ -94,9 +91,9 @@ which terminal-session-proxy-manager
 
 ## 🐚 Интеграция с shell (обязательно)
 
-<Aside type="caution">
+<!--site:aside type="caution"-->
 Независимо от способа установки, вам необходимо прописать скрипт инициализации в конфигурацию вашей оболочки, чтобы команда `proxy on` могла изменять переменные окружения. См. [Интеграция с оболочкой](SHELL_INTEGRATION.ru.md).
-</Aside>
+<!--site:/aside-->
 
 **Zsh** (`~/.zshrc`):
 

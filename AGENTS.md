@@ -37,6 +37,17 @@ cargo fmt --all -- --check && cargo clippy --all-targets --locked -- -D warnings
 CI runs these with `RUSTFLAGS: -D warnings`, plus an MSRV check against the
 `rust-version` in `Cargo.toml`. Warnings are build failures — do not leave them.
 
+**If you touched `docs/`, `README*.md`, `CONTRIBUTING.md` or `CHANGELOG*.md`,
+you also changed the website** — those files are its content. Verify it:
+
+```bash
+cd website && npm ci && npm test && npm run build
+```
+
+The build regenerates every page and fails on a dead internal link.
+`.github/workflows/website.yml` runs the same three commands on every pull
+request that touches those paths.
+
 ## Layout
 
 | Path | Contains |
@@ -51,6 +62,8 @@ CI runs these with `RUSTFLAGS: -D warnings`, plus an MSRV check against the
 | `src/error.rs` | `ProxyError` — variants callers may want to match on. |
 | `locales/` | `en.json` and `ru.json`, embedded at compile time. |
 | `tests/cli.rs` | End-to-end tests that spawn the real binary. |
+| `docs/` | The canonical user documentation, in English and Russian. Also the site's source — see below. |
+| `website/` | The Astro Starlight documentation site. Has its own [`AGENTS.md`](website/AGENTS.md); read it before changing anything there. |
 
 Note there is no `best.rs`, `benchmark.rs`, or `git.rs`: benchmarking and
 best-profile selection live in `src/cmd/profile.rs`, and Git integration is
@@ -183,6 +196,21 @@ A change to commands or configuration is incomplete until these agree:
 If you materially change the TUI, say so in your summary — the screenshot in the
 README will need retaking. GitHub caches images aggressively, so a new
 screenshot needs a **new filename**, not an overwrite.
+
+### These documents are also the website
+
+`README*.md`, `docs/*.md`, `CONTRIBUTING.md` and `CHANGELOG*.md` are the source
+the site in `website/` is generated from, page for page. Two consequences:
+
+- **Keep them plain CommonMark.** They are read on GitHub as well as on the
+  site. No JSX, no `import` line. Site-only structure — tabs, cards, steps,
+  asides — goes in `<!--site:…-->` comments that GitHub renders as nothing and
+  the generator expands. The syntax is documented in
+  [`website/AGENTS.md`](website/AGENTS.md), rule 3a.
+- **A new link target must resolve.** The generator throws on a link it cannot
+  place, so adding `[x](docs/NEW.md)` without adding `NEW.md` to
+  `website/scripts/docs-manifest.mjs` fails the site build. That is deliberate;
+  fix the manifest rather than the check.
 
 ## Conventions
 

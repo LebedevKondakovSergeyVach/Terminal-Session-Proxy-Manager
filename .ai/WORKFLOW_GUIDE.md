@@ -25,6 +25,22 @@ cargo test <name-fragment>   # a single test
 `cargo clippy --fix --allow-dirty` handles the mechanical lints, but read the
 diff — it will happily rewrite a line you meant to keep.
 
+### The website
+
+The site in `website/` is generated from `README*.md`, `docs/*.md`,
+`CONTRIBUTING.md` and `CHANGELOG*.md`. A change to any of those is a change to
+the site, so verify it too:
+
+```bash
+cd website
+npm ci            # or `npm install` while iterating
+npm test          # unit tests for the content generator
+npm run build     # regenerates every page; fails on a dead internal link
+```
+
+`.github/workflows/website.yml` runs the same commands on every pull request
+touching those paths, and `.github/workflows/pages.yml` publishes from `main`.
+
 Do not report success without having run these. If something fails and you
 cannot fix it, say so explicitly rather than describing the work as complete.
 

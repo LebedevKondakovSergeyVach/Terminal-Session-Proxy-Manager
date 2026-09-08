@@ -1,5 +1,3 @@
-import { Steps } from '@astrojs/starlight/components';
-
 # ⚙️ Configuration
 
 Two JSON files. `proxy config path` and `proxy settings path` print exactly
@@ -16,25 +14,25 @@ which ones are in use.
 
 **`config.json`**
 
-<Steps>
+<!--site:steps-->
 
 1. `--config-file <PATH>`
 2. `TSPM_CONFIG`
 3. `config_path` in `settings.json` — a relative value is resolved against the directory holding `settings.json`, not your working directory
 4. The OS config directory above
 
-</Steps>
+<!--site:/steps-->
 
 **`settings.json`**
 
-<Steps>
+<!--site:steps-->
 
 1. `--settings-file <PATH>`
 2. `TSPM_SETTINGS`
 3. The OS config directory above
 4. `./settings.json` in the working directory
 
-</Steps>
+<!--site:/steps-->
 
 The working-directory entry is last on purpose. `settings.json` is a common
 filename, and letting any directory you happen to be in outrank your own

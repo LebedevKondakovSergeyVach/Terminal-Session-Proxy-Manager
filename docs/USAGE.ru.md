@@ -1,5 +1,3 @@
-import { Card, CardGrid, Aside } from '@astrojs/starlight/components';
-
 # 📖 Справочник команд
 
 Команды, изменяющие ваш текущий shell (`on`, `off`, `use`, `switch`, `best`),
@@ -7,20 +5,29 @@ import { Card, CardGrid, Aside } from '@astrojs/starlight/components';
 [интеграции с оболочкой](SHELL_INTEGRATION.ru.md). Остальные работают и с
 полным именем бинарника.
 
-<CardGrid stagger>
-	<Card title="Управление сессией" icon="laptop">
-		`proxy on` / `proxy off` / `proxy env`
-	</Card>
-	<Card title="Профили и TUI" icon="list-format">
-		`proxy switch` / `proxy use` / `proxy dash`
-	</Card>
-	<Card title="Измерения" icon="rocket">
-		`proxy benchmark` / `proxy best` / `proxy speedtest`
-	</Card>
-	<Card title="Диагностика" icon="magnifier">
-		`proxy status` / `proxy diagnose` / `proxy monitor`
-	</Card>
-</CardGrid>
+<!--site:cards stagger-->
+
+## Управление сессией
+<!--site:item icon="laptop"-->
+
+`proxy on` / `proxy off` / `proxy env`
+
+## Профили и TUI
+<!--site:item icon="list-format"-->
+
+`proxy switch` / `proxy use` / `proxy dash`
+
+## Измерения
+<!--site:item icon="rocket"-->
+
+`proxy benchmark` / `proxy best` / `proxy speedtest`
+
+## Диагностика
+<!--site:item icon="magnifier"-->
+
+`proxy status` / `proxy diagnose` / `proxy monitor`
+
+<!--site:/cards-->
 
 ## Глобальные опции
 
@@ -191,9 +198,9 @@ proxy git on      # Направить git через активный проф�
 proxy git off     # Отключить проксирование git
 ```
 
-<Aside type="tip">
+<!--site:aside type="tip"-->
 Команда прописывает `http.proxy` и `https.proxy` в ваш **глобальный** конфигурационный файл git. В отличие от команд управления сессией, эти настройки сохраняются даже после перезапуска терминала, пока вы не выполните `proxy git off`.
-</Aside>
+<!--site:/aside-->
 
 ---
 

@@ -18,8 +18,12 @@
       **both** `locales/en.json` and `locales/ru.json`
 - [ ] New or changed CLI commands are reflected in `README.md`, `README.ru.md`
       and `docs/`
-- [ ] `CHANGELOG.md` has an entry under `## [Unreleased]`
-      (required for any change to `src/`, `locales/` or `Cargo.toml`)
+- [ ] `CHANGELOG.md` **and** `CHANGELOG.ru.md` have an entry under
+      `## [Unreleased]` (required for any change to `src/`, `locales/`,
+      `shell/`, `configs/` or `Cargo.toml`)
+- [ ] If this touches `docs/`, the READMEs, `CONTRIBUTING.md` or a changelog —
+      those are the website's content — `cd website && npm test && npm run build`
+      passes, and the sources are still plain CommonMark (no JSX, no `import`)
 
 <!--
 Releasing? If this is release/X.Y.Z -> main, merging publishes: CI tags the

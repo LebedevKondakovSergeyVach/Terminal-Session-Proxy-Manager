@@ -12,6 +12,9 @@
  * @property {boolean} stripPreamble  Remove everything above the first H1.
  * @property {boolean} stripBadges    Remove status-badge-only lines.
  * @property {boolean} stripHeroImage Remove the repository banner image.
+ * @property {string[]} [components]   Starlight components the page uses. The
+ *   generator emits the import for exactly these and fails if the expanded body
+ *   uses one that is not listed, or lists one the body never uses.
  */
 
 /** @type {PageEntry[]} */
@@ -45,6 +48,7 @@ export const PAGES = [
 		stripPreamble: false,
 		stripBadges: false,
 		stripHeroImage: false,
+		components: ['Aside', 'TabItem', 'Tabs'],
 	},
 	{
 		source: 'docs/INSTALLATION.ru.md',
@@ -55,6 +59,7 @@ export const PAGES = [
 		stripPreamble: false,
 		stripBadges: false,
 		stripHeroImage: false,
+		components: ['Aside', 'TabItem', 'Tabs'],
 	},
 	{
 		source: 'docs/CONFIGURATION.md',
@@ -65,6 +70,7 @@ export const PAGES = [
 		stripPreamble: false,
 		stripBadges: false,
 		stripHeroImage: false,
+		components: ['Steps'],
 	},
 	{
 		source: 'docs/CONFIGURATION.ru.md',
@@ -75,6 +81,7 @@ export const PAGES = [
 		stripPreamble: false,
 		stripBadges: false,
 		stripHeroImage: false,
+		components: ['Steps'],
 	},
 	{
 		source: 'docs/USAGE.md',
@@ -85,6 +92,7 @@ export const PAGES = [
 		stripPreamble: false,
 		stripBadges: false,
 		stripHeroImage: false,
+		components: ['Aside', 'Card', 'CardGrid'],
 	},
 	{
 		source: 'docs/USAGE.ru.md',
@@ -95,6 +103,7 @@ export const PAGES = [
 		stripPreamble: false,
 		stripBadges: false,
 		stripHeroImage: false,
+		components: ['Aside', 'Card', 'CardGrid'],
 	},
 	{
 		source: 'docs/SHELL_INTEGRATION.md',
@@ -105,6 +114,7 @@ export const PAGES = [
 		stripPreamble: false,
 		stripBadges: false,
 		stripHeroImage: false,
+		components: ['Aside', 'Badge', 'Steps'],
 	},
 	{
 		source: 'docs/SHELL_INTEGRATION.ru.md',
@@ -115,6 +125,7 @@ export const PAGES = [
 		stripPreamble: false,
 		stripBadges: false,
 		stripHeroImage: false,
+		components: ['Aside', 'Badge', 'Steps'],
 	},
 	{
 		source: 'CONTRIBUTING.md',
@@ -125,6 +136,7 @@ export const PAGES = [
 		stripPreamble: false,
 		stripBadges: false,
 		stripHeroImage: false,
+		components: ['FileTree', 'Steps'],
 	},
 	{
 		source: 'CHANGELOG.md',

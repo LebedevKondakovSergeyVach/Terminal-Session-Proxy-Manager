@@ -149,9 +149,15 @@ downloaded them.
 
 ### Adding a changelog entry
 
-Every pull request that touches `src/`, `locales/` or `Cargo.toml` must add a
-`CHANGELOG.md` entry under `## [Unreleased]`; CI enforces it. Docs-only and
-CI-only changes are exempt.
+Every pull request that touches `src/`, `locales/`, `shell/`, `configs/` or
+`Cargo.toml` must add a `CHANGELOG.md` entry under `## [Unreleased]`, and the
+matching Russian entry in `CHANGELOG.ru.md` — both changelogs are published, so
+an entry in one language ships a page that is out of date in the other. CI
+enforces both. Docs-only and CI-only changes are exempt.
+
+`shell/` and `configs/` count as user-facing: the shell function is the
+documented integration point, and `config.default.json` ships the defaults
+people meet on first run.
 
 Write for the person upgrading, not the person reviewing the diff: say what
 changed for them and, for a fix, what went wrong before.
@@ -172,5 +178,12 @@ why this fix over another.
 | `ci.yml` | Every pull request; pushes to `main`, `release/**`, `hotfix/**`; weekly | fmt, clippy, docs, tests on Linux and macOS, MSRV, `cargo audit` |
 | `branch-policy.yml` | Every pull request | Branch naming, head/base pairing, changelog entry, release readiness |
 | `release.yml` | Merge into `main`; a pushed `v*` tag | Re-verifies, tags, builds four targets, publishes, bumps Homebrew |
+| `website.yml` | Pull requests and pushes touching `website/`, `docs/`, `assets/`, the READMEs, `CONTRIBUTING.md` or `CHANGELOG*.md` | Generator tests, full site build, internal-link validation, `npm audit` |
+| `pages.yml` | Pushes to **`main`** touching those same paths | Rebuilds and publishes the site to GitHub Pages |
 
 Warnings are failures: CI sets `RUSTFLAGS: -D warnings`.
+
+`pages.yml` deploys from `main` and nowhere else. Pointing it at a release or
+task branch publishes unreviewed documentation to the live URL, and hands that
+branch's `npm ci` the workflow's Pages and OIDC tokens. If you need to preview
+the site, build it locally (`cd website && npm run build && npm run preview`).

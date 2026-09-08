@@ -1,5 +1,3 @@
-import { Steps, Badge, Aside } from '@astrojs/starlight/components';
-
 # 🐚 Shell Integration
 
 A process cannot change the environment of the shell that started it. The
@@ -8,7 +6,7 @@ what the binary printed. Without it, `proxy on` cannot affect your session.
 
 ## Setup
 
-<Steps>
+<!--site:steps-->
 
 1. **Add the init script to Zsh** (`~/.zshrc`):
    ```zsh
@@ -23,7 +21,7 @@ what the binary printed. Without it, `proxy on` cannot affect your session.
 3. **Restart your terminal** or `source` the file. This also installs tab
    completion, so a separate `completions` step is unnecessary.
 
-</Steps>
+<!--site:/steps-->
 
 > Compatible with Powerlevel10k instant prompt — nothing is printed at startup.
 
@@ -36,9 +34,9 @@ files are generated from `init`, but the `eval` form can never go stale.
 
 ## How it works
 
-<Aside type="note">
+<!--site:aside type="note"-->
 A background process cannot modify its parent shell's environment. This is why running the binary directly cannot export variables into your active session.
-</Aside>
+<!--site:/aside-->
 
 To solve this, the `proxy` shell function wraps the Rust binary:
 
@@ -59,7 +57,7 @@ This ensures that your terminal session receives the environment variables immed
 
 ---
 
-## What you get <Badge text="Core" variant="tip" />
+## What you get <!--site:badge text="Core" variant="tip"-->
 
 The `proxy` function forwards anything it does not handle itself to the binary,
 so `proxy <anything>` works.

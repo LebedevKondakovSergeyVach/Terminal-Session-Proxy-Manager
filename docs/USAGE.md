@@ -1,5 +1,3 @@
-import { Card, CardGrid, Aside } from '@astrojs/starlight/components';
-
 # 📖 Command Reference
 
 Commands that change your current shell (`on`, `off`, `use`, `switch`, `best`)
@@ -7,20 +5,29 @@ must go through the `proxy` shell function installed by
 [shell integration](SHELL_INTEGRATION.md). Everything else works with the full
 binary name as well.
 
-<CardGrid stagger>
-	<Card title="Session Control" icon="laptop">
-		`proxy on` / `proxy off` / `proxy env`
-	</Card>
-	<Card title="Profiles & TUI" icon="list-format">
-		`proxy switch` / `proxy use` / `proxy dash`
-	</Card>
-	<Card title="Measurement" icon="rocket">
-		`proxy benchmark` / `proxy best` / `proxy speedtest`
-	</Card>
-	<Card title="Diagnostics" icon="magnifier">
-		`proxy status` / `proxy diagnose` / `proxy monitor`
-	</Card>
-</CardGrid>
+<!--site:cards stagger-->
+
+## Session Control
+<!--site:item icon="laptop"-->
+
+`proxy on` / `proxy off` / `proxy env`
+
+## Profiles & TUI
+<!--site:item icon="list-format"-->
+
+`proxy switch` / `proxy use` / `proxy dash`
+
+## Measurement
+<!--site:item icon="rocket"-->
+
+`proxy benchmark` / `proxy best` / `proxy speedtest`
+
+## Diagnostics
+<!--site:item icon="magnifier"-->
+
+`proxy status` / `proxy diagnose` / `proxy monitor`
+
+<!--site:/cards-->
 
 ## Global options
 
@@ -190,9 +197,9 @@ proxy git on      # Point git at the active profile
 proxy git off     # Remove it
 ```
 
-<Aside type="tip">
+<!--site:aside type="tip"-->
 This writes `http.proxy` and `https.proxy` to your **global** git config. Unlike the session commands, this persists across terminal restarts until you run `proxy git off`.
-</Aside>
+<!--site:/aside-->
 
 ---
 

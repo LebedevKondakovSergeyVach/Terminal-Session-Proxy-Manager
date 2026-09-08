@@ -194,11 +194,12 @@ TSPM_CONFIG=~/work-proxies.json proxy best
 
 ## 📚 Документация
 
+- [🌐 **Сайт документации**](https://lebedevkondakovsergeyvach.github.io/Terminal-Session-Proxy-Manager/ru/) — всё перечисленное ниже, с поиском и перекрёстными ссылками
 - [📦 **Установка**](docs/INSTALLATION.ru.md) — сборка и настройка PATH
 - [🐚 **Интеграция с shell**](docs/SHELL_INTEGRATION.ru.md) — Zsh, Bash и строка приглашения
 - [⚙️ **Конфигурация**](docs/CONFIGURATION.ru.md) — полная схема `config.json` и `settings.json`
 - [📖 **Справочник команд**](docs/USAGE.ru.md) — все подкоманды и флаги
-- [🤝 **Участие в разработке**](CONTRIBUTING.md) · [🔒 **Безопасность**](SECURITY.md) · [📝 **История изменений**](CHANGELOG.md)
+- [🤝 **Участие в разработке**](CONTRIBUTING.md) · [🔒 **Безопасность**](SECURITY.md) · [📝 **История изменений**](CHANGELOG.ru.md)
 
 ---
 

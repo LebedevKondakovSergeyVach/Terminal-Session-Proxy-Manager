@@ -73,14 +73,15 @@ pub async fn run_ping(config: &AppConfig, i18n: &I18n, timeout_ms: u64) -> Resul
 
     for (name, status, elapsed) in results.into_iter().flatten() {
         if let Some(code) = status {
+            let elapsed = elapsed.to_string();
             let (status_text, code_str) = if (200..300).contains(&code) {
                 (
-                    format!("✅ OK ({elapsed} ms)").green().bold(),
+                    i18n.format("ping_status_ok", &[&elapsed]).green().bold(),
                     format!("[HTTP {code}]").green(),
                 )
             } else {
                 (
-                    format!("⚠️ WARN ({elapsed} ms)").yellow().bold(),
+                    i18n.format("ping_status_warn", &[&elapsed]).yellow().bold(),
                     format!("[HTTP {code}]").yellow(),
                 )
             };

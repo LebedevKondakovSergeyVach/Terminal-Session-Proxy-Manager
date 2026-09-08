@@ -5,9 +5,11 @@ use anyhow::{Result, anyhow};
 
 /// Prints the shell statements the caller's shell will evaluate.
 ///
-/// Everything printed here is executed by that shell, so every interpolated
-/// value goes through [`shell_quote`] — including the status message, which
-/// embeds a profile name straight from `config.json`.
+/// Everything printed here is executed by that shell. Nothing is interpolated
+/// at this level: the statements come from [`export_statements`], which quotes
+/// every profile field through `proxy_env::shell_quote` before it can reach a
+/// shell. This function prints them and nothing else — no status line, so no
+/// second path a profile name could travel down unquoted.
 ///
 /// # Errors
 /// Returns an error when no profile is active. Exiting zero here would let
@@ -24,14 +26,9 @@ pub fn print_env_commands(mode: &EnvMode, config: &AppConfig, i18n: &I18n) -> Re
             for statement in statements {
                 println!("{statement}");
             }
-
-            if let Some(_profile) = config.active_profile() {
-                // Previously this printed an echo confirmation. Suppressed by user request.
-            }
         }
         EnvMode::Off => {
             println!("{}", unset_statement());
-            // Previously this printed an echo confirmation. Suppressed by user request.
         }
     }
     Ok(())

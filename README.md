@@ -193,6 +193,7 @@ example.
 
 ## 📚 Documentation
 
+- [🌐 **Documentation site**](https://lebedevkondakovsergeyvach.github.io/Terminal-Session-Proxy-Manager/) — everything below, searchable and cross-linked
 - [📦 **Installation**](docs/INSTALLATION.md) — build instructions and PATH setup
 - [🐚 **Shell Integration**](docs/SHELL_INTEGRATION.md) — Zsh, Bash, and prompt setup
 - [⚙️ **Configuration**](docs/CONFIGURATION.md) — full `config.json` and `settings.json` schema

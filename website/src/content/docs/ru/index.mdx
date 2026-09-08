@@ -51,13 +51,13 @@ import '../../../assets/zigzag.css';
       <p>Профили, а не экспорты. Настройте прокси один раз, затем переключайтесь одной командой или через интерактивный выбор. Команда <code>switch</code> открывает TUI-интерфейс, где можно выбрать профиль стрелками. При нажатии Enter утилита мгновенно прокидывает <code>HTTPS_PROXY</code>, <code>ALL_PROXY</code> и другие переменные прямо в вашу сессию <code>zsh</code> или <code>bash</code>.</p>
     </div>
     <div class="zigzag-image">
-      <div class="theme-light-only"><Image src={switchLight} alt="Switch Light" /></div>
-      <div class="theme-dark-only"><Image src={switchDark} alt="Switch Dark" /></div>
+      <div class="theme-light-only"><Image src={switchLight} alt="Команда proxy switch с интерактивным списком прокси-профилей в терминале" width={1200} /></div>
+      <div class="theme-dark-only"><Image src={switchDark} alt="Команда proxy switch с интерактивным списком прокси-профилей в терминале" width={1200} /></div>
     </div>
   </div>
 
   <div class="connector-path">
-    <svg class="connector-svg" viewBox="0 0 1000 80" preserveAspectRatio="none">
+    <svg class="connector-svg" viewBox="0 0 1000 80" preserveAspectRatio="none" aria-hidden="true">
       <path d="M 720 0 C 720 40, 280 40, 280 80" vector-effect="non-scaling-stroke" />
     </svg>
   </div>
@@ -69,13 +69,13 @@ import '../../../assets/zigzag.css';
       <p>Проверяйте фактическую маршрутизацию трафика одной командой. Утилита <code>status</code> показывает ваши реальные внешние IPv4 и IPv6 адреса, а также провайдера и геолокацию. Для полного контроля используйте команду <code>dash</code> — интерактивный TUI-дашборд, объединяющий текущий IP, геолокацию, график задержки и переключение профилей на одном экране.</p>
     </div>
     <div class="zigzag-image">
-      <div class="theme-light-only"><Image src={statusLight} alt="Status Light" /></div>
-      <div class="theme-dark-only"><Image src={statusDark} alt="Status Dark" /></div>
+      <div class="theme-light-only"><Image src={statusLight} alt="Команда proxy status показывает внешний IP-адрес, провайдера и геолокацию" width={1200} /></div>
+      <div class="theme-dark-only"><Image src={statusDark} alt="Команда proxy status показывает внешний IP-адрес, провайдера и геолокацию" width={1200} /></div>
     </div>
   </div>
 
   <div class="connector-path">
-    <svg class="connector-svg" viewBox="0 0 1000 80" preserveAspectRatio="none">
+    <svg class="connector-svg" viewBox="0 0 1000 80" preserveAspectRatio="none" aria-hidden="true">
       <path d="M 280 0 C 280 40, 720 40, 720 80" vector-effect="non-scaling-stroke" />
     </svg>
   </div>
@@ -87,13 +87,13 @@ import '../../../assets/zigzag.css';
       <p>Утилиты <code>ping</code> и <code>benchmark</code> делают реальные параллельные запросы, измеряя задержку. Результаты позволяют сразу выбрать лучший сервер, а команда <code>best</code> сделает это за вас. Для бесперебойной работы используйте <code>monitor</code> — проверку состояния с автопереключением (auto-healing) при отказе активного прокси.</p>
     </div>
     <div class="zigzag-image">
-      <div class="theme-light-only"><Image src={pingLight} alt="Ping Light" /></div>
-      <div class="theme-dark-only"><Image src={pingDark} alt="Ping Dark" /></div>
+      <div class="theme-light-only"><Image src={pingLight} alt="Команда proxy ping выводит задержку в миллисекундах для каждой цели" width={1200} /></div>
+      <div class="theme-dark-only"><Image src={pingDark} alt="Команда proxy ping выводит задержку в миллисекундах для каждой цели" width={1200} /></div>
     </div>
   </div>
 
   <div class="connector-path">
-    <svg class="connector-svg" viewBox="0 0 1000 80" preserveAspectRatio="none">
+    <svg class="connector-svg" viewBox="0 0 1000 80" preserveAspectRatio="none" aria-hidden="true">
       <path d="M 720 0 C 720 40, 280 40, 280 80" vector-effect="non-scaling-stroke" />
     </svg>
   </div>
@@ -106,8 +106,8 @@ import '../../../assets/zigzag.css';
       <p>Единый бинарный файл, не требующий тяжелых сред выполнения вроде Node.js или Python. Отличается мгновенным запуском и строгой обработкой ошибок. Нужно передать настройки другим инструментам? Команда <code>export</code> подготовит конфиги для Docker, cURL, Git, <code>.env</code> и JVM-сборок — с корректным экранированием для shell.</p>
     </div>
     <div class="zigzag-image">
-      <div class="theme-light-only"><Image src={helpLight} alt="Help Light" /></div>
-      <div class="theme-dark-only"><Image src={helpDark} alt="Help Dark" /></div>
+      <div class="theme-light-only"><Image src={helpLight} alt="Вывод proxy --help со списком всех подкоманд и их описаний" width={1200} /></div>
+      <div class="theme-dark-only"><Image src={helpDark} alt="Вывод proxy --help со списком всех подкоманд и их описаний" width={1200} /></div>
     </div>
   </div>
 
@@ -118,6 +118,6 @@ import '../../../assets/zigzag.css';
     <p style="color: var(--sl-color-gray-3); margin: 0; font-size: 0.9rem;">Распространяется под лицензией <a href="https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/blob/main/LICENSE">AGPL-3.0</a>. Разработано <a href="https://github.com/LebedevKondakovSergeyVach">Lebedev-Kondakov Sergey</a>.</p>
   </div>
   <div class="footer-version">
-    <a href="https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/releases/tag/v2.2.2" id="version-link" data-version="v2.2.2">Terminal Session Proxy Manager v2.2.2</a>
+    <a href={`https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/releases/tag/v${import.meta.env.PUBLIC_TSPM_VERSION}`}>Terminal Session Proxy Manager v{import.meta.env.PUBLIC_TSPM_VERSION}</a>
   </div>
 </div>

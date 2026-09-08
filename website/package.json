@@ -2,6 +2,9 @@
   "name": "website",
   "type": "module",
   "version": "0.0.1",
+  "engines": {
+    "node": "^20.19.0 || ^22.12.0 || >=24.0.0"
+  },
   "scripts": {
     "sync": "node scripts/sync-docs.mjs",
     "predev": "node scripts/sync-docs.mjs",
@@ -24,8 +27,5 @@
     "starlight-links-validator": "^0.25.3",
     "starlight-llms-txt": "^0.11.0",
     "starlight-theme-md3": "^0.2.1"
-  },
-  "devDependencies": {
-    "playwright": "^1.62.1"
   }
 }

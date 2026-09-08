@@ -1,16 +1,21 @@
 ---
 import { Icon } from '@astrojs/starlight/components';
+
+// The icons render `aria-hidden`, so these labels are the buttons' only
+// accessible name. They were hard-coded Russian, which an English screen-reader
+// user heard verbatim. Starlight already ships `themeSelect.*` in both locales.
+const t = Astro.locals.t;
 ---
 
 <starlight-theme-switch>
-	<div class="theme-switch-container">
-		<button data-theme-value="light" aria-label="Светлая тема" title="Светлая">
+	<div class="theme-switch-container" role="group" aria-label={t('themeSelect.accessibleLabel')}>
+		<button data-theme-value="light" aria-label={t('themeSelect.light')} title={t('themeSelect.light')}>
 			<Icon name="sun" />
 		</button>
-		<button data-theme-value="auto" aria-label="Системная тема" title="Авто">
+		<button data-theme-value="auto" aria-label={t('themeSelect.auto')} title={t('themeSelect.auto')}>
 			<Icon name="laptop" />
 		</button>
-		<button data-theme-value="dark" aria-label="Тёмная тема" title="Тёмная">
+		<button data-theme-value="dark" aria-label={t('themeSelect.dark')} title={t('themeSelect.dark')}>
 			<Icon name="moon" />
 		</button>
 	</div>
@@ -57,7 +62,7 @@ import { Icon } from '@astrojs/starlight/components';
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 	}
 	:global([data-theme='light']) button[aria-pressed="true"] {
-		background-color: white;
+		background-color: var(--sl-color-bg);
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 	}
 	/*
@@ -118,8 +123,13 @@ import { Icon } from '@astrojs/starlight/components';
 			this.querySelectorAll('button').forEach((btn) => {
 				btn.addEventListener('click', (e) => {
 					const newTheme = btn.dataset.themeValue;
-					
-					if (!document.startViewTransition) {
+
+					// A 500ms full-viewport wipe is exactly what a reduced-motion
+					// setting asks us not to do. custom.css gates every other
+					// animation on this; the toggle used to be the exception.
+					const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+					if (!document.startViewTransition || reduceMotion) {
 						setTheme(newTheme);
 						return;
 					}
@@ -154,7 +164,12 @@ import { Icon } from '@astrojs/starlight/components';
 								pseudoElement: '::view-transition-new(root)',
 							}
 						);
-					});
+					})
+					// `ready` rejects whenever the transition is skipped — a
+					// hidden document, or a second click before the first
+					// settles. Nothing to do about it, but it must not surface
+					// as an unhandled rejection.
+					.catch(() => {});
 				});
 			});
 			

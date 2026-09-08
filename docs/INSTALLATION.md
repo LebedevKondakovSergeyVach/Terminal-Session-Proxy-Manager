@@ -1,9 +1,8 @@
-import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
-
 # 📦 Installation (macOS & Linux)
 
-<Tabs>
-<TabItem label="Homebrew">
+<!--site:tabs-->
+
+## Homebrew
 
 The easiest route, on both macOS and Linux:
 
@@ -17,8 +16,7 @@ To upgrade later:
 brew upgrade terminal-session-proxy-manager
 ```
 
-</TabItem>
-<TabItem label="Cargo">
+## Cargo
 
 Requires Rust **1.88 or newer** (the project uses edition 2024). Install a
 toolchain from [rustup.rs](https://rustup.rs), then:
@@ -31,8 +29,7 @@ This puts the binary in `~/.cargo/bin`, which rustup normally adds to your
 `PATH`. If `terminal-session-proxy-manager` is not found afterwards, see
 [PATH setup](#-path-setup) below.
 
-</TabItem>
-<TabItem label="Binary">
+## Binary
 
 Download an archive for your platform from the
 [releases page](https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/releases).
@@ -46,8 +43,8 @@ shasum -a 256 -c terminal-session-proxy-manager-macos-arm64.tar.gz.sha256
 tar -xzf terminal-session-proxy-manager-macos-arm64.tar.gz
 sudo mv terminal-session-proxy-manager /usr/local/bin/
 ```
-</TabItem>
-</Tabs>
+
+<!--site:/tabs-->
 
 On macOS, Gatekeeper may quarantine a downloaded binary. Clear it with:
 
@@ -93,9 +90,9 @@ which terminal-session-proxy-manager
 
 ## 🐚 Shell integration (required)
 
-<Aside type="caution">
+<!--site:aside type="caution"-->
 However you installed it, add the init script to your shell configuration so `proxy on` can change your environment. See [Shell Integration](SHELL_INTEGRATION.md).
-</Aside>
+<!--site:/aside-->
 
 **Zsh** (`~/.zshrc`):
 

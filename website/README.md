@@ -1,10 +1,11 @@
 # Documentation website
 
 The [Astro Starlight](https://starlight.astro.build/) documentation site for
-Terminal Session Proxy Manager. Intended for deployment as a GitHub Pages
-project page at `/Terminal-Session-Proxy-Manager/`, in English and Russian.
-The deployment workflow is not set up yet — there is no GitHub Actions job
-publishing the site.
+Terminal Session Proxy Manager, deployed as a GitHub Pages project page at
+`/Terminal-Session-Proxy-Manager/`, in English and Russian.
+
+`.github/workflows/website.yml` gates every pull request that touches the site
+or its sources; `.github/workflows/pages.yml` publishes from `main`.
 
 ## Commands
 
@@ -31,11 +32,17 @@ repository's own Markdown — `README.md`, `README.ru.md`, `docs/*.md`,
   and cleanup rules.
 - `scripts/lib/cleanup.mjs` strips GitHub chrome — language switchers, the
   banner, status badges — asserting each rule matched.
+- `scripts/lib/components.mjs` expands the `<!--site:…-->` comments into
+  Starlight components. The sources stay plain CommonMark so they read
+  correctly on GitHub; the site-only structure lives in comments GitHub
+  ignores.
 - `scripts/lib/links.mjs` rewrites every link to a base-prefixed site path or
   an absolute GitHub URL, and throws on anything unrecognised.
 - `scripts/lib/frontmatter.mjs` serialises frontmatter as valid YAML.
 
-Generated pages are Git-ignored, so the site cannot drift from its sources.
+Generated pages are Git-ignored — `.md` and `.mdx` alike — so the site cannot
+drift from its sources. The only hand-authored pages are `index.mdx` and
+`ru/index.mdx`.
 
 `astro.config.mjs` pins `markdown.processor` to `unified()` rather than
 Astro 7's default Sätteri processor: `starlight-image-zoom` doesn't yet

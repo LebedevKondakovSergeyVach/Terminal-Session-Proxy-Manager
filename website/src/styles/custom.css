@@ -6,11 +6,12 @@
  * is left is what the theme does not claim: typography, scrollbars, and the one
  * screenshot rule.
  *
- * There is no `!important` in this file, and there must not be. The previous
- * version of this stylesheet had fifteen, all of them repainting the theme's
- * derived tokens because the theme had been given the wrong accent. An
- * `!important` here means the two are fighting again — fix the theme's options,
- * not the specificity.
+ * There is no `!important` in this file, and there must not be. Two earlier
+ * versions had them — fifteen, then twenty-eight — every one repainting a
+ * token the theme derives. An `!important` here means the two are fighting
+ * again, and the fix is never the specificity: this file is unlayered, and
+ * unlayered CSS already outranks everything Starlight and the theme put in
+ * `@layer`. If a rule seems to need forcing, it is aimed at the wrong thing.
  */
 @import '@fontsource-variable/inter';
 @import '@fontsource-variable/jetbrains-mono';
@@ -231,8 +232,12 @@ header.header {
 	order: 1; /* Ensure it stays below text */
 }
 
-/* Reduce bottom padding on splash pages using Starlight's official CSS variable */
-:root[data-has-sidebar="false"] {
+/* Reduce bottom padding on splash pages.
+ *
+ * Starlight emits `data-has-sidebar` as a boolean presence attribute, never
+ * `="false"` — a splash page simply omits it. Matching on its absence is the
+ * only form that selects anything; the `="false"` version matched nothing. */
+:root:not([data-has-sidebar]) {
 	--sl-main-pad: 0 0 1rem 0;
 }
 
@@ -463,7 +468,7 @@ starlight-tabs ul[role="tablist"] {
 	padding: 0;
 	list-style: none;
 	overflow-x: auto;
-	border-bottom: none !important;
+	border-bottom: none;
 }
 
 starlight-tabs ul[role="tablist"] li {
@@ -479,11 +484,13 @@ starlight-tabs a[role="tab"] {
 	padding: 0.5rem 1.25rem;
 	font-weight: 600;
 	font-size: 0.95rem;
-	color: var(--sl-color-text-dimmed);
+	color: var(--sl-color-gray-3);
 	text-decoration: none;
 	border-radius: 0.5rem;
-	border: none !important;
-	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	border: none;
+	transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+		background 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+		box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 	position: relative;
 	white-space: nowrap;
     background: transparent;
@@ -495,9 +502,9 @@ starlight-tabs a[role="tab"]:hover {
 }
 
 starlight-tabs a[role="tab"][aria-selected="true"] {
-	color: var(--sl-color-text-invert) !important;
-	background: var(--sl-color-text-accent) !important;
-	box-shadow: 0 4px 10px rgba(230, 110, 26, 0.35);
+	color: var(--sl-color-text-invert);
+	background: var(--sl-color-text-accent);
+	box-shadow: 0 4px 10px color-mix(in srgb, var(--sl-color-text-accent) 35%, transparent);
 }
 
 /* Add a subtle underline animation effect for unselected tabs on hover */
@@ -570,68 +577,56 @@ starlight-tabs [role="tabpanel"]:not([hidden]) {
 	margin-bottom: 0.5rem;
 }
 
-/* Force MD3 Asides to use explicit vibrant colors instead of generic surface tones */
+/*
+ * Asides: one hue per variant.
+ *
+ * The md3 theme repaints all four from the same seed-derived surface tones,
+ * which leaves note, tip, caution and danger nearly indistinguishable. These
+ * rules put a distinct hue back.
+ *
+ * No `!important`, and no hex literals. The theme's aside rules live in
+ * `@layer md3.components`, and unlayered CSS outranks every layer whatever its
+ * specificity — the same mechanism used further up this file. And the values
+ * are Starlight's own `--sl-color-<hue>` tokens, which already flip between
+ * light and dark, so this needs no `[data-theme]` fork. The previous version
+ * had one, plus nine hardcoded hex values and twenty `!important`s.
+ */
 .sl-markdown-content .starlight-aside--note {
-	border-left: 4px solid #3b82f6 !important; /* Blue */
-	background-color: rgba(59, 130, 246, 0.05) !important;
-}
-.sl-markdown-content .starlight-aside--note .starlight-aside__title {
-	color: #3b82f6 !important;
-}
-.sl-markdown-content .starlight-aside--note .starlight-aside__title svg {
-	color: #3b82f6 !important;
+	--sl-color-asides-text-accent: var(--sl-color-blue-high);
+	--sl-color-asides-border: var(--sl-color-blue);
 }
 
 .sl-markdown-content .starlight-aside--tip {
-	border-left: 4px solid #10b981 !important; /* Green */
-	background-color: rgba(16, 185, 129, 0.05) !important;
-}
-.sl-markdown-content .starlight-aside--tip .starlight-aside__title {
-	color: #10b981 !important;
-}
-.sl-markdown-content .starlight-aside--tip .starlight-aside__title svg {
-	color: #10b981 !important;
+	--sl-color-asides-text-accent: var(--sl-color-green-high);
+	--sl-color-asides-border: var(--sl-color-green);
 }
 
-.sl-markdown-content .starlight-aside--caution,
-.sl-markdown-content .starlight-aside--warning {
-	border-left: 4px solid #eab308 !important; /* Yellow */
-	background-color: rgba(234, 179, 8, 0.05) !important;
-}
-.sl-markdown-content .starlight-aside--caution .starlight-aside__title,
-.sl-markdown-content .starlight-aside--warning .starlight-aside__title {
-	color: #ca8a04 !important; /* Slightly darker yellow for text readability */
-}
-.sl-markdown-content .starlight-aside--caution .starlight-aside__title svg,
-.sl-markdown-content .starlight-aside--warning .starlight-aside__title svg {
-	color: #eab308 !important;
+.sl-markdown-content .starlight-aside--caution {
+	--sl-color-asides-text-accent: var(--sl-color-orange-high);
+	--sl-color-asides-border: var(--sl-color-orange);
 }
 
 .sl-markdown-content .starlight-aside--danger {
-	border-left: 4px solid #ef4444 !important; /* Red */
-	background-color: rgba(239, 68, 68, 0.05) !important;
-}
-.sl-markdown-content .starlight-aside--danger .starlight-aside__title {
-	color: #ef4444 !important;
-}
-.sl-markdown-content .starlight-aside--danger .starlight-aside__title svg {
-	color: #ef4444 !important;
+	--sl-color-asides-text-accent: var(--sl-color-red-high);
+	--sl-color-asides-border: var(--sl-color-red);
 }
 
-/* Ensure dark mode has correct contrast */
-html[data-theme='dark'] .sl-markdown-content .starlight-aside--note { background-color: rgba(59, 130, 246, 0.1) !important; }
-html[data-theme='dark'] .sl-markdown-content .starlight-aside--note .starlight-aside__title { color: #60a5fa !important; }
+/*
+ * Starlight 0.41.7's aside variants are exactly note, tip, caution and danger
+ * (integrations/aside-utils.ts). There is no `--warning`; `warning` is the
+ * icon name caution uses, and the selectors written for it matched nothing.
+ */
+.sl-markdown-content .starlight-aside {
+	border: 1px solid var(--sl-color-asides-border);
+	border-inline-start: 4px solid var(--sl-color-asides-border);
+	background-color: color-mix(in srgb, var(--sl-color-asides-border) 7%, transparent);
+	color: var(--sl-color-text);
+}
 
-html[data-theme='dark'] .sl-markdown-content .starlight-aside--tip { background-color: rgba(16, 185, 129, 0.1) !important; }
-html[data-theme='dark'] .sl-markdown-content .starlight-aside--tip .starlight-aside__title { color: #34d399 !important; }
-
-html[data-theme='dark'] .sl-markdown-content .starlight-aside--caution,
-html[data-theme='dark'] .sl-markdown-content .starlight-aside--warning { background-color: rgba(234, 179, 8, 0.1) !important; }
-html[data-theme='dark'] .sl-markdown-content .starlight-aside--caution .starlight-aside__title,
-html[data-theme='dark'] .sl-markdown-content .starlight-aside--warning .starlight-aside__title { color: #facc15 !important; }
-
-html[data-theme='dark'] .sl-markdown-content .starlight-aside--danger { background-color: rgba(239, 68, 68, 0.1) !important; }
-html[data-theme='dark'] .sl-markdown-content .starlight-aside--danger .starlight-aside__title { color: #f87171 !important; }
+.sl-markdown-content .starlight-aside__title,
+.sl-markdown-content .starlight-aside__title svg {
+	color: var(--sl-color-asides-border);
+}
 
 
 

@@ -25,4 +25,13 @@ pnpm-debug.log*
 # listed in scripts/docs-manifest.mjs instead. `**` matches zero or more
 # directories, so this covers any depth a manifest `dest` might use
 # (e.g. `guides/foo.md`), not just the currently flat and `ru/`-nested cases.
+#
+# Both extensions: most manifest `dest` values are `.mdx`, because the page
+# uses Starlight components. An earlier `**/*.md`-only rule matched none of
+# them, so nine generated pages were committed while four were ignored.
 src/content/docs/**/*.md
+src/content/docs/**/*.mdx
+
+# …except the two pages that are genuinely hand-authored.
+!src/content/docs/index.mdx
+!src/content/docs/ru/index.mdx
