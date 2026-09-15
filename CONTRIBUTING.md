@@ -38,10 +38,11 @@ cargo run -- profile list
 Run what CI runs. Warnings are build failures.
 
 ```bash
-cargo fmt --all -- --check
-cargo clippy --all-targets --locked -- -D warnings
-cargo test --locked
+cargo fmt --all -- --check && cargo clippy --all-targets --locked -- -D warnings && cargo test --locked
 ```
+
+CI also passes `--all-features`; the crate defines no features, so this checks
+the same code.
 
 ## Things that are easy to get wrong
 
@@ -94,7 +95,7 @@ rather than `test_profile` — and assert one thing per test.
 
 - Pure logic goes in a `#[cfg(test)] mod tests` next to the code.
 - Anything involving argv, exit codes, or files goes in `tests/cli.rs`.
-- Integration tests must isolate state with `TSPM_CONFIG` and `TSPM_SETTINGS`;
+- Integration tests must isolate state with `TSPM_CONFIG`, `TSPM_SETTINGS` and `TSPM_LANG`;
   use the `Cli` helper at the top of `tests/cli.rs`. A test must never touch the
   real `~/.config`.
 - Please don't add tests that need network access. They are slow and flaky.
@@ -134,7 +135,7 @@ Branch your work off the **open release branch**, not off `main`, and open the
 pull request against that same release branch:
 
 ```bash
-git checkout release/2.3.0 && git pull
+git checkout release/X.Y.Z && git pull
 git checkout -b fix/dashboard-empty-list
 ```
 
@@ -148,8 +149,11 @@ Full rules, including how a release is cut, are in
 
 ## Changelog
 
-Any pull request touching `src/`, `locales/` or `Cargo.toml` needs an entry
-under `## [Unreleased]` in `CHANGELOG.md`. CI checks this. Docs-only and CI-only
+Any pull request touching `src/`, `locales/`, `shell/`, `configs/` or
+`Cargo.toml` needs an entry under `## [Unreleased]` in `CHANGELOG.md` **and** the
+matching entry in `CHANGELOG.ru.md`. CI checks both: a behaviour change without a
+`CHANGELOG.md` entry fails, and so does a `CHANGELOG.md` change without its
+Russian twin, because both changelogs are published. Docs-only and CI-only
 changes are exempt.
 
 ## Commits

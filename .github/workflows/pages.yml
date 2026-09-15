@@ -2,9 +2,9 @@ name: Deploy Astro site to GitHub Pages
 
 # Only main publishes. The site is generated from the repository's canonical
 # Markdown, so a deploy from a task or release branch would put unreviewed,
-# unreleased documentation on the public URL — and, because the build job holds
-# the Pages and OIDC tokens, would run that branch's `npm ci` lifecycle scripts
-# with them. Pull requests are gated by website.yml instead.
+# unreleased documentation on the public URL — built by that branch's own
+# `npm ci` lifecycle scripts and published by the deploy job, the only one
+# holding the Pages and OIDC tokens. Pull requests are gated by website.yml instead.
 on:
   push:
     branches: [main]

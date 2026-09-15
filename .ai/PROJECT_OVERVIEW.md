@@ -35,10 +35,16 @@ feature of `reqwest`. Raw port checks use `std::net::TcpStream::connect_timeout`
 ### `src/` — entry point and cross-cutting modules
 
 - **`main.rs`** — Resolves config paths and language from raw argv
-  (`preparse`), builds a localised clap command, parses, and dispatches. Returns
-  `ExitCode`. Deliberately contains no business logic.
-- **`lib.rs`** — Library root. Everything worth testing lives beneath it, which
-  is why `main.rs` stays thin.
+  (`preparse`), builds a localised clap command, parses, and dispatches through
+  one flat `match` in `dispatch`. Returns `ExitCode`. Most arms call into
+  `src/cmd/`, but a few subcommands are implemented here in full: `debug`
+  (inline in `dispatch`, toggling the marker file through `shell_handoff`),
+  `config path` and `config show` (inline), `prompt` (`print_prompt_segment`)
+  and `run` (`run_through_proxy`, which propagates the child's exit status).
+- **`lib.rs`** — Library root. Most of what is worth testing lives beneath it.
+  The code in `main.rs` is outside the library, so it is covered by `main.rs`'s
+  own `#[cfg(test)]` module and by the end-to-end tests in `tests/cli.rs`
+  (which exercise `run` and `config`, for example).
 - **`cli.rs`** — The clap command tree only. Doc comments here are bilingual
   (`English | Русский`) and act as the static fallback; `main.rs` overrides
   subcommand descriptions at runtime from the `cmd_*` locale keys.
@@ -64,7 +70,11 @@ feature of `reqwest`. Raw port checks use `std::net::TcpStream::connect_timeout`
 - **`i18n.rs`** — Loads `locales/*.json`, embedded with `include_str!`. `t` looks
   up a key; `format` substitutes `{}` placeholders in order.
 
-### `src/cmd/` — one module per subcommand
+### `src/cmd/` — subcommand implementations
+
+Roughly one module per subcommand, with exceptions: several subcommands share a
+module, and `debug`, `config`, `prompt` and `run` have none (see `main.rs`
+above).
 
 - **`dash.rs`** — The TUI. An RAII `TerminalGuard` plus a panic hook guarantee
   the terminal is restored on every exit path. Long actions that need a normal
@@ -83,7 +93,8 @@ feature of `reqwest`. Raw port checks use `std::net::TcpStream::connect_timeout`
   **`speedtest.rs`** — The network-facing reports.
 - **`init.rs`**, **`completions.rs`** — Shell integration and completions.
 - **`settings.rs`**, **`export_cmd.rs`** — Settings management and export
-  formats.
+  formats. The top-level `lang` subcommand lives in `settings.rs` too
+  (`set_lang`), shared with `settings set --lang`.
 
 ### `locales/`
 
