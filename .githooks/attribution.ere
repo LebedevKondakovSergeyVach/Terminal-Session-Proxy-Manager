@@ -1,0 +1,5 @@
+^[[:space:]]*(co-authored-by|claude-session)[[:space:]]*:
+^[[:space:]]*([^[:alnum:][:space:]]+[[:space:]]*)?(generated|made)[- ](with|by)[[:space:]:]+.*(claude|cursor|gemini|codex|copilot|antigravity)
+cursoragent@cursor\.com
+noreply@anthropic\.com
+claude\.ai/code/session

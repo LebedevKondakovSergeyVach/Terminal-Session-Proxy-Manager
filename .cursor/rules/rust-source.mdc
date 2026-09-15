@@ -1,0 +1,9 @@
+---
+description: "Rust source, tests and locales - pointer to .claude/rules/rust-source.md"
+globs: src/**,tests/**,locales/**
+alwaysApply: false
+---
+
+Before reading or editing these files, read `.claude/rules/rust-source.md` and
+follow it. That file is the single source for this area; this rule only points
+to it.

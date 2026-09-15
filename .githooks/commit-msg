@@ -1,0 +1,23 @@
+#!/bin/sh
+# Rejects authorship attribution in commit messages — AGENTS.md, "Conventions".
+# Enable once per clone: git config core.hooksPath .githooks
+# `--author` is invisible to this hook; the rule text covers that case.
+#
+# Patterns live in attribution.ere, shared with the agent-docs audit. They are
+# anchored to the start of a line, so a message that merely mentions the words
+# ("restores the cursor", "why 'Generated with …' lines are rejected") passes.
+
+patterns="$(dirname "$0")/attribution.ere"
+
+# `git commit -v` appends the diff below a scissors line before this hook runs;
+# drop it, and comment lines, so quoted diff text cannot trigger a rejection.
+found=$(sed '/^# -\{24\} >8 -\{24\}$/,$d' "$1" | grep -v '^#' | grep -i -E -f "$patterns")
+
+if [ -n "$found" ]; then
+    echo "commit-msg: authorship attribution is not allowed here (AGENTS.md, Conventions):" >&2
+    echo "$found" >&2
+    echo "Remove those lines and commit again. Do not bypass this with --no-verify." >&2
+    exit 1
+fi
+
+exit 0

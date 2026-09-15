@@ -1,0 +1,9 @@
+---
+description: "CI workflows, dependencies and releases - pointer to .claude/rules/ci-and-release.md"
+globs: .github/**,Cargo.toml,Cargo.lock
+alwaysApply: false
+---
+
+Before reading or editing these files, read `.claude/rules/ci-and-release.md` and
+follow it. That file is the single source for this area; this rule only points
+to it.

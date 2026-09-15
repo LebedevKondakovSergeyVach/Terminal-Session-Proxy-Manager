@@ -1,0 +1,9 @@
+---
+description: "The Astro Starlight documentation site - pointer to website/AGENTS.md"
+globs: website/**
+alwaysApply: false
+---
+
+Before reading or editing anything under `website/`, read `website/AGENTS.md`
+and follow it. That file is the single source for this area; this rule only
+points to it. The matching skill is `.agents/skills/starlight-website/SKILL.md`.

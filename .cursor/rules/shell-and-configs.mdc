@@ -1,0 +1,9 @@
+---
+description: "Shell integration and shipped defaults - pointer to .claude/rules/shell-and-configs.md"
+globs: shell/**,configs/**
+alwaysApply: false
+---
+
+Before reading or editing these files, read `.claude/rules/shell-and-configs.md`
+and follow it. That file is the single source for this area; this rule only
+points to it.
