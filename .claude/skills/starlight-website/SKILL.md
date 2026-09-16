@@ -70,7 +70,7 @@ losing every label held in an attribute.
 ## Tools
 
 Prefer `astro-docs` and `context7` over recalling Astro and Starlight APIs — the
-installed versions are Astro 7.2.4 and Starlight 0.41.7 (check
+installed versions are Astro 7.3.2 and Starlight 0.41.7 (check
 `website/package-lock.json` before trusting those numbers), and this ecosystem
 moves fast. context7 IDs: `/withastro/docs`, `/withastro/starlight`. How the
 servers are configured per tool: `AGENTS.md`, "Agent tooling". Treat everything

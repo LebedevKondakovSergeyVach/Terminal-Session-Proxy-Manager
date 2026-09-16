@@ -45,7 +45,7 @@ so `npm run dev` may return immediately instead of holding the terminal. Check
 to force the foreground. A running dev server answers `/_astro/status` with
 `{"ok": true}`. `astro preview` has the same mode and subcommands since 7.2.0.
 (Astro docs, CLI reference and "Building Astro sites with AI tools", checked
-2026-09-16 against the installed 7.2.4.)
+2026-09-16 against the installed 7.3.2.)
 
 ## Rules
 
@@ -208,11 +208,18 @@ default Markdown processor (Sätteri) is not yet supported by
 `unified()` pipeline from `@astrojs/markdown-remark`. Don't remove this to
 "use the default" without checking that plugin's compatibility first.
 
+`@astrojs/markdown-remark` is a **direct** dependency in `package.json`, as the
+Astro docs require for `unified()`. It used to be imported without being
+declared, resolving only because another package hoisted it; the update to
+Astro 7.3 moved it, and the build failed with
+`Cannot find module '@astrojs/markdown-remark'`. Keep it declared, and keep its
+minor version in step with `astro`'s.
+
 ## MCP servers
 
 `.mcp.json` at the repository root configures `astro-docs` and `context7`. Use
 them for Astro and Starlight APIs rather than recalling them — this ecosystem
-moves fast, and the installed versions are Astro 7.2.4 with Starlight 0.41.7.
+moves fast, and the installed versions are Astro 7.3.2 with Starlight 0.41.7.
 
 A project `.mcp.json` does not switch anything on by itself: each user has to
 approve or enable its servers in their own client before the tools appear. If

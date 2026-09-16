@@ -13,6 +13,18 @@ A documentation release. The project gains a published website, and the CLI's
 output is reworked for terminals and scripts that do not want decoration. Two
 changes affect scripts — see **Changed**.
 
+### Security
+
+- **CLI**: `rustls` updated to 0.23.45 for
+  [RUSTSEC-2026-0285](https://rustsec.org/advisories/RUSTSEC-2026-0285.html):
+  TLS 1.3 handshake messages sent across an encryption-level boundary were
+  accepted instead of rejected. `reqwest` uses it for every HTTPS request the
+  tool makes — status, ping, speedtest, imports from a URL.
+- **Docs**: The website's build dependencies are updated past advisories in
+  `astro` (critical: remote code execution through AVIF image optimisation),
+  `sharp`, `svgo` and `js-yaml`. Astro moves to 7.3.2. These affect only the
+  site build, not the CLI.
+
 ### Added
 
 - **Docs**: A documentation website, published at
