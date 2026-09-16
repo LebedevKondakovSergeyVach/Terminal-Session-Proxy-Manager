@@ -99,6 +99,10 @@ proxy profile set work \
 proxy profile remove work          # Delete
 ```
 
+`profile set` saves the profile as active but does not touch the variables of
+the shell you are in. With the proxy on, run `proxy use work` (or `proxy on`)
+afterwards to apply it.
+
 `--protocol` accepts `http`, `https`, `socks4`, `socks4a`, `socks5`, `socks5h`.
 Omitted fields keep their current value on an existing profile.
 
@@ -134,8 +138,9 @@ proxy ping --timeout 2000  # With a 2 s timeout
 proxy speedtest            # Real download throughput
 ```
 
-`benchmark` probes every profile against every ping target concurrently.
-Unreachable profiles sort last and are shown as a timeout rather than a number.
+`benchmark` tests the profiles one after another, probing all ping targets of
+each profile at once. Unreachable profiles sort last and are shown as a timeout
+rather than a number.
 
 ---
 
@@ -148,7 +153,7 @@ proxy dash
 | Key | Action |
 | :--- | :--- |
 | `↑` `↓` / `k` `j` | Move the selection |
-| `Space` | Preview a profile without leaving |
+| `Space` | Make a profile active without leaving (saved; the shell is not updated) |
 | `Enter` | Apply the profile and exit, updating the shell |
 | `b` | Switch to the fastest profile |
 | `i` | Import from a URL or file |
@@ -166,12 +171,18 @@ shell integration; run `proxy dash`, not the bare binary.
 
 ```bash title="Terminal" frame="terminal"
 proxy diagnose  # Local socket, session variables, and endpoint reachability
-proxy monitor   # Health check; switches to the fastest alternative on failure
+proxy monitor   # Health check; picks the fastest reachable profile on failure
 ```
 
 `monitor` probes `health_check_url` from `config.json` through the proxy that is
-currently in your environment. If it fails, it benchmarks the other profiles and
-switches to the best reachable one.
+currently in your environment — `ALL_PROXY`, `all_proxy` or `http_proxy`. If the
+check fails, or none of those is set, it benchmarks the profiles and saves the
+fastest reachable one as active. It does not change the shell you run it in:
+apply the new profile there with `proxy on`, or run `proxy on` in a new shell.
+
+`diagnose` lists `http_proxy`, `https_proxy`, `ALL_PROXY` and `GRADLE_OPTS` from
+your session. For the complete set that `proxy on` exports, run
+`env | grep -i proxy`.
 
 ---
 

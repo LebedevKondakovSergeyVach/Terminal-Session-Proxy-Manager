@@ -7,6 +7,7 @@
 ![Баннер проекта](assets/banner.jpg)
 
 [![CI](https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/actions/workflows/ci.yml/badge.svg)](https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/actions/workflows/ci.yml)
+[![Docs](https://img.shields.io/badge/docs-%D1%81%D0%B0%D0%B9%D1%82-orange.svg)](https://lebedevkondakovsergeyvach.github.io/Terminal-Session-Proxy-Manager/ru/)
 [![Rust](https://img.shields.io/badge/rust-1.88%2B-orange.svg)](https://www.rust-lang.org)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey.svg)](README.ru.md)
@@ -23,8 +24,9 @@
   командой или через интерактивный выбор.
 - **Интерактивный TUI-дашборд.** Текущий IP, геолокация, график задержки и
   переключение профилей на одном экране.
-- **Автовыбор самого быстрого.** Параллельный замер всех профилей с выбором
-  лучшего и автопереключением при отказе активного прокси.
+- **Автовыбор самого быстрого.** Замер всех профилей — каждый проверяется по
+  всем целям одновременно — с выбором лучшего и монитором, который переключает
+  профиль при отказе активного прокси.
 - **Диагностика.** Замер задержки, проверка сокетов и реальный тест скорости.
 - **Экспорт куда угодно.** Одна команда для Docker, cURL, Git, `.env` и
   JVM-сборок — с корректным экранированием для shell.

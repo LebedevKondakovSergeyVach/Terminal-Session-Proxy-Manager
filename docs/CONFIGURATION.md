@@ -112,7 +112,7 @@ A complete, current example ships as
 | :--- | :--- | :--- | :--- |
 | `active_profile` | string | everything | Key of the active entry in `profiles` |
 | `profiles` | map | everything | Profile key → profile object |
-| `ping_targets` | array | `ping`, `benchmark`, `best` | Endpoints probed for latency |
+| `ping_targets` | array | `ping`, `benchmark`, `best`, `monitor`, `dash` | Endpoints probed for latency |
 | `diagnose_endpoints` | array | `diagnose` | Endpoints checked for reachability |
 | `geo_apis` | array | `status`, `dash` | JSON IP/geolocation APIs, tried in order until one answers |
 | `ipv4_api` | string | `status` | Plain-text endpoint returning your external IPv4 |

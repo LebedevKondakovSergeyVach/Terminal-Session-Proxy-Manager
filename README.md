@@ -7,6 +7,7 @@
 ![Project Banner](assets/banner.jpg)
 
 [![CI](https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/actions/workflows/ci.yml/badge.svg)](https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/actions/workflows/ci.yml)
+[![Docs](https://img.shields.io/badge/docs-website-orange.svg)](https://lebedevkondakovsergeyvach.github.io/Terminal-Session-Proxy-Manager/)
 [![Rust](https://img.shields.io/badge/rust-1.88%2B-orange.svg)](https://www.rust-lang.org)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey.svg)](README.md)
@@ -23,8 +24,9 @@ environment variables your tools actually read — on **macOS** and **Linux**
   command or an interactive picker.
 - **Interactive TUI dashboard.** Live IP, geolocation, latency sparkline, and
   profile switching in one screen.
-- **Pick the fastest automatically.** Benchmarks every profile in parallel and
-  selects the best one, with auto-failover when the active proxy dies.
+- **Pick the fastest automatically.** Benchmarks every profile — each against
+  all its ping targets at once — and selects the best one, with a health monitor
+  that fails over to another profile when the active proxy dies.
 - **Diagnostics.** Latency probes, socket checks, and a real bandwidth test.
 - **Exports everything.** One command for Docker, cURL, Git, `.env`, and JVM
   build tooling — with correct shell quoting.

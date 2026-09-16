@@ -142,5 +142,6 @@ installed but the binary is not on `PATH`. See
 [INSTALLATION.md](INSTALLATION.md).
 
 **`proxy on` runs but tools ignore the proxy** — confirm with
-`proxy diagnose`, which prints the variables actually set in your session. Note
-that variables are not inherited by shells that were already open.
+`proxy diagnose`, which prints the main proxy variables set in your session
+(`env | grep -i proxy` shows all of them). Note that variables are not inherited
+by shells that were already open.
