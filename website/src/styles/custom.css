@@ -306,6 +306,13 @@ header.header {
 	display: none;
 }
 
+/* Docs pages carry the home button (SiteTitle.astro) instead of the logo: one
+   way home, labelled, rather than a picture and a button side by side that go
+   to the same place. The logo stays on the splash page. */
+:root[data-has-sidebar] .site-title img {
+	display: none;
+}
+
 /* Reduce bottom padding on splash pages.
  *
  * Starlight emits `data-has-sidebar` as a boolean presence attribute, never
@@ -450,7 +457,8 @@ html[data-theme='dark'] .hero::before {
 
 /*
  * 1. Center and enlarge search bar on Desktop
- * 2. Adaptive toolbar: the logo alone stands for the site title on mobile
+ * 2. Adaptive toolbar: on mobile the title text gives way — to the logo on the
+ *    splash page, to the home button on docs pages
  */
 header.header > .header {
 	display: flex;
@@ -501,12 +509,14 @@ header.header > .header {
 	}
 
 	/*
-	 * The logo alone, as the link home.
+	 * The title text gives way to make room.
 	 *
-	 * This used to hide the whole `.site-title` link to make room for the
-	 * toolbar — which also removed the only way back to the home page from a
-	 * docs page. Only the text goes now, and only visually: it stays in the link
-	 * as its accessible name, which is why the logo's alt is empty.
+	 * On the splash page the logo stays as the link, and the text goes only
+	 * visually: it remains the link's accessible name, which is why the logo's
+	 * alt is empty. On a docs page the logo is already hidden, so the link would
+	 * be an invisible focus stop — it goes entirely, and the home button beside
+	 * it is the way home. (Hiding this link on every page, as an earlier rule
+	 * did, left docs pages on a phone with no way home at all.)
 	 */
 	header.header > .header > .title-wrapper .site-title span {
 		position: absolute;
@@ -515,6 +525,10 @@ header.header > .header {
 		overflow: hidden;
 		clip-path: inset(50%);
 		white-space: nowrap;
+	}
+
+	:root[data-has-sidebar] header.header > .header > .title-wrapper .site-title {
+		display: none;
 	}
 
 	header.header > .header > .title-wrapper {

@@ -34,10 +34,11 @@ export default defineConfig({
 			title: 'Terminal Session Proxy Manager',
 			// The logo is the orange-flower artwork; the favicon is a separate,
 			// simpler mark (the orange cube), because the flower turns to a blur
-			// at tab size. Below 50rem the header drops the title text and keeps
-			// the logo (custom.css). The alt stays empty because the title text is
-			// still in the link, for screen readers, at every width — an alt would
-			// read the name twice.
+			// at tab size. The logo shows on the splash page only — docs pages
+			// have the home button instead (custom.css, SiteTitle.astro). The alt
+			// stays empty because the title text is still in the link for screen
+			// readers, even where it is hidden visually — an alt would read the
+			// name twice.
 			logo: { src: './src/assets/logo.jpg' },
 			favicon: '/favicon.png',
 			plugins: [
