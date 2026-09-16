@@ -41,8 +41,8 @@ repository's own Markdown — `README.md`, `README.ru.md`, `docs/*.md`,
 - `scripts/lib/frontmatter.mjs` serialises frontmatter as valid YAML.
 
 Generated pages are Git-ignored — `.md` and `.mdx` alike — so the site cannot
-drift from its sources. The only hand-authored pages are `index.mdx` and
-`ru/index.mdx`.
+drift from its sources. The only hand-authored pages are the home pages,
+`index.mdx` and `ru/index.mdx`, and the 404 pages, `404.md` and `ru/404.md`.
 
 `astro.config.mjs` pins `markdown.processor` to `unified()` rather than
 Astro 7's default Sätteri processor: `starlight-image-zoom` doesn't yet
@@ -55,12 +55,14 @@ website/
 ├── site.config.mjs        # site + base, imported by the config and the generator
 ├── astro.config.mjs       # Starlight config: locales, sidebar, plugins
 ├── scripts/               # content generator and its tests
-├── public/                # served at the site root (favicon, og.jpg)
+├── icons/                 # 1024px sources of the favicon and the logo
+├── public/                # served at the site root (favicon.png, apple-touch-icon.png, og.jpg)
 └── src/
-    ├── assets/            # images processed by Astro
-    ├── components/        # Starlight component overrides
-    ├── content/docs/      # index.mdx is hand-written; the rest is generated
-    └── styles/custom.css  # theme layer over stock Starlight
+    ├── assets/            # images processed by Astro, including logo.jpg
+    ├── components/        # overrides: ThemeSelect, Search, SiteTitle
+    ├── content/docs/      # index.mdx and 404.md (both locales) are hand-written; the rest is generated
+    ├── content/i18n/      # UI strings: pagefind.* and the site's own tspm.*
+    └── styles/custom.css  # layout, responsive layer and typography over the theme
 ```
 
 ## For agents

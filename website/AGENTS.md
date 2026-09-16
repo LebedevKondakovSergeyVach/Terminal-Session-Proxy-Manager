@@ -138,10 +138,23 @@ the English page and the sidebar carries a badge saying so.
 `starlight-theme-md3` supplies all four, derived from the `seed` hex in
 `astro.config.mjs` — the project's rust orange. Change the look by changing the
 theme's options (`seed`, `variant`, `shape`, `density`, `motion`), never by
-overriding its `--md-sys-*` or `--md3-comp-*` tokens.
+overriding its `--md-sys-*` or `--md3-comp-*` tokens. There is one sanctioned
+exception, commented where it lives at the top of `custom.css`: the selected
+sidebar item's `--md3-comp-nav-item-selected-*` pair points at the primary
+container, so the highlight carries the brand orange. Do not add a second.
 
-`custom.css` is a thin layer for what the theme does not claim: typography,
-scrollbars, and one screenshot border.
+`custom.css` holds what the theme does not claim: typography, scrollbars, the
+screenshot rules, the splash page's own layout (hero, tiles, footer), and the
+responsive layer. That layer uses Starlight's `49.999rem` step and the theme's
+`34.999rem`, plus `29.999rem` and `22.499rem` for the splash header on narrow
+phones; touch targets reach 44px under `pointer: coarse`; the site's own hover
+effects sit behind `hover: hover`, because a touch browser keeps `:hover` after
+a tap; and its own transitions and animations sit behind
+`prefers-reduced-motion: no-preference`. Write `max-width` boundaries as
+`49.999rem`, not `50rem` — at exactly 800px a `50rem` rule matches together with
+Starlight's desktop layout. Within an interaction block, `:active` comes after
+`:hover` and `:focus`: at equal specificity the later rule wins, and a pressed
+element is also hovered.
 
 **No `!important` in the site's own CSS.** `custom.css` and
 `src/assets/zigzag.css` are both clean and must stay that way. Two earlier
@@ -181,6 +194,36 @@ that did mapped every count ≥ 2 to `результатов`, which is wrong fo
 Note that Pagefind has only `one_result` and `many_results`, so the Russian
 `many_results` is worded (`Найдено результатов: [COUNT]`) to read correctly
 with any numeral.
+
+### 6b. Component overrides, the site's own UI strings, and its icons
+
+`astro.config.mjs` overrides three Starlight components, all in
+`src/components/`:
+
+| Override | Does |
+| :--- | :--- |
+| `ThemeSelect.astro` | Three-way light/auto/dark switch. Docs pages render it twice (header and mobile menu), so it updates every instance; storage is read first and the page's own choice is the fallback only when storage throws. |
+| `Search.astro` | Stock search plus the quick-links panel (rule 6a). |
+| `SiteTitle.astro` | Stock title plus a round home button on docs pages (`hasSidebar`), styled from the same theme tokens as the search button. |
+
+The header logo shows on the splash pages only; `custom.css` hides it where the
+home button is. Below 50rem the title text is hidden — visually on the splash
+page, where the logo stays the link, and entirely on docs pages, so no invisible
+link is left as a focus stop.
+
+UI strings of the site's own — not Starlight's, not Pagefind's — are `tspm.*`
+keys in the same `i18n` collection, read with `Astro.locals.t`. A new key goes
+into the `i18nSchema({ extend })` object in `src/content.config.ts` **and** into
+both `src/content/i18n/en.json` and `ru.json`. Prefer that to branching on the
+locale in a component. The one component that still branches is `Search.astro`,
+whose quick links are built by a client script that has no `Astro.locals`.
+
+The images in `icons/` are the 1024px sources: `favicon.jpg` becomes
+`public/favicon.png` (32px) and `public/apple-touch-icon.png` (180px);
+`logo.jpg` becomes `src/assets/logo.jpg` (192px). Regenerate from the sources,
+e.g. `sips -s format png -Z 32 icons/favicon.jpg --out public/favicon.png`.
+`head` entries in the config are emitted verbatim, so the apple-touch-icon path
+carries `BASE` itself; the `favicon` option gets `base` from Starlight.
 
 ### 7. Client scripts and page transitions
 
