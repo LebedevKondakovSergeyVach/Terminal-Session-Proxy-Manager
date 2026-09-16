@@ -35,6 +35,9 @@ npm test         # unit tests for the content generator
 `astro dev --background` runs the server detached; manage it with `astro dev
 stop`, `astro dev status` and `astro dev logs [--follow]`. These are subcommands
 of `astro dev`, so `astro --help` does not list them — `astro dev --help` does.
+Astro starts background mode on its own when it detects an agent, so run
+`astro dev status` before starting another server (`website/AGENTS.md`,
+"Commands").
 
 ## The four things that most often go wrong
 

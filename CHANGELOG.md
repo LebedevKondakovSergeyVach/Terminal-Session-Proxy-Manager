@@ -7,7 +7,7 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
-## [2.3.0] — 2026-09-08
+## [2.3.0] — 2026-09-16
 
 A documentation release. The project gains a published website, and the CLI's
 output is reworked for terminals and scripts that do not want decoration. Two
@@ -40,6 +40,15 @@ changes affect scripts — see **Changed**.
   clears the selection menu when it closes, whether you chose or cancelled.
 - **CLI**: `proxy ping` prints HTTP 2XX responses in green and everything else
   in yellow.
+- **Contributing**: Git hooks in `.githooks/`, enabled once per clone with
+  `git config core.hooksPath .githooks`. `commit-msg` rejects tool attribution
+  lines (`Co-Authored-By:`, "Generated with …"); `pre-push` refuses pushes to
+  `main` and tag pushes, since merging a release branch is what publishes.
+- **Contributing**: One set of instructions for AI coding agents. `AGENTS.md`
+  is the shared contract; `CLAUDE.md`, `GEMINI.md` and `.cursor/rules/` are the
+  entry points for Claude Code, Antigravity and Cursor; area rules live in
+  `.claude/rules/`, and the task skills in `.claude/skills/` gain
+  `agent-docs-audit`, which checks the set for drift.
 
 ### Changed
 
@@ -70,6 +79,17 @@ changes affect scripts — see **Changed**.
   changelog now also has to pass the site build
   (`cd website && npm ci && npm test && npm run build`), because those files
   are the site's content.
+- **Contributing**: The changelog rule in `CONTRIBUTING.md` now matches what CI
+  enforces — changes to `shell/` and `configs/` need an entry too, in both
+  `CHANGELOG.md` and `CHANGELOG.ru.md`. The pull request template uses the same
+  `--locked` checks and `npm ci` as the rest of the documentation.
+- **Contributing**: `CLAUDE.md` imports `AGENTS.md` instead of only linking to
+  it, so Claude Code actually loads the project rules; the skills moved from
+  `.agents/skills/` (now symlinks) to `.claude/skills/`, where Claude Code finds
+  them.
+- **Docs**: The release notes in `.ai/GIT_WORKFLOW.md` describe the pipeline as
+  it runs: the tag is created after the binaries build, so a failed build
+  leaves no tag behind, and the recovery steps follow from that.
 
 ### Removed
 

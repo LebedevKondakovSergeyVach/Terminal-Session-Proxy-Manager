@@ -39,6 +39,14 @@ server as a background process, and `astro dev stop`, `astro dev status` and
 Prefer `astro dev --background` over your harness's own backgrounding when you
 need the shell back, since it also gives you `stop`/`status`/`logs`.
 
+Astro turns background mode on by itself when it detects an AI coding agent,
+so `npm run dev` may return immediately instead of holding the terminal. Check
+`astro dev status` before starting a second server; set `ASTRO_DEV_BACKGROUND=0`
+to force the foreground. A running dev server answers `/_astro/status` with
+`{"ok": true}`. `astro preview` has the same mode and subcommands since 7.2.0.
+(Astro docs, CLI reference and "Building Astro sites with AI tools", checked
+2026-09-16 against the installed 7.2.4.)
+
 ## Rules
 
 ### 1. Never edit the generated pages

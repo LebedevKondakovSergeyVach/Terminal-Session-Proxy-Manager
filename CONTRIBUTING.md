@@ -161,6 +161,16 @@ changes are exempt.
 [Conventional Commits](https://www.conventionalcommits.org/): `feat:`, `fix:`,
 `docs:`, `chore:`, `refactor:`, `test:`, `perf:`, `ci:`, `build:`.
 
+Enable the repository's Git hooks once per clone:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+`commit-msg` rejects tool attribution lines such as `Co-Authored-By:` or
+"Generated with …", and `pre-push` refuses pushes to `main` and tag pushes —
+releases are cut by merging, and CI creates the tag.
+
 ## Releases
 
 Maintainers only. Cutting a release means opening `release/X.Y.Z` from `main`,
@@ -170,4 +180,6 @@ pipeline does the rest. Never tag by hand as part of another change.
 ## Using an AI agent
 
 Point it at [`AGENTS.md`](AGENTS.md) first; it encodes the rules above in the
-form agents follow.
+form agents follow. Claude Code loads it through `CLAUDE.md`; Cursor and
+Antigravity read it directly, with `.cursor/rules/` and `GEMINI.md` adding what
+is specific to each.
