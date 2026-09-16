@@ -101,6 +101,8 @@ const t = Astro.locals.t;
 
 <script>
 	class StarlightThemeSwitch extends HTMLElement {
+		static chosen = null;
+
 		constructor() {
 			super();
 			
@@ -125,12 +127,17 @@ const t = Astro.locals.t;
 				}
 			};
 
-			const getTheme = () => readStored() || 'auto';
+			// The choice made on this page wins over storage: with storage blocked
+			// nothing is saved, and reading only from it reported 'auto' — so the
+			// system-scheme listener below overrode a theme picked a moment ago.
+			// Kept on the element class, shared by both copies of the switch.
+			const getTheme = () => StarlightThemeSwitch.chosen ?? readStored() ?? 'auto';
 			
 			const getPreferredColorScheme = () =>
 				matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
 			
 			const setTheme = (theme) => {
+				StarlightThemeSwitch.chosen = theme;
 				// Every instance, not just this one: docs pages render the switch
 				// twice, in the header and in the mobile menu, and updating only the
 				// clicked copy left the other showing the previous choice.

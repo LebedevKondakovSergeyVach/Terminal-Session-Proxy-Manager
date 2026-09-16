@@ -558,17 +558,21 @@ header.header > .header {
 }
 
 /*
- * Narrow phones, splash page: search, theme switch and language select do not
- * fit beside anything else at 320px. Three things give way:
- * - the GitHub icon, which the page also links from a hero tile;
- * - the logo link, which on this page leads to the page already open;
+ * Narrow phones, splash pages: search, theme switch and language select do not
+ * fit beside anything else at 320px. What gives way:
+ * - the GitHub icon, which the home page also links from a hero tile;
  * - the language select's fixed width (Starlight's `7em`, raised by the
  *   theme's `inline-size: max(…, 6.875rem)`), sized for labels far longer
- *   than "EN" and "RU" — its content decides instead.
+ *   than "EN" and "RU" — its content decides instead;
+ * - on the home page (the one with a hero), the logo link, which leads to the
+ *   page already open;
+ * - on the 404 pages, the language select instead: there the logo is the only
+ *   way home, and the page body already links the other language.
  */
 @media (max-width: 29.999rem) {
 	:root:not([data-has-sidebar]) header.header .right-group .social-icons,
-	:root:not([data-has-sidebar]) header.header > .header > .title-wrapper {
+	:root[data-has-hero] header.header > .header > .title-wrapper,
+	:root:not([data-has-sidebar]):not([data-has-hero]) header.header .right-group starlight-lang-select {
 		display: none;
 	}
 
