@@ -9,9 +9,15 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [2.3.0] — 2026-09-16
 
-A documentation release. The project gains a published website, and the CLI's
-output is reworked for terminals and scripts that do not want decoration. Two
-changes affect scripts — see **Changed**.
+The release that gives the project a home on the web. A bilingual documentation
+site is published from this repository's own Markdown and works on phones as
+well as desktops. The CLI's output is reworked for terminals and scripts that
+do not want decoration, and a TLS advisory is fixed.
+
+**Upgrading?** Three output changes can affect scripts that read what the tool
+prints — they are marked **Breaking for scripts** under **Changed**. Nothing
+changes in `config.json`, `settings.json`, the command names, flags or exit
+codes.
 
 ### Security
 
@@ -19,39 +25,88 @@ changes affect scripts — see **Changed**.
   [RUSTSEC-2026-0285](https://rustsec.org/advisories/RUSTSEC-2026-0285.html):
   TLS 1.3 handshake messages sent across an encryption-level boundary were
   accepted instead of rejected. `reqwest` uses it for every HTTPS request the
-  tool makes — status, ping, speedtest, imports from a URL.
-- **Docs**: The website's build dependencies are updated past advisories in
+  tool makes — `status`, `ping`, `speedtest`, `monitor`, imports from a URL.
+- **Website**: The site's build dependencies are updated past advisories in
   `astro` (critical: remote code execution through AVIF image optimisation),
   `sharp`, `svgo` and `js-yaml`. Astro moves to 7.3.2. These affect only the
   site build, not the CLI.
 
 ### Added
 
-- **Docs**: A documentation website, published at
+#### Documentation website
+
+- **Website**: A documentation site at
   [lebedevkondakovsergeyvach.github.io/Terminal-Session-Proxy-Manager](https://lebedevkondakovsergeyvach.github.io/Terminal-Session-Proxy-Manager/),
-  in English and Russian. Its pages are generated from this repository's own
-  Markdown, so the site and the files on GitHub cannot drift apart. Full-text
-  search, tabbed install instructions, stepped guides and colour-coded
-  callouts, plus `llms.txt` for machine readers.
+  in English and Russian (`/ru/`), built with Astro Starlight. Its pages are
+  generated from `README*.md`, `docs/*.md`, `CONTRIBUTING.md` and the
+  changelogs at build time, so the site and the files on GitHub cannot drift
+  apart.
+- **Website**: A home page with the project's features side by side with
+  terminal screenshots in light and dark variants, and quick-start tiles.
+- **Website**: Material Design 3 styling whose whole palette is derived from
+  the project's rust orange, in light and dark, with smooth transitions between
+  pages that fall back to a plain swap when reduced motion is requested.
+- **Website**: A three-way theme switch — light, auto (follows the system) and
+  dark — with a circular reveal when the theme changes.
+- **Website**: Full-text search, with quick links to the main guides while the
+  search box is empty, and a search interface translated into Russian.
+- **Website**: Install instructions in tabs (Homebrew, Cargo, prebuilt binary),
+  step-by-step guides, colour-coded callouts, terminal-framed code blocks with
+  a copy button, and screenshots that zoom on click or tap.
+- **Website**: Works on phones and touch screens:
+  - wide tables scroll sideways instead of being cut off;
+  - tab labels wrap on narrow screens instead of running off the edge;
+  - buttons, tabs and selects are at least 44px tall to tap;
+  - hover effects apply only with a mouse, so a tapped card no longer stays
+    raised;
+  - the header fits a 320px-wide screen;
+  - on phones the theme and language controls of a docs page live in the
+    menu.
+- **Website**: A round home button beside the site title on every docs page, on
+  phones and desktops, labelled "Home" / "На главную" for screen readers.
+- **Website**: The project's logo in the header of the home page, its own
+  favicon, and an icon for home-screen bookmarks on iOS.
+- **Website**: A custom 404 page in both languages, with links back into the
+  documentation and a way home on every screen width.
+- **Website**: A preview image for links shared on social networks and in
+  messengers, and `llms.txt` for machine readers.
+- **Website**: The build fails on a broken internal link, so a dead link cannot
+  reach the published site.
+
+#### Documentation
+
 - **Docs**: `CHANGELOG.ru.md` — the release history in Russian, published at
   `/ru/changelog/`. `README.ru.md` now links to it rather than to the English
   file.
-- **Docs**: A custom 404 page, in both languages.
 - **Docs**: `docs/SHELL_INTEGRATION.md` explains *why* the shell function is
   needed, with a sequence diagram; `docs/USAGE.md` opens with the subcommands
   grouped into four categories.
-- **Docs**: The search interface is translated into Russian, through
-  Starlight's `pagefind.*` translation collection.
-- **CI**: `website.yml` gates every pull request touching the site or the
-  documents it is built from — it runs the generator's tests, builds the site
-  and fails on a dead internal link. `pages.yml` publishes from `main`.
-- **CI**: Dependabot now watches the website's npm dependencies as well as
-  Cargo and the GitHub Actions.
-- **Config**: OpenAI and Anthropic joined the default `ping_targets`.
-- **CLI**: `proxy switch` shows each profile's `[ON]` / `[OFF]` state and
-  clears the selection menu when it closes, whether you chose or cancelled.
-- **CLI**: `proxy ping` prints HTTP 2XX responses in green and everything else
+- **Docs**: The READMEs carry a badge linking to the documentation site.
+
+#### CLI and configuration
+
+- **Config**: OpenAI (`https://status.openai.com/api/v2/status.json`) and
+  Anthropic (`https://www.anthropic.com`) joined the default `ping_targets`.
+  Existing configs keep their own list.
+- **CLI**: After switching, `proxy switch` and `proxy use <key>` end the
+  confirmation line with `[ON]` or `[OFF]` — whether proxy variables are set in
+  this shell. Through the `proxy` shell function, `[ON]` means the new profile
+  has just been applied; `[OFF]` means it is saved and waits for `proxy on`.
+- **CLI**: The `proxy switch` menu is cleared from the screen when it closes,
+  whether you chose a profile or cancelled.
+- **CLI**: `proxy ping` prints HTTP 2xx responses in green and everything else
   in yellow.
+
+#### Automation and contributing
+
+- **CI**: `website.yml` gates every pull request that touches the site or the
+  documents it is built from — it runs the generator's tests, builds the site
+  and fails on a dead internal link. `pages.yml` publishes the site from
+  `main`.
+- **CI**: Dependabot watches the website's npm dependencies as well as Cargo
+  and the GitHub Actions.
+- **CI**: The branch policy requires `CHANGELOG.ru.md` to change whenever
+  `CHANGELOG.md` does, since both are published.
 - **Contributing**: Git hooks in `.githooks/`, enabled once per clone with
   `git config core.hooksPath .githooks`. `commit-msg` rejects tool attribution
   lines (`Co-Authored-By:`, "Generated with …"); `pre-push` refuses pushes to
@@ -59,54 +114,89 @@ changes affect scripts — see **Changed**.
 - **Contributing**: One set of instructions for AI coding agents. `AGENTS.md`
   is the shared contract; `CLAUDE.md`, `GEMINI.md` and `.cursor/rules/` are the
   entry points for Claude Code, Antigravity and Cursor; area rules live in
-  `.claude/rules/`, and the task skills in `.claude/skills/` gain
-  `agent-docs-audit`, which checks the set for drift.
+  `.claude/rules/`. The task skills in `.claude/skills/` gain
+  `starlight-website`, for work on the site, and `agent-docs-audit`, which
+  checks the instruction set for drift. `.mcp.json` declares the `context7`
+  and `astro-docs` documentation servers.
 
 ### Changed
 
-- **CLI**: `proxy on` and `proxy off` no longer print a confirmation line.
-  They emit only the shell statements to be evaluated, so
-  `eval "$(proxy env on)"` is now silent. **A script that parsed that
-  confirmation needs updating.**
+#### CLI output
+
+- **CLI** — **Breaking for scripts**: `proxy on` and `proxy off` no longer
+  print a confirmation line. They emit only the shell statements to be
+  evaluated, so `eval "$(proxy env on)"` is now silent. A script that looked
+  for that confirmation needs updating.
+- **CLI** — **Breaking for scripts**: the line `proxy use <key>` and
+  `proxy switch` print after switching ends with the new `[ON]` / `[OFF]` tag,
+  so its shape has changed.
+- **CLI** — **Breaking for scripts**: `proxy ping` labels a non-2xx response
+  `WARN (… ms)` in yellow; it used to be `OK` in green, like a success.
 - **CLI**: Emoji are gone from the translation strings and from the headers of
   the reporting commands — `ping`, `diagnose`, `monitor`, `git`, `import`,
   `benchmark`, `speedtest` — and from the dashboard's port indicator. The
   prompt marker and the dashboard's title bar keep theirs. The status labels
-  `proxy ping` prints are localised now, rather than fixed English.
-- **CLI**: The rule printed between report blocks is a plain line instead of a
-  bold cyan one.
-- **Docs**: `docs/*.md` and `CONTRIBUTING.md` are plain CommonMark. The site's
-  tabs, cards, steps and callouts are written as `<!--site:…-->` comments,
-  which GitHub renders as nothing and the site generator expands — so one file
-  reads correctly in both places. An intermediate version of this release put
-  the components directly in those documents, which cost them their headings
-  on GitHub.
-- **Docs**: `docs/CONFIGURATION.md` lists the full default `ping_targets`.
-- **CLI**: `proxy use <key>` prints the same `[ON]` / `[OFF]` tag as
-  `proxy switch`, so the line it emits has changed shape.
-- **Repo**: `docs/` holds only user documentation again. The website rebuild's
-  design notes moved to `.ai/archive/`, which is where shipped design documents
-  live from now on — they are history, not guidance, and each says so.
-- **Contributing**: a change to `docs/`, the READMEs, `CONTRIBUTING.md` or a
-  changelog now also has to pass the site build
+  `proxy ping` prints are translated now, rather than fixed English.
+- **CLI**: The rule printed between report blocks is a plain line of `-`
+  instead of a bold cyan line of `=`, and report headers no longer start with
+  spaces.
+
+#### Documentation
+
+- **Docs**: `docs/*.md` and `CONTRIBUTING.md` are plain CommonMark, readable on
+  GitHub as before. The site's tabs, cards, steps and callouts are written as
+  `<!--site:…-->` comments, which GitHub renders as nothing and the site
+  generator expands.
+- **Docs**: `docs/CONFIGURATION.md` lists the full default `ping_targets`, and
+  its field table names every command that reads them.
+- **Docs**: Corrected descriptions of what several commands do:
+  - `benchmark` tests profiles one after another, probing each profile's ping
+    targets at once — not every profile concurrently;
+  - `Space` in `proxy dash` saves the selected profile as active without
+    leaving; it does not update the shell, only `Enter` does;
+  - `monitor`, on a failed health check or with no proxy variable set, saves
+    the fastest reachable profile as active but does not change the shell it
+    runs in;
+  - `profile set` makes the profile active without re-applying the shell's
+    variables;
+  - `diagnose` lists the main proxy variables, not every one `proxy on` sets.
+- **Docs**: The release notes in `.ai/GIT_WORKFLOW.md` describe the pipeline as
+  it runs: the tag is created after the binaries build, so a failed build
+  leaves no tag behind, and the recovery steps follow from that.
+
+#### Dependencies
+
+- **CLI**: `chacha20` 0.10.1, which was yanked from crates.io, is replaced by
+  0.10.2.
+
+#### Contributing
+
+- **Contributing**: A change to `docs/`, the READMEs, `CONTRIBUTING.md` or a
+  changelog also has to pass the site build
   (`cd website && npm ci && npm test && npm run build`), because those files
   are the site's content.
-- **Contributing**: The changelog rule in `CONTRIBUTING.md` now matches what CI
+- **Contributing**: The changelog rule in `CONTRIBUTING.md` matches what CI
   enforces — changes to `shell/` and `configs/` need an entry too, in both
   `CHANGELOG.md` and `CHANGELOG.ru.md`. The pull request template uses the same
   `--locked` checks and `npm ci` as the rest of the documentation.
 - **Contributing**: `CLAUDE.md` imports `AGENTS.md` instead of only linking to
   it, so Claude Code actually loads the project rules; the skills moved from
   `.agents/skills/` (now symlinks) to `.claude/skills/`, where Claude Code finds
-  them.
-- **Docs**: The release notes in `.ai/GIT_WORKFLOW.md` describe the pipeline as
-  it runs: the tag is created after the binaries build, so a failed build
-  leaves no tag behind, and the recovery steps follow from that.
+  them. The `release-manager` skill updates the changelog link footer, and
+  `cargo-audit` asks where a security entry belongs once a release is cut.
+- **CI**: The branch policy compares a pull request against its merge base, so
+  a documentation-only pull request is no longer blocked by other commits on
+  the release branch.
+- **CI**: Workflows default to read-only repository access; the `cargo audit`
+  job gets only the extra permission it needs to report its results, which it
+  previously failed to do.
 
 ### Removed
 
 - **CLI**: The `env_on_msg` and `env_off_msg` translation keys, unused since
   `proxy on` and `proxy off` stopped printing a confirmation.
+- **Contributing**: The `aur-packager` skill — the project publishes no AUR
+  package — and the unused `.agents/mcp_config.json`.
 
 ## [2.2.2] — 2026-08-21
 
