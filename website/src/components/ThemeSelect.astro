@@ -48,8 +48,8 @@ const t = Astro.locals.t;
 		border-radius: 999px;
 		position: relative;
 	}
-	/* A finger needs a larger target than a pointer: at the desktop padding the
-	   buttons measured 35×29px, under the 44px a touch target should have. */
+	/* A finger needs a larger target than a pointer: the desktop padding leaves
+	   these buttons well under the 44px a touch target should have. */
 	@media (pointer: coarse) {
 		button {
 			min-inline-size: 2.75rem;

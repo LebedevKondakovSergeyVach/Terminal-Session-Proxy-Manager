@@ -101,7 +101,9 @@ html[data-theme='dark'] .theme-light-only {
   opacity: 0.6;
 }
 
-@media (max-width: 50rem) {
+/* 49.999rem so that exactly 800px, where Starlight already lays out the desktop
+   page, gets the side-by-side sections too. */
+@media (max-width: 49.999rem) {
   .zigzag-section, .zigzag-reverse {
     flex-direction: column;
     text-align: center;

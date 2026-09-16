@@ -322,9 +322,10 @@ import Default from '@astrojs/starlight/components/Search.astro';
 
 <style is:global>
 	/* Prevent modal jittering when results are momentarily cleared during search.
-	   On a phone the on-screen keyboard covers half the screen and `vh` does not
-	   shrink for it, so a half-screen floor pushed the first results under the
-	   keyboard; a smaller one there still stops the jitter. */
+	   On a phone the on-screen keyboard covers half the screen and no viewport
+	   unit shrinks for it — `svh` tracks browser toolbars, not the keyboard — so
+	   a half-screen floor pushed the first results under it. The smaller floor is
+	   the fix, and it still stops the jitter. */
 	#starlight__search .pagefind-ui__results-area {
 		min-height: 30svh;
 	}

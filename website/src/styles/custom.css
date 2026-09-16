@@ -3,8 +3,10 @@
  *
  * The theme owns colour, shape, elevation and motion — it derives all of them
  * from the `seed` set in astro.config.mjs. Nothing here may restate them. What
- * is left is what the theme does not claim: typography, scrollbars, and the one
- * screenshot rule.
+ * is left is what the theme does not claim: typography, scrollbars, the
+ * screenshot rules, the splash page's own layout, and the responsive layer —
+ * breakpoints, touch-target sizes, and gating the site's own hover and motion
+ * on `hover: hover` and `prefers-reduced-motion`.
  *
  * There is no `!important` in this file, and there must not be. Two earlier
  * versions had them — fifteen, then twenty-eight — every one repainting a
@@ -72,8 +74,9 @@ header.header {
 /* Wide tables scroll instead of being cut off. The theme gives tables
    `width: max-content; max-width: 100%` with `overflow: hidden` (for the rounded
    corners), so on a phone the columns past the edge were clipped with no way to
-   reach them — a 601px table in a 326px column on /ru/configuration/ at 360px.
-   `auto` still clips the corners and scrolls only when the table is wider. */
+   reach them — the four-column field table in the configuration guide lost
+   half its width. `auto` still clips the corners and scrolls only when the
+   table is wider than the column. */
 .sl-markdown-content table {
 	overflow-x: auto;
 }
@@ -185,9 +188,9 @@ header.header {
 	margin: 2.5rem auto 0;
 }
 
-/* One column only where two genuinely do not fit — the theme's own 35rem step.
-   Stacking all the way to 50rem put four full-width tiles, over 600px of them,
-   on a tablet or a landscape phone. */
+/* One column only where two genuinely do not fit, at the breakpoint the theme
+   uses for its hero cards. Stacking all the way to 50rem put four full-width
+   tiles, more than a screen of them, on a tablet or a landscape phone. */
 @media (max-width: 34.999rem) {
 	.hero .actions {
 		grid-template-columns: 1fr;
@@ -266,8 +269,8 @@ header.header {
 	order: 1; /* Ensure it stays below text */
 }
 
-/* Centred and stacked, each tile was 139px tall on a phone — four of them
-   made the hero nearly two screens at 320px. Icon beside the label instead,
+/* Centred and stacked, with the icon above the label, four tiles made the hero
+   nearly two screens tall on a narrow phone. Icon beside the label instead,
    description under it. */
 @media (max-width: 34.999rem) {
 	.hero .actions .sl-link-button {
@@ -289,6 +292,33 @@ header.header {
 		margin-top: 0;
 		text-align: start;
 	}
+}
+
+/* The logo is a photographic app icon on a black square: rounded like one, so
+   its corners do not read as a hard box on the light theme. The theme draws a
+   primary-coloured dot before the title as its stand-in mark; next to a real
+   logo that is two marks, so the dot goes where a logo is present. */
+.site-title img {
+	border-radius: 22%;
+}
+
+.site-title:has(img)::before {
+	display: none;
+}
+
+/* The hero image is the same kind of icon. Starlight gives it a fixed box that
+   suits an illustration beside the text; centred above the title in this
+   single-column hero it is sized to the viewport instead, so it does not push
+   the title below the fold on a phone. Starlight moves it after the text from
+   50rem (`order: 2`), which in one column would put it under the actions. */
+.hero > img {
+	order: 0;
+	position: relative;
+	z-index: 1;
+	justify-self: center;
+	inline-size: clamp(7rem, 28vw, 13rem);
+	block-size: auto;
+	border-radius: 22%;
 }
 
 /* Reduce bottom padding on splash pages.
@@ -351,7 +381,7 @@ header.header {
 	}
 }
 
-/* 29px tall at the desktop size — under the 44px a finger needs. */
+/* Its padding suits a pointer; a finger needs 44px. */
 @media (pointer: coarse) {
 	.footer-version a {
 		min-block-size: 2.75rem;
@@ -423,9 +453,9 @@ html[data-theme='dark'] .hero::before {
 	margin-top: clamp(1rem, 4vw, 2.5rem);
 }
 
-/* The theme sets the hero title at display-medium (45px) at every width; at
-   320px the site name wrapped over 260px of height. The theme's own next step
-   down, not a size of ours. */
+/* The theme sets the hero title at display-medium at every width, and on a
+   narrow phone the site name wrapped over five lines. The theme's own next
+   step down, not a size of ours. */
 @media (max-width: 34.999rem) {
 	.hero h1 {
 		font-size: var(--md-sys-typescale-display-small-size);
@@ -433,9 +463,9 @@ html[data-theme='dark'] .hero::before {
 	}
 }
 
-/* 
+/*
  * 1. Center and enlarge search bar on Desktop
- * 2. Adaptive toolbar: Hide site title on mobile to fit the toolbar
+ * 2. Adaptive toolbar: the logo alone stands for the site title on mobile
  */
 header.header > .header {
 	display: flex;
@@ -477,17 +507,31 @@ header.header > .header {
 	}
 }
 
-/* On Mobile */
-@media (max-width: 50rem) {
+/* On Mobile. 49.999rem, not 50rem: at exactly 800px both this and the desktop
+   block above matched, and this one, coming later, hid the title in what
+   Starlight lays out as the desktop header. */
+@media (max-width: 49.999rem) {
 	header.header > .header {
 		gap: 0.5rem;
 	}
-	
-	/* Hide the site title to save space for the toolbar */
-	header.header > .header > .title-wrapper .site-title {
-		display: none;
+
+	/*
+	 * The logo alone, as the link home.
+	 *
+	 * This used to hide the whole `.site-title` link to make room for the
+	 * toolbar — which also removed the only way back to the home page from a
+	 * docs page. Only the text goes now, and only visually: it stays in the link
+	 * as its accessible name, which is why the logo's alt is empty.
+	 */
+	header.header > .header > .title-wrapper .site-title span {
+		position: absolute;
+		inline-size: 1px;
+		block-size: 1px;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
 	}
-	
+
 	header.header > .header > .title-wrapper {
 		flex: 0 0 auto;
 	}
@@ -502,9 +546,9 @@ header.header > .header {
 	 *
 	 * Starlight hides this group below 50rem because a docs page repeats its
 	 * theme and language controls in the mobile menu. Forcing it visible on
-	 * every page put a 325px group into a header 236px wide at 320px, underneath
-	 * the menu button. The splash page has no menu, so there it is the only way
-	 * to switch.
+	 * every page pushed the group underneath the menu button, and past the edge
+	 * of a phone. The splash page has no menu, so there it is the only way to
+	 * switch.
 	 */
 	:root:not([data-has-sidebar]) header.header > .header > .right-group.sl-hidden {
 		display: flex;
@@ -515,13 +559,13 @@ header.header > .header {
 }
 
 /*
- * Narrow phones, splash page. Measured at 320px, the toolbar still ended 66px
- * past the 288px the header has. Three things give way:
+ * Narrow phones, splash page: search, theme switch and language select do not
+ * fit beside anything else at 320px. Three things give way:
  * - the GitHub icon, which the page also links from a hero tile;
- * - the title wrapper, an empty link once the site title is hidden above;
- * - the language select's fixed width (112px, from Starlight and the theme's
- *   `inline-size: max(…, 6.875rem)`), sized for labels far longer than "EN"
- *   and "RU" — its content decides instead.
+ * - the logo link, which on this page leads to the page already open;
+ * - the language select's fixed width (Starlight's `7em`, raised by the
+ *   theme's `inline-size: max(…, 6.875rem)`), sized for labels far longer
+ *   than "EN" and "RU" — its content decides instead.
  */
 @media (max-width: 29.999rem) {
 	:root:not([data-has-sidebar]) header.header .right-group .social-icons,
@@ -538,7 +582,7 @@ header.header > .header {
 	}
 }
 
-/* Under 360px even that is 24px too wide. The globe is decoration next to
+/* Under 360px even that is too wide. The globe is decoration next to
    "EN"/"RU", and the select's own variables are what its padding is built
    from, so zeroing the icon and tightening the padding moves both together. */
 @media (max-width: 22.499rem) {
@@ -552,7 +596,8 @@ header.header > .header {
 	}
 }
 
-/* Starlight's select is 38px tall; a finger needs 44. */
+/* The theme sizes header controls from its density token, which at
+   `comfortable` leaves the select short of the 44px a finger needs. */
 @media (pointer: coarse) {
 	starlight-lang-select select {
 		min-block-size: 2.75rem;
