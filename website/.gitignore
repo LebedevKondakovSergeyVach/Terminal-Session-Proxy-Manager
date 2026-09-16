@@ -1,0 +1,40 @@
+# build output
+dist/
+# generated types
+.astro/
+
+# dependencies
+node_modules/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+
+# environment variables
+.env
+.env.production
+
+# macOS-specific files
+.DS_Store
+
+# Generated from the repository's canonical Markdown by scripts/sync-docs.mjs.
+# Never edit these by hand and never commit them — edit the source documents
+# listed in scripts/docs-manifest.mjs instead. `**` matches zero or more
+# directories, so this covers any depth a manifest `dest` might use
+# (e.g. `guides/foo.md`), not just the currently flat and `ru/`-nested cases.
+#
+# Both extensions: most manifest `dest` values are `.mdx`, because the page
+# uses Starlight components. An earlier `**/*.md`-only rule matched none of
+# them, so nine generated pages were committed while four were ignored.
+src/content/docs/**/*.md
+src/content/docs/**/*.mdx
+
+# …except the pages that are genuinely hand-authored. Nothing in the manifest
+# writes to these paths, so they are ours to keep.
+!src/content/docs/index.mdx
+!src/content/docs/ru/index.mdx
+!src/content/docs/404.md
+!src/content/docs/ru/404.md

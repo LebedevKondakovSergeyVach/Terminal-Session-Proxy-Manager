@@ -119,16 +119,33 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
-          changed=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA")
+          # Three dots: diff against the merge base, not the base branch's tip.
+          # A two-dot diff also reports files someone else changed on the
+          # release branch after this one was cut, which blocked docs-only
+          # pull requests demanding a changelog entry for another commit.
+          changed=$(git diff --name-only "$BASE_SHA...$HEAD_SHA")
 
-          touches_code=$(echo "$changed" | grep -E '^(src/|locales/|Cargo\.toml)' || true)
+          # shell/ and configs/ are user-facing too: the shell function is the
+          # documented integration point, and config.default.json ships the
+          # defaults people see on first run.
+          touches_code=$(echo "$changed" | grep -E '^(src/|locales/|shell/|configs/|Cargo\.toml)' || true)
           touches_changelog=$(echo "$changed" | grep -E '^CHANGELOG\.md$' || true)
+          touches_changelog_ru=$(echo "$changed" | grep -E '^CHANGELOG\.ru\.md$' || true)
 
           if [ -n "$touches_code" ] && [ -z "$touches_changelog" ]; then
             echo "::error::This pull request changes behaviour but not CHANGELOG.md."
             echo "::error::Add an entry under '## [Unreleased]'."
             echo "Changed files:"
             echo "$touches_code"
+            exit 1
+          fi
+
+          # The two changelogs are both published — CHANGELOG.ru.md is served at
+          # /ru/changelog/ — so an entry in one language only ships a page that
+          # is silently out of date in the other.
+          if [ -n "$touches_changelog" ] && [ -z "$touches_changelog_ru" ]; then
+            echo "::error::CHANGELOG.md changed but CHANGELOG.ru.md did not."
+            echo "::error::Both changelogs are published; add the matching Russian entry."
             exit 1
           fi
 

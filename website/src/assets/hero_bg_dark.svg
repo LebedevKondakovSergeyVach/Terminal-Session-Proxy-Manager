@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="800" viewBox="0 0 1440 800" preserveAspectRatio="xMidYMin slice">
+  <defs>
+    <!-- Stronger Background Glow -->
+    <radialGradient id="glow" cx="50%" cy="15%" r="65%">
+      <stop offset="0%" stop-color="#E66E1A" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#111111" stop-opacity="0" />
+    </radialGradient>
+    
+    <linearGradient id="fade" x1="0" y1="0" x2="0" y2="100%">
+      <stop offset="0%" stop-color="#E66E1A" stop-opacity="1.0" />
+      <stop offset="100%" stop-color="#E66E1A" stop-opacity="0" />
+    </linearGradient>
+
+    <!-- Detailed Terminal Grid -->
+    <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.5" fill="#E66E1A" fill-opacity="0.3" />
+      <path d="M 30 0 V 60 M 0 30 H 60" stroke="#E66E1A" stroke-opacity="0.09" stroke-width="0.5" />
+    </pattern>
+  </defs>
+  
+  <!-- Base gradient fill -->
+  <rect width="1440" height="800" fill="url(#glow)" />
+  <rect width="1440" height="800" fill="url(#grid)" />
+  
+  <!-- Abstract Dashboard UI / Proxy Stats Box -->
+  <g stroke="#E66E1A" stroke-width="2" stroke-opacity="0.75" fill="none">
+    <!-- Left Terminal -->
+    <rect x="80" y="80" width="260" height="180" rx="8" />
+    <path d="M 80 110 H 340" stroke-width="1"/>
+    <!-- Buttons -->
+    <circle cx="100" cy="95" r="4" fill="#E66E1A" fill-opacity="0.8" stroke="none"/>
+    <circle cx="120" cy="95" r="4" fill="#E66E1A" fill-opacity="0.8" stroke="none"/>
+    <circle cx="140" cy="95" r="4" fill="#E66E1A" fill-opacity="0.8" stroke="none"/>
+    
+    <!-- Right Terminal -->
+    <rect x="1080" y="60" width="300" height="220" rx="8" />
+    <path d="M 1080 90 H 1380" stroke-width="1"/>
+    <circle cx="1100" cy="75" r="4" fill="#E66E1A" fill-opacity="0.8" stroke="none"/>
+    <circle cx="1120" cy="75" r="4" fill="#E66E1A" fill-opacity="0.8" stroke="none"/>
+    <circle cx="1140" cy="75" r="4" fill="#E66E1A" fill-opacity="0.8" stroke="none"/>
+    
+    <!-- Small metric boxes inside Right Terminal -->
+    <rect x="1100" y="110" width="120" height="60" rx="4" stroke-opacity="0.375"/>
+    <rect x="1240" y="110" width="120" height="60" rx="4" stroke-opacity="0.375"/>
+  </g>
+
+  <!-- Typography: CLI Logs and Metrics -->
+  <g font-family="monospace" font-size="16" font-weight="bold" fill="#E66E1A" fill-opacity="0.8">
+    <!-- Inside Left Terminal -->
+    <text x="100" y="140">> tspm profile use prod</text>
+    <text x="100" y="165">[OK] Environment active</text>
+    <text x="100" y="190">SOCKS5  127.0.0.1:1080</text>
+    <text x="100" y="215">HTTP    127.0.0.1:1081</text>
+    <text x="100" y="240" font-family="monospace">█</text> <!-- Cursor block -->
+    
+    <!-- Inside Right Terminal -->
+    <text x="1100" y="130" font-size="12">LATENCY</text>
+    <text x="1100" y="155" font-size="24">14ms</text>
+    
+    <text x="1240" y="130" font-size="12">BANDWIDTH</text>
+    <text x="1240" y="155" font-size="24">1.2G</text>
+
+    <text x="1100" y="200">> Auto-failover: ON</text>
+    <text x="1100" y="225">> Active: node-fra-01</text>
+    <text x="1100" y="250">> Benchmarking... 100%</text>
+
+    <!-- Scattered Tech Text -->
+    <text x="350" y="550" font-size="14" fill-opacity="0.48">[TCP] Socket established</text>
+    <text x="850" y="650" font-size="14" fill-opacity="0.48">Routing table updated</text>
+  </g>
+  
+  <g font-family="monospace" font-size="10" fill="#E66E1A" fill-opacity="0.32000000000000006">
+    <text x="50" y="500">01011001 01100101</text>
+    <text x="50" y="520">11001010 10011011</text>
+    <text x="1250" y="600">00110011 11011010</text>
+    <text x="1250" y="620">10110101 01101000</text>
+  </g>
+
+  <!-- High-Tech Routing Nodes and Paths -->
+  <g stroke="url(#fade)" stroke-width="3" fill="none">
+    <!-- Heavy active routes -->
+    <path d="M 210 260 Q 400 350 450 450 T 800 500 T 1200 280" stroke-opacity="1.0" />
+    <!-- Secondary dashed routes -->
+    <path d="M 340 180 Q 550 150 700 250 T 1080 170" stroke-opacity="0.75" stroke-dasharray="8, 8" />
+    <!-- Failure route -->
+    <path d="M 100 450 Q 300 600 600 550" stroke-opacity="0.75" stroke-dasharray="2, 6" />
+    <path d="M 600 550 L 630 520" stroke="red" stroke-width="2" stroke-opacity="0.7"/> <!-- Break indicator -->
+
+    <!-- Data Packets traveling along paths -->
+    <g fill="#E66E1A" stroke="none">
+      <circle cx="340" cy="317" r="4" fill-opacity="1.0" />
+      <circle cx="625" cy="485" r="4" fill-opacity="1.0" />
+      <circle cx="950" cy="405" r="4" fill-opacity="1.0" />
+    </g>
+
+    <g fill="#111111" stroke="#E66E1A" stroke-width="2">
+      <!-- Active Concentric Nodes -->
+      <g transform="translate(450, 450)">
+        <circle cx="0" cy="0" r="12" stroke-opacity="1.0"/>
+        <circle cx="0" cy="0" r="6" fill="#E66E1A" stroke="none" fill-opacity="1.0"/>
+      </g>
+      
+      <g transform="translate(800, 500)">
+        <circle cx="0" cy="0" r="14" stroke-opacity="1.0"/>
+        <circle cx="0" cy="0" r="7" fill="#E66E1A" stroke="none" fill-opacity="1.0"/>
+      </g>
+      
+      <g transform="translate(700, 250)">
+        <circle cx="0" cy="0" r="10" stroke-opacity="0.75"/>
+        <circle cx="0" cy="0" r="5" fill="#E66E1A" stroke="none" fill-opacity="0.75"/>
+      </g>
+      
+      <g transform="translate(1200, 280)">
+        <circle cx="0" cy="0" r="12" stroke-opacity="0.75"/>
+        <circle cx="0" cy="0" r="6" fill="#E66E1A" stroke="none" fill-opacity="0.75"/>
+      </g>
+      
+      <!-- Small junction nodes -->
+      <circle cx="340" cy="180" r="5" stroke-opacity="0.75" fill="#E66E1A"/>
+      <circle cx="1080" cy="170" r="5" stroke-opacity="0.75" fill="#E66E1A"/>
+      <circle cx="210" cy="260" r="5" stroke-opacity="1.0" fill="#E66E1A"/>
+      <circle cx="100" cy="450" r="4" stroke-opacity="0.75" fill="#E66E1A"/>
+      <circle cx="600" cy="550" r="6" stroke-opacity="0.3" fill="#E66E1A"/>
+    </g>
+  </g>
+  
+</svg>

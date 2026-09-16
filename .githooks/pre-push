@@ -1,0 +1,25 @@
+#!/bin/sh
+# Refuses pushes to main and tag pushes — AGENTS.md, "Branching".
+# Merging a release branch into main publishes, and release.yml creates the
+# tag itself, so neither should ever leave a working copy by accident.
+# Enable once per clone: git config core.hooksPath .githooks
+#
+# A maintainer who deliberately starts a release by pushing a tag
+# (.ai/GIT_WORKFLOW.md, "Cutting and shipping a release") can push with --no-verify.
+# Agents never do.
+
+status=0
+while read -r local_ref local_sha remote_ref remote_sha; do
+    case "$remote_ref" in
+        refs/heads/main)
+            echo "pre-push: refusing to push to main — merge a release branch through a pull request." >&2
+            status=1
+            ;;
+        refs/tags/*)
+            echo "pre-push: refusing to push tag ${remote_ref#refs/tags/} — release.yml creates tags." >&2
+            status=1
+            ;;
+    esac
+done
+
+exit $status

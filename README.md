@@ -4,9 +4,10 @@
 
 # ⚡ Terminal Session Proxy Manager
 
-![Project Banner](assets/banner_new.jpg)
+![Project Banner](assets/banner.jpg)
 
 [![CI](https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/actions/workflows/ci.yml/badge.svg)](https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/actions/workflows/ci.yml)
+[![Docs](https://img.shields.io/badge/docs-website-orange.svg)](https://lebedevkondakovsergeyvach.github.io/Terminal-Session-Proxy-Manager/)
 [![Rust](https://img.shields.io/badge/rust-1.88%2B-orange.svg)](https://www.rust-lang.org)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey.svg)](README.md)
@@ -23,14 +24,15 @@ environment variables your tools actually read — on **macOS** and **Linux**
   command or an interactive picker.
 - **Interactive TUI dashboard.** Live IP, geolocation, latency sparkline, and
   profile switching in one screen.
-- **Pick the fastest automatically.** Benchmarks every profile in parallel and
-  selects the best one, with auto-failover when the active proxy dies.
+- **Pick the fastest automatically.** Benchmarks every profile — each against
+  all its ping targets at once — and selects the best one, with a health monitor
+  that fails over to another profile when the active proxy dies.
 - **Diagnostics.** Latency probes, socket checks, and a real bandwidth test.
 - **Exports everything.** One command for Docker, cURL, Git, `.env`, and JVM
   build tooling — with correct shell quoting.
 - **Bilingual.** Full English and Russian interface.
 
-![Interactive Dashboard](assets/proxy_dashboard_final.png)
+![Interactive Dashboard](assets/proxy_dashboard.png)
 
 ---
 
@@ -40,19 +42,19 @@ environment variables your tools actually read — on **macOS** and **Linux**
 
 **Homebrew (macOS / Linux):**
 
-```bash
+```bash title="Terminal" frame="terminal"
 brew install LebedevKondakovSergeyVach/tap/terminal-session-proxy-manager
 ```
 
 **Cargo** (requires Rust 1.88+):
 
-```bash
+```bash title="Terminal" frame="terminal"
 cargo install --git https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager.git
 ```
 
 **From source:**
 
-```bash
+```bash title="Terminal" frame="terminal"
 git clone https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager.git
 cd Terminal-Session-Proxy-Manager
 cargo install --path .
@@ -66,13 +68,13 @@ to your shell configuration:
 
 **Zsh** (`~/.zshrc`):
 
-```bash
+```bash title="Terminal" frame="terminal"
 eval "$(terminal-session-proxy-manager init zsh)"
 ```
 
 **Bash** (`~/.bashrc`):
 
-```bash
+```bash title="Terminal" frame="terminal"
 eval "$(terminal-session-proxy-manager init bash)"
 ```
 
@@ -81,7 +83,7 @@ Restart your terminal or run `source ~/.zshrc`. You now have `proxy on`,
 
 ### First run
 
-```bash
+```bash title="Terminal" frame="terminal"
 proxy profile set home --name "Home" --host 127.0.0.1 --port 1080
 proxy on
 proxy status
@@ -161,7 +163,7 @@ Available on every subcommand.
 
 `NO_COLOR` is honoured. Useful for keeping several setups apart:
 
-```bash
+```bash title="Terminal" frame="terminal"
 TSPM_CONFIG=~/work-proxies.json proxy best
 ```
 
@@ -193,6 +195,7 @@ example.
 
 ## 📚 Documentation
 
+- [🌐 **Documentation site**](https://lebedevkondakovsergeyvach.github.io/Terminal-Session-Proxy-Manager/) — everything below, searchable and cross-linked
 - [📦 **Installation**](docs/INSTALLATION.md) — build instructions and PATH setup
 - [🐚 **Shell Integration**](docs/SHELL_INTEGRATION.md) — Zsh, Bash, and prompt setup
 - [⚙️ **Configuration**](docs/CONFIGURATION.md) — full `config.json` and `settings.json` schema

@@ -1,0 +1,89 @@
+name: Website
+
+# The pull-request gate for the documentation site. Without it a dead link, a
+# manifest entry pointing at a deleted file, or a broken astro.config.mjs is
+# discovered only by pages.yml, after the merge, leaving the live site stale.
+#
+# The path filter has to cover the repository's own Markdown, not just
+# website/: the site's pages are generated from README.md, docs/*.md,
+# CONTRIBUTING.md and CHANGELOG*.md, and those are exactly the edits most
+# likely to break the link validator.
+#
+# The two path lists below are duplicated rather than shared through a YAML
+# anchor: GitHub Actions does not resolve anchors in workflow files. Keep them
+# in step with each other and with pages.yml.
+on:
+  pull_request:
+    paths:
+      - 'website/**'
+      - 'docs/**'
+      - 'assets/**'
+      - 'README.md'
+      - 'README.ru.md'
+      - 'CHANGELOG.md'
+      - 'CHANGELOG.ru.md'
+      - 'CONTRIBUTING.md'
+      - '.github/workflows/website.yml'
+  push:
+    branches:
+      - main
+      - 'release/**'
+      - 'hotfix/**'
+    paths:
+      - 'website/**'
+      - 'docs/**'
+      - 'assets/**'
+      - 'README.md'
+      - 'README.ru.md'
+      - 'CHANGELOG.md'
+      - 'CHANGELOG.ru.md'
+      - 'CONTRIBUTING.md'
+      - '.github/workflows/website.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Generator tests and site build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: website
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: website/package-lock.json
+
+      # The Node equivalent of --locked: proves package-lock.json is committed
+      # and current, rather than quietly resolving a newer tree.
+      - name: Install
+        run: npm ci
+
+      - name: Test the content generator
+        run: npm test
+
+      # `prebuild` regenerates every page from its source, and
+      # starlight-links-validator fails the build on a dead internal link.
+      - name: Build the site
+        run: npm run build
+
+      # The generated pages are Git-ignored, so a stale copy cannot be
+      # committed — but a source edit that changes a generated page without
+      # anyone running the generator still has to produce a page that builds,
+      # which the step above proves. This one catches the reverse: a tracked
+      # file the generator would overwrite.
+      - name: No generated page is tracked
+        run: git diff --exit-code -- src/content/docs
+
+      - name: Audit dependencies
+        run: npm audit --audit-level=high

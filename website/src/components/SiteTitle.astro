@@ -1,0 +1,84 @@
+---
+import Default from '@astrojs/starlight/components/SiteTitle.astro';
+
+// A round home button beside the title, on docs pages only; there it replaces
+// the logo (custom.css), and on a phone the title too. The splash page is home
+// already, so it gets no button.
+const { hasSidebar, siteTitleHref } = Astro.locals.starlightRoute;
+const label = Astro.locals.t('tspm.home');
+---
+
+<Default {...Astro.props} />
+{
+	hasSidebar && (
+		<a class="home-button" href={siteTitleHref} aria-label={label} title={label}>
+			{/* Material Symbols "home" (Apache-2.0): Starlight's icon set has no
+			    house, and this matches the MD3 theme's own iconography. */}
+			<svg aria-hidden="true" viewBox="0 -960 960 960" width="24" height="24" fill="currentColor">
+				<path d="M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z" />
+			</svg>
+		</a>
+	)
+}
+
+<style>
+	/*
+	 * Drawn like the theme's round search button on a phone, from the same
+	 * tokens, so the two read as a pair at every width. Colour, shape and state
+	 * opacity all come from the theme; only the size and layout are ours.
+	 */
+	.home-button {
+		position: relative;
+		isolation: isolate;
+		overflow: hidden;
+		flex: none;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		inline-size: 3rem;
+		block-size: 3rem;
+		border-radius: var(--md-sys-shape-full);
+		background-color: var(--md3-comp-search-field-container-color);
+		color: var(--md-sys-color-on-surface-variant);
+		-webkit-tap-highlight-color: transparent;
+	}
+	.home-button::after {
+		content: '';
+		position: absolute;
+		z-index: -1;
+		inset: 0;
+		border-radius: inherit;
+		background-color: var(--md3-comp-search-field-state-layer-color);
+		opacity: 0;
+		pointer-events: none;
+	}
+	/* Space from the title text, which is only shown from 50rem. */
+	@media (min-width: 50rem) {
+		.home-button {
+			margin-inline-start: 0.5rem;
+		}
+	}
+	.home-button svg {
+		inline-size: 1.5rem;
+		block-size: 1.5rem;
+	}
+	.home-button:focus-visible {
+		outline: 2px solid var(--md-sys-color-primary);
+		outline-offset: -2px;
+	}
+	.home-button:focus-visible::after {
+		opacity: var(--md3-comp-search-field-focus-state-layer-opacity);
+	}
+	/* Hover only for a real pointer — a touch browser keeps it after a tap. */
+	@media (hover: hover) {
+		.home-button:hover {
+			color: var(--md-sys-color-on-surface);
+		}
+		.home-button:hover::after {
+			opacity: var(--md3-comp-search-field-hover-state-layer-opacity);
+		}
+	}
+	.home-button:active::after {
+		opacity: var(--md3-comp-search-field-pressed-state-layer-opacity);
+	}
+</style>

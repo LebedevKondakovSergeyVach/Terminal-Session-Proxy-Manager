@@ -23,7 +23,7 @@ pub fn handle_git_proxy(mode: &crate::cli::GitMode, config: &AppConfig, i18n: &I
             set_git_config("https.proxy", &proxy_url)?;
 
             println!(
-                "⚙️  {} {} ({}:{})",
+                "{} {} ({}:{})",
                 i18n.t("git_proxy_set"),
                 profile.name.green().bold(),
                 profile.host,
@@ -35,12 +35,12 @@ pub fn handle_git_proxy(mode: &crate::cli::GitMode, config: &AppConfig, i18n: &I
             // desired end state rather than a failure.
             unset_git_config("http.proxy")?;
             unset_git_config("https.proxy")?;
-            println!("🛑 {}", i18n.t("git_proxy_unset").yellow().bold());
+            println!("{}", i18n.t("git_proxy_unset").yellow().bold());
         }
         GitMode::Status => {
             let none = i18n.t("none_label");
             rule();
-            println!("   🐙  {}", i18n.t("git_header").white().bold());
+            println!("{}", i18n.t("git_header").white().bold());
             rule();
             for key in ["http.proxy", "https.proxy"] {
                 println!(

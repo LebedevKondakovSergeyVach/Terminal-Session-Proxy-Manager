@@ -9,7 +9,7 @@ use std::time::Duration;
 /// Runs diagnostic tests on local sockets, session env vars, and HTTP endpoints.
 pub async fn run_diagnose(config: &AppConfig, i18n: &I18n) -> Result<()> {
     rule();
-    println!("   🔍 {}", i18n.t("diagnose_header").white().bold());
+    println!("{}", i18n.t("diagnose_header").white().bold());
     rule();
 
     let pb = spinner(i18n.t("spinner_diagnose"));

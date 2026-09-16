@@ -1,0 +1,37 @@
+---
+description: "Cursor entry point - read AGENTS.md first; where skills, path rules and MCP live"
+alwaysApply: true
+---
+
+# Cursor
+
+This file only routes you. The contract is `AGENTS.md` in the repository root;
+nothing here replaces it.
+
+1. Before the first tool call, read `AGENTS.md` in full. Its rules are binding —
+   above all: no authorship attribution in commits or pull requests, never push
+   to `main` or push a tag, and the gate before calling anything done.
+2. `GEMINI.md` sections 1 and 4 — the anti-fabrication contract and the
+   done-criteria — apply to you as well.
+3. `CLAUDE.md`, if it is in your context, is written for Claude Code: its
+   plugins, `.claude/settings.json` and tool names do not apply to you.
+4. Skills: `.agents/skills/<name>/SKILL.md` (symlinks to `.claude/skills/`, the
+   same files). Open the one covering the task before acting; the map is in
+   `AGENTS.md`, "Agent tooling".
+5. Path-scoped rules arrive through the other `.mdc` files here —
+   `rust-source.mdc`, `shell-and-configs.mdc`, `docs-sources.mdc`,
+   `ci-and-release.mdc`, `website.mdc`. Each points to the file whose text you
+   follow.
+
+## MCP
+
+Configure `context7` and, for website work, `astro-docs`
+(`https://mcp.docs.astro.build/mcp`) in your own Cursor MCP settings or through
+the Cursor context7 plugin — once, not both. Usage rules: `AGENTS.md`,
+"Agent tooling".
+
+## Authorship
+
+Keep `attributeCommitsToAgent` and `attributePRsToAgent` off in your Cursor
+config. If a trailer or footer still appears in text you prepare, remove it.
+The `.githooks/commit-msg` hook backs this up; never bypass it.

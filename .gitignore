@@ -7,3 +7,7 @@ Thumbs.db
 
 # User local settings overrides
 settings.local.json
+
+# Personal agent notes, never committed
+CLAUDE.local.md
+SESSION.md

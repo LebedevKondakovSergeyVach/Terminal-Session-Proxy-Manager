@@ -6,12 +6,25 @@ Thanks for taking the time. This is a small project, so the process is short.
 
 Requires Rust 1.88 or newer (edition 2024). Install via [rustup](https://rustup.rs).
 
-```bash
-git clone https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager.git
-cd Terminal-Session-Proxy-Manager
-cargo build
-cargo test
-```
+<!--site:steps-->
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager.git
+   cd Terminal-Session-Proxy-Manager
+   ```
+
+2. **Build the project**
+   ```bash
+   cargo build
+   ```
+
+3. **Run the tests**
+   ```bash
+   cargo test
+   ```
+
+<!--site:/steps-->
 
 To try your build without installing it:
 
@@ -25,10 +38,11 @@ cargo run -- profile list
 Run what CI runs. Warnings are build failures.
 
 ```bash
-cargo fmt --all -- --check
-cargo clippy --all-targets --locked -- -D warnings
-cargo test --locked
+cargo fmt --all -- --check && cargo clippy --all-targets --locked -- -D warnings && cargo test --locked
 ```
+
+CI also passes `--all-features`; the crate defines no features, so this checks
+the same code.
 
 ## Things that are easy to get wrong
 
@@ -53,6 +67,27 @@ error and returning `Ok` — people write `proxy profile use "$p" || fallback`.
 **No private data in defaults.** `AppConfig::default` may reference only
 loopback addresses and well-known public endpoints.
 
+## Project Structure
+
+<!--site:filetree-->
+
+- docs/ Documentation markdown files
+- locales/
+  - en.json English translation keys
+  - ru.json Russian translation keys
+- src/
+  - cmd/ Subcommands logic (ping, monitor, etc.)
+  - config/ Config loading and defaults
+  - cli.rs CLI parsing tree (clap)
+  - main.rs Entry point
+- tests/
+  - cli.rs End-to-end binary tests
+- website/ Astro Starlight documentation site
+- AGENTS.md Rules for AI agents
+- Cargo.toml
+
+<!--site:/filetree-->
+
 ## Tests
 
 Name tests as sentences describing the guarantee — `using_an_unknown_profile_exits_non_zero`
@@ -60,7 +95,7 @@ rather than `test_profile` — and assert one thing per test.
 
 - Pure logic goes in a `#[cfg(test)] mod tests` next to the code.
 - Anything involving argv, exit codes, or files goes in `tests/cli.rs`.
-- Integration tests must isolate state with `TSPM_CONFIG` and `TSPM_SETTINGS`;
+- Integration tests must isolate state with `TSPM_CONFIG`, `TSPM_SETTINGS` and `TSPM_LANG`;
   use the `Cli` helper at the top of `tests/cli.rs`. A test must never touch the
   real `~/.config`.
 - Please don't add tests that need network access. They are slow and flaky.
@@ -71,7 +106,24 @@ When fixing a bug, add the test that fails without the fix.
 
 If you change commands or configuration, update `README.md` **and**
 `README.ru.md`, the matching file in `docs/` and its `.ru.md` twin, and add a
-`CHANGELOG.md` entry under `Unreleased`.
+`CHANGELOG.md` entry under `Unreleased` plus its `CHANGELOG.ru.md` twin.
+
+Those same files are the documentation website. `website/` holds an Astro
+Starlight site whose pages are generated from them, so editing one is editing
+the other. Two things follow:
+
+- Keep them plain CommonMark. They are read on GitHub as well as on the site,
+  so no JSX and no `import` line. Site-only structure — tabs, cards, steps,
+  asides — is written as `<!--site:...-->` comments, which GitHub renders as
+  nothing and the generator expands. `website/AGENTS.md` documents the syntax.
+- Verify the site still builds:
+
+  ```bash
+  cd website && npm ci && npm test && npm run build
+  ```
+
+  The build regenerates every page and fails on a dead internal link, so a
+  link to a document that has no page will stop it.
 
 ## Branching
 
@@ -83,7 +135,7 @@ Branch your work off the **open release branch**, not off `main`, and open the
 pull request against that same release branch:
 
 ```bash
-git checkout release/2.3.0 && git pull
+git checkout release/X.Y.Z && git pull
 git checkout -b fix/dashboard-empty-list
 ```
 
@@ -97,14 +149,27 @@ Full rules, including how a release is cut, are in
 
 ## Changelog
 
-Any pull request touching `src/`, `locales/` or `Cargo.toml` needs an entry
-under `## [Unreleased]` in `CHANGELOG.md`. CI checks this. Docs-only and CI-only
+Any pull request touching `src/`, `locales/`, `shell/`, `configs/` or
+`Cargo.toml` needs an entry under `## [Unreleased]` in `CHANGELOG.md` **and** the
+matching entry in `CHANGELOG.ru.md`. CI checks both: a behaviour change without a
+`CHANGELOG.md` entry fails, and so does a `CHANGELOG.md` change without its
+Russian twin, because both changelogs are published. Docs-only and CI-only
 changes are exempt.
 
 ## Commits
 
 [Conventional Commits](https://www.conventionalcommits.org/): `feat:`, `fix:`,
 `docs:`, `chore:`, `refactor:`, `test:`, `perf:`, `ci:`, `build:`.
+
+Enable the repository's Git hooks once per clone:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+`commit-msg` rejects tool attribution lines such as `Co-Authored-By:` or
+"Generated with …", and `pre-push` refuses pushes to `main` and tag pushes —
+releases are cut by merging, and CI creates the tag.
 
 ## Releases
 
@@ -115,4 +180,6 @@ pipeline does the rest. Never tag by hand as part of another change.
 ## Using an AI agent
 
 Point it at [`AGENTS.md`](AGENTS.md) first; it encodes the rules above in the
-form agents follow.
+form agents follow. Claude Code loads it through `CLAUDE.md`; Cursor and
+Antigravity read it directly, with `.cursor/rules/` and `GEMINI.md` adding what
+is specific to each.

@@ -15,7 +15,7 @@ pub async fn run_ping(config: &AppConfig, i18n: &I18n, timeout_ms: u64) -> Resul
         .filter(|p| !p.is_empty());
 
     rule();
-    println!("   ⚡  {}", i18n.t("ping_header").white().bold());
+    println!("{}", i18n.t("ping_header").white().bold());
     rule();
 
     if let Some(ref p) = proxy_env {
@@ -73,11 +73,23 @@ pub async fn run_ping(config: &AppConfig, i18n: &I18n, timeout_ms: u64) -> Resul
 
     for (name, status, elapsed) in results.into_iter().flatten() {
         if let Some(code) = status {
+            let elapsed = elapsed.to_string();
+            let (status_text, code_str) = if (200..300).contains(&code) {
+                (
+                    i18n.format("ping_status_ok", &[&elapsed]).green().bold(),
+                    format!("[HTTP {code}]").green(),
+                )
+            } else {
+                (
+                    i18n.format("ping_status_warn", &[&elapsed]).yellow().bold(),
+                    format!("[HTTP {code}]").yellow(),
+                )
+            };
             println!(
-                "  • {:<18} — {} [HTTP {}]",
+                "  • {:<18} — {} {}",
                 name.white().bold(),
-                format!("✅ OK ({elapsed} ms)").green().bold(),
-                code
+                status_text,
+                code_str
             );
         } else {
             println!(

@@ -1,50 +1,54 @@
 # 📦 Установка (macOS и Linux)
 
-## 🍏 Homebrew
+<!--site:tabs-->
 
-Самый простой способ, работает и на macOS, и на Linux:
+## Homebrew
 
-```bash
+Самый простой способ для macOS и Linux:
+
+```bash title="Terminal" frame="terminal"
 brew install LebedevKondakovSergeyVach/tap/terminal-session-proxy-manager
 ```
 
-Обновление:
+Обновление в дальнейшем:
 
-```bash
+```bash title="Terminal" frame="terminal"
 brew upgrade terminal-session-proxy-manager
 ```
 
-## 🦀 Cargo
+## Cargo
 
-Требуется Rust **1.88 или новее** (проект использует edition 2024). Установите
-toolchain через [rustup.rs](https://rustup.rs), затем:
+Требуется Rust **1.88 или новее** (проект использует редакцию 2024 года).
+Установите тулчейн с [rustup.rs](https://rustup.rs), затем выполните:
 
-```bash
+```bash title="Terminal" frame="terminal"
 cargo install --git https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager.git
 ```
 
-Бинарник попадёт в `~/.cargo/bin`, который rustup обычно добавляет в `PATH`.
-Если после установки команда `terminal-session-proxy-manager` не находится, см.
-[настройку PATH](#-настройка-path) ниже.
+Бинарник будет помещён в `~/.cargo/bin`, который rustup обычно сам добавляет в
+ваш `PATH`. Если после этого утилита не найдена, см. раздел
+[Настройка PATH](#-настройка-path) ниже.
 
-## 📥 Готовые сборки
+## Готовая сборка
 
-Скачайте архив для своей платформы со
+Скачайте архив для вашей платформы со
 [страницы релизов](https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/releases).
-Публикуются сборки для macOS (x86_64, arm64) и Linux (x86_64, arm64).
+Сборки публикуются для macOS (x86_64, arm64) и Linux (x86_64, arm64).
 
-К каждому архиву прилагается файл `.sha256`. Проверьте перед установкой:
+Каждый архив сопровождается файлом `.sha256`. Проверьте его перед установкой:
 
-```bash
+```bash title="Terminal" frame="terminal"
 shasum -a 256 -c terminal-session-proxy-manager-macos-arm64.tar.gz.sha256
 
 tar -xzf terminal-session-proxy-manager-macos-arm64.tar.gz
 sudo mv terminal-session-proxy-manager /usr/local/bin/
 ```
 
-На macOS Gatekeeper может поместить скачанный бинарник в карантин. Снять его:
+<!--site:/tabs-->
 
-```bash
+В macOS Gatekeeper может поместить скачанный файл в карантин. Чтобы снять его:
+
+```bash title="Terminal" frame="terminal"
 xattr -d com.apple.quarantine /usr/local/bin/terminal-session-proxy-manager
 ```
 
@@ -52,14 +56,14 @@ xattr -d com.apple.quarantine /usr/local/bin/terminal-session-proxy-manager
 
 ## 🛠️ Сборка из исходников
 
-```bash
+```bash title="Terminal" frame="terminal"
 git clone https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager.git
 cd Terminal-Session-Proxy-Manager
 
-# Установка в ~/.cargo/bin
+# Установить в ~/.cargo/bin
 cargo install --path .
 
-# Или просто сборка, бинарник останется в target/release/
+# Или просто собрать (бинарник останется в target/release/)
 cargo build --release
 ```
 
@@ -67,18 +71,19 @@ cargo build --release
 
 ## 🔧 Настройка PATH
 
-Если бинарник установлен, но не находится, добавьте его каталог в `PATH`.
+Если программа установлена, но командный интерпретатор её не находит, добавьте
+директорию с ней в `PATH`.
 
-Для установки через Cargo (`~/.zshrc` или `~/.bashrc`):
+При установке через Cargo (`~/.zshrc` или `~/.bashrc`):
 
-```bash
+```bash title="~/.zshrc" frame="code"
 export PATH="$HOME/.cargo/bin:$PATH"
 ```
 
-При ручной установке в `/usr/local/bin` этот каталог обычно уже есть в `PATH`.
-Проверить, какой именно бинарник используется:
+При ручной установке в `/usr/local/bin` эта директория обычно уже есть в `PATH`.
+Проверьте, какой именно бинарник используется:
 
-```bash
+```bash title="Terminal" frame="terminal"
 which terminal-session-proxy-manager
 ```
 
@@ -86,34 +91,34 @@ which terminal-session-proxy-manager
 
 ## 🐚 Интеграция с shell (обязательно)
 
-Независимо от способа установки добавьте скрипт инициализации в конфигурацию
-оболочки. Без него команда `proxy` не существует, и ничто не сможет изменить
-окружение вашей сессии — ни один процесс не может изменить родительскую
-оболочку.
+<!--site:aside type="caution"-->
+Независимо от способа установки, вам необходимо прописать скрипт инициализации в конфигурацию вашей оболочки, чтобы команда `proxy on` могла изменять переменные окружения. См. [Интеграция с оболочкой](SHELL_INTEGRATION.ru.md).
+<!--site:/aside-->
 
 **Zsh** (`~/.zshrc`):
 
-```bash
+```bash title="~/.zshrc" frame="code"
 eval "$(terminal-session-proxy-manager init zsh)"
 ```
 
 **Bash** (`~/.bashrc`):
 
-```bash
+```bash title="~/.bashrc" frame="code"
 eval "$(terminal-session-proxy-manager init bash)"
 ```
 
-Перезапустите терминал или выполните `source ~/.zshrc`. Подробности и полный
-список функций — в [SHELL_INTEGRATION.ru.md](SHELL_INTEGRATION.ru.md).
+Перезапустите терминал или выполните `source ~/.zshrc` для применения изменений.
+Подробности и полный список команд см. в
+[SHELL_INTEGRATION.ru.md](SHELL_INTEGRATION.ru.md).
 
 ---
 
 ## 🔍 Проверка установки
 
-```bash
+```bash title="Terminal" frame="terminal"
 terminal-session-proxy-manager --version
-type proxy          # должна определиться shell-функция
-proxy config path   # покажет используемый config.json
+type proxy          # должен сообщить, что это shell-функция
+proxy config path   # покажет, какой config.json используется
 proxy status
 ```
 
@@ -121,7 +126,7 @@ proxy status
 
 ## 🗑️ Удаление
 
-```bash
+```bash title="Terminal" frame="terminal"
 # Homebrew
 brew uninstall terminal-session-proxy-manager
 
@@ -132,11 +137,12 @@ cargo uninstall terminal-session-proxy-manager
 sudo rm /usr/local/bin/terminal-session-proxy-manager
 ```
 
-Затем удалите строку `eval "$(... init ...)"` из rc-файла оболочки.
+Затем удалите строку `eval "$(... init ...)"` из файла конфигурации вашей
+оболочки (rc-файла).
 
-Конфигурация намеренно остаётся на месте. Если она больше не нужна:
+Настройки намеренно не удаляются. Если хотите удалить и их:
 
-```bash
+```bash title="Terminal" frame="terminal"
 # macOS
 rm -rf ~/Library/Application\ Support/terminal-session-proxy-manager
 # Linux

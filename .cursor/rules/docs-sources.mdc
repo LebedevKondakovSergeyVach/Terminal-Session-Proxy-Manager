@@ -1,0 +1,9 @@
+---
+description: "User docs that are also the website source - pointer to .claude/rules/docs-sources.md"
+globs: README*.md,docs/**,CONTRIBUTING.md,CHANGELOG*.md,assets/**
+alwaysApply: false
+---
+
+Before reading or editing these files, read `.claude/rules/docs-sources.md` and
+follow it. That file is the single source for this area; this rule only points
+to it.
