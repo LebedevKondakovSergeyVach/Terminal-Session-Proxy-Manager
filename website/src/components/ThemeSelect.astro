@@ -111,11 +111,13 @@ const t = Astro.locals.t;
 			// Storage can throw rather than be absent — a SecurityError when site
 			// data is blocked — and `typeof localStorage` does not catch that. The
 			// switch must still work for the page, just without remembering.
+			// `undefined` means storage could not be read at all; `null` means it
+			// was read and holds no choice, which is how 'auto' is saved.
 			const readStored = () => {
 				try {
 					return localStorage.getItem(storageKey);
 				} catch {
-					return null;
+					return undefined;
 				}
 			};
 			const writeStored = (theme) => {
@@ -127,11 +129,16 @@ const t = Astro.locals.t;
 				}
 			};
 
-			// The choice made on this page wins over storage: with storage blocked
-			// nothing is saved, and reading only from it reported 'auto' — so the
-			// system-scheme listener below overrode a theme picked a moment ago.
-			// Kept on the element class, shared by both copies of the switch.
-			const getTheme = () => StarlightThemeSwitch.chosen ?? readStored() ?? 'auto';
+			// Storage stays the source of truth whenever it can be read, so a choice
+			// made in another tab is honoured. Only when it cannot be read does the
+			// choice made on this page count: reading storage alone then reported
+			// 'auto', and the system-scheme listener below overrode a theme picked a
+			// moment ago. Kept on the element class, shared by both switch copies.
+			const getTheme = () => {
+				const stored = readStored();
+				if (stored === undefined) return StarlightThemeSwitch.chosen ?? 'auto';
+				return stored ?? 'auto';
+			};
 			
 			const getPreferredColorScheme = () =>
 				matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
