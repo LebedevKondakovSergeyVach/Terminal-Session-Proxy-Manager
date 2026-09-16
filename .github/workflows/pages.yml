@@ -37,11 +37,11 @@ jobs:
       contents: read
     steps:
       - name: Checkout your repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # The generator's own tests are not run by withastro/action, and a
       # deploy is the last place to discover they fail.
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -52,7 +52,7 @@ jobs:
         working-directory: website
 
       - name: Install, build, and upload your site
-        uses: withastro/action@v3
+        uses: withastro/action@v5
         with:
           path: ./website
           package-manager: npm
@@ -71,4 +71,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
