@@ -306,21 +306,6 @@ header.header {
 	display: none;
 }
 
-/* The hero image is the same kind of icon. Starlight gives it a fixed box that
-   suits an illustration beside the text; centred above the title in this
-   single-column hero it is sized to the viewport instead, so it does not push
-   the title below the fold on a phone. Starlight moves it after the text from
-   50rem (`order: 2`), which in one column would put it under the actions. */
-.hero > img {
-	order: 0;
-	position: relative;
-	z-index: 1;
-	justify-self: center;
-	inline-size: clamp(7rem, 28vw, 13rem);
-	block-size: auto;
-	border-radius: 22%;
-}
-
 /* Reduce bottom padding on splash pages.
  *
  * Starlight emits `data-has-sidebar` as a boolean presence attribute, never

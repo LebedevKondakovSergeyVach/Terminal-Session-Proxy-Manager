@@ -32,10 +32,12 @@ export default defineConfig({
 	integrations: [
 		starlight({
 			title: 'Terminal Session Proxy Manager',
-			// The logo is also the only home link on a phone: below 50rem the
-			// header drops the title text and keeps this image (custom.css). The
-			// alt stays empty because the title text is still in the link, for
-			// screen readers, at every width — an alt would read the name twice.
+			// The logo is the orange-flower artwork; the favicon is a separate,
+			// simpler mark (the orange cube), because the flower turns to a blur
+			// at tab size. Below 50rem the header drops the title text and keeps
+			// the logo (custom.css). The alt stays empty because the title text is
+			// still in the link, for screen readers, at every width — an alt would
+			// read the name twice.
 			logo: { src: './src/assets/logo.jpg' },
 			favicon: '/favicon.png',
 			plugins: [
@@ -81,6 +83,7 @@ export default defineConfig({
 			components: {
 				ThemeSelect: './src/components/ThemeSelect.astro',
 				Search: './src/components/Search.astro',
+				SiteTitle: './src/components/SiteTitle.astro',
 			},
 			customCss: ['./src/styles/custom.css'],
 			// Starlight already emits og:title/description/type/site_name and
