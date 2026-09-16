@@ -32,6 +32,15 @@ export default defineConfig({
 	integrations: [
 		starlight({
 			title: 'Terminal Session Proxy Manager',
+			// The logo is the orange-flower artwork; the favicon is a separate,
+			// simpler mark (the orange cube), because the flower turns to a blur
+			// at tab size. The logo shows on the splash page only — docs pages
+			// have the home button instead (custom.css, SiteTitle.astro). The alt
+			// stays empty because the title text is still in the link for screen
+			// readers, even where it is hidden visually — an alt would read the
+			// name twice.
+			logo: { src: './src/assets/logo.jpg' },
+			favicon: '/favicon.png',
 			plugins: [
 				viewTransitions(),
 				// Material Design 3 shapes, elevation and motion.
@@ -75,6 +84,7 @@ export default defineConfig({
 			components: {
 				ThemeSelect: './src/components/ThemeSelect.astro',
 				Search: './src/components/Search.astro',
+				SiteTitle: './src/components/SiteTitle.astro',
 			},
 			customCss: ['./src/styles/custom.css'],
 			// Starlight already emits og:title/description/type/site_name and
@@ -82,6 +92,13 @@ export default defineConfig({
 			// is 1200x630 because that is the ratio that card crops to — the
 			// 1376x384 banner used before was letterboxed by every consumer.
 			head: [
+				// iOS ignores the PNG favicon for home-screen bookmarks and looks
+				// for this instead. The path carries `base` because `head` entries
+				// are emitted verbatim.
+				{
+					tag: 'link',
+					attrs: { rel: 'apple-touch-icon', href: `${BASE}/apple-touch-icon.png` },
+				},
 				{
 					tag: 'meta',
 					attrs: { property: 'og:image', content: `${SITE}${BASE}/og.jpg` },

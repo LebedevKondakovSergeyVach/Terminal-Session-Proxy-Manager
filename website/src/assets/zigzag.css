@@ -3,12 +3,12 @@
   flex-direction: column;
   align-items: center;
   gap: 0;
-  margin-top: 4rem;
+  margin-top: clamp(2.5rem, 8vw, 4rem);
 }
 .zigzag-section {
   display: flex;
   align-items: center;
-  gap: 3rem;
+  gap: clamp(1.5rem, 4vw, 3rem);
   width: 100%;
   max-width: 1000px;
   margin: 0 auto;
@@ -24,7 +24,8 @@
   flex: 1;
 }
 .zigzag-text h2 {
-  font-size: 1.8rem;
+  /* 1.8rem fixed wrapped these headings onto three lines at 320px. */
+  font-size: clamp(1.4rem, 1rem + 2vw, 1.8rem);
   margin-top: 0;
   margin-bottom: 1rem;
   color: var(--sl-color-text-accent);
@@ -100,11 +101,18 @@ html[data-theme='dark'] .theme-light-only {
   opacity: 0.6;
 }
 
-@media (max-width: 50rem) {
+/* 49.999rem so that exactly 800px, where Starlight already lays out the desktop
+   page, gets the side-by-side sections too. */
+@media (max-width: 49.999rem) {
   .zigzag-section, .zigzag-reverse {
     flex-direction: column;
     text-align: center;
     gap: 1.5rem;
+  }
+  /* A heading centres well over a stacked image; a paragraph of five lines
+     does not — every line starts somewhere else, which is hard to read. */
+  .zigzag-text p {
+    text-align: start;
   }
   .connector-path {
     height: 40px;

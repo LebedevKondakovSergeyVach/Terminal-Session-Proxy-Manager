@@ -46,15 +46,31 @@ const t = Astro.locals.t;
 		align-items: center;
 		justify-content: center;
 		border-radius: 999px;
-		transition: color 0.3s ease, background-color 0.3s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
 		position: relative;
 	}
-	button:hover {
-		color: var(--sl-color-text-accent);
-		background-color: var(--sl-color-gray-5);
+	/* A finger needs a larger target than a pointer: the desktop padding leaves
+	   these buttons well under the 44px a touch target should have. */
+	@media (pointer: coarse) {
+		button {
+			min-inline-size: 2.75rem;
+			min-block-size: 2.75rem;
+		}
 	}
-	button:active {
-		transform: scale(0.9);
+	/* Touch browsers keep `:hover` after a tap, which left a tapped button
+	   painted as hovered. Only a real pointer gets the hover state. */
+	@media (hover: hover) {
+		button:hover {
+			color: var(--sl-color-text-accent);
+			background-color: var(--sl-color-gray-5);
+		}
+	}
+	@media (prefers-reduced-motion: no-preference) {
+		button {
+			transition: color 0.3s ease, background-color 0.3s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+		}
+		button:active {
+			transform: scale(0.9);
+		}
 	}
 	button[aria-pressed="true"] {
 		background-color: var(--sl-color-bg);
@@ -85,35 +101,60 @@ const t = Astro.locals.t;
 
 <script>
 	class StarlightThemeSwitch extends HTMLElement {
+		static chosen = null;
+
 		constructor() {
 			super();
 			
 			const storageKey = 'starlight-theme';
 			
-			const getTheme = () => {
-				if (typeof localStorage !== 'undefined' && localStorage.getItem(storageKey)) {
+			// Storage can throw rather than be absent — a SecurityError when site
+			// data is blocked — and `typeof localStorage` does not catch that. The
+			// switch must still work for the page, just without remembering.
+			// `undefined` means storage could not be read at all; `null` means it
+			// was read and holds no choice, which is how 'auto' is saved.
+			const readStored = () => {
+				try {
 					return localStorage.getItem(storageKey);
+				} catch {
+					return undefined;
 				}
-				return 'auto';
+			};
+			const writeStored = (theme) => {
+				try {
+					if (theme === 'auto') localStorage.removeItem(storageKey);
+					else localStorage.setItem(storageKey, theme);
+				} catch {
+					// Not persisted; the choice still applies to this page.
+				}
+			};
+
+			// Storage stays the source of truth whenever it can be read, so a choice
+			// made in another tab is honoured. Only when it cannot be read does the
+			// choice made on this page count: reading storage alone then reported
+			// 'auto', and the system-scheme listener below overrode a theme picked a
+			// moment ago. Kept on the element class, shared by both switch copies.
+			const getTheme = () => {
+				const stored = readStored();
+				if (stored === undefined) return StarlightThemeSwitch.chosen ?? 'auto';
+				return stored ?? 'auto';
 			};
 			
 			const getPreferredColorScheme = () =>
 				matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
 			
 			const setTheme = (theme) => {
-				// Update buttons UI
-				this.querySelectorAll('button').forEach((btn) => {
+				StarlightThemeSwitch.chosen = theme;
+				// Every instance, not just this one: docs pages render the switch
+				// twice, in the header and in the mobile menu, and updating only the
+				// clicked copy left the other showing the previous choice.
+				document.querySelectorAll('starlight-theme-switch button').forEach((btn) => {
 					btn.setAttribute('aria-pressed', btn.dataset.themeValue === theme ? 'true' : 'false');
 				});
 				
-				// Update DOM theme and localStorage
-				if (theme === 'auto') {
-					document.documentElement.dataset.theme = getPreferredColorScheme();
-					if (typeof localStorage !== 'undefined') localStorage.removeItem(storageKey);
-				} else {
-					document.documentElement.dataset.theme = theme;
-					if (typeof localStorage !== 'undefined') localStorage.setItem(storageKey, theme);
-				}
+				document.documentElement.dataset.theme =
+					theme === 'auto' ? getPreferredColorScheme() : theme;
+				writeStored(theme);
 			};
 			
 			// Initial setup on load

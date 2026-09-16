@@ -3,8 +3,10 @@
  *
  * The theme owns colour, shape, elevation and motion — it derives all of them
  * from the `seed` set in astro.config.mjs. Nothing here may restate them. What
- * is left is what the theme does not claim: typography, scrollbars, and the one
- * screenshot rule.
+ * is left is what the theme does not claim: typography, scrollbars, the
+ * screenshot rules, the splash page's own layout, and the responsive layer —
+ * breakpoints, touch-target sizes, and gating the site's own hover and motion
+ * on `hover: hover` and `prefers-reduced-motion`.
  *
  * There is no `!important` in this file, and there must not be. Two earlier
  * versions had them — fifteen, then twenty-eight — every one repainting a
@@ -67,6 +69,16 @@ header.header {
    0.9em balances JetBrains Mono perfectly against Inter at any size. */
 .sl-markdown-content :not(pre) > code {
 	font-size: 0.9em;
+}
+
+/* Wide tables scroll instead of being cut off. The theme gives tables
+   `width: max-content; max-width: 100%` with `overflow: hidden` (for the rounded
+   corners), so on a phone the columns past the edge were clipped with no way to
+   reach them — the four-column field table in the configuration guide lost
+   half its width. `auto` still clips the corners and scrolls only when the
+   table is wider than the column. */
+.sl-markdown-content table {
+	overflow-x: auto;
 }
 
 /* Screenshots of the TUI need an edge too; the terminal's own background is
@@ -176,9 +188,14 @@ header.header {
 	margin: 2.5rem auto 0;
 }
 
-@media (max-width: 50rem) {
+/* One column only where two genuinely do not fit, at the breakpoint the theme
+   uses for its hero cards. Stacking all the way to 50rem put four full-width
+   tiles, more than a screen of them, on a tablet or a landscape phone. */
+@media (max-width: 34.999rem) {
 	.hero .actions {
 		grid-template-columns: 1fr;
+		gap: 0.75rem;
+		margin-top: 1.5rem;
 	}
 }
 
@@ -192,7 +209,6 @@ header.header {
 	background-color: var(--md-sys-color-surface-container-low, var(--sl-color-bg-nav));
 	border: 1px solid var(--sl-color-hairline);
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-	transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.2s cubic-bezier(0.2, 0, 0, 1), background-color 0.2s ease;
 	text-decoration: none;
 	color: var(--sl-color-text-accent);
 	font-weight: 600;
@@ -201,15 +217,36 @@ header.header {
 	box-sizing: border-box;
 }
 
-.hero .actions .sl-link-button:hover {
-	transform: translateY(-4px);
-	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-	background-color: var(--md-sys-color-surface-container, var(--sl-color-bg-nav));
+/*
+ * Hover and press feedback.
+ *
+ * Hover only for a real pointer: a touch browser keeps `:hover` after a tap,
+ * which left a tapped tile raised. Motion only without a reduced-motion request.
+ */
+@media (hover: hover) {
+	.hero .actions .sl-link-button:hover {
+		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+		background-color: var(--md-sys-color-surface-container, var(--sl-color-bg-nav));
+	}
 }
 
-.hero .actions .sl-link-button:active {
-	transform: translateY(2px) scale(0.98);
-	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+	.hero .actions .sl-link-button:hover {
+		transform: translateY(-4px);
+	}
+}
+
+/* After the hover rules on purpose: a pressed tile is also hovered, and at equal
+   specificity the later rule wins — press has to be the one. */
+@media (prefers-reduced-motion: no-preference) {
+	.hero .actions .sl-link-button {
+		transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.2s cubic-bezier(0.2, 0, 0, 1), background-color 0.2s ease;
+	}
+
+	.hero .actions .sl-link-button:active {
+		transform: translateY(2px) scale(0.98);
+		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+	}
 }
 
 .hero .actions .sl-link-button svg {
@@ -232,6 +269,50 @@ header.header {
 	order: 1; /* Ensure it stays below text */
 }
 
+/* Centred and stacked, with the icon above the label, four tiles made the hero
+   nearly two screens tall on a narrow phone. Icon beside the label instead,
+   description under it. */
+@media (max-width: 34.999rem) {
+	.hero .actions .sl-link-button {
+		display: grid;
+		grid-template-columns: auto 1fr;
+		column-gap: 0.875rem;
+		justify-items: start;
+		align-items: center;
+		padding: 0.875rem 1.125rem;
+		text-align: start;
+	}
+
+	.hero .actions .sl-link-button svg {
+		grid-row: span 2;
+		margin-bottom: 0;
+	}
+
+	.hero .actions .sl-link-button::after {
+		margin-top: 0;
+		text-align: start;
+	}
+}
+
+/* The logo is a photographic app icon on a black square: rounded like one, so
+   its corners do not read as a hard box on the light theme. The theme draws a
+   primary-coloured dot before the title as its stand-in mark; next to a real
+   logo that is two marks, so the dot goes where a logo is present. */
+.site-title img {
+	border-radius: 22%;
+}
+
+.site-title:has(img)::before {
+	display: none;
+}
+
+/* Docs pages carry the home button (SiteTitle.astro) instead of the logo: one
+   way home, labelled, rather than a picture and a button side by side that go
+   to the same place. The logo stays on the splash page. */
+:root[data-has-sidebar] .site-title img {
+	display: none;
+}
+
 /* Reduce bottom padding on splash pages.
  *
  * Starlight emits `data-has-sidebar` as a boolean presence attribute, never
@@ -243,7 +324,7 @@ header.header {
 
 /* Home Footer */
 .home-footer {
-	margin-top: 5rem;
+	margin-top: clamp(3rem, 10vw, 5rem);
 	padding-top: 1rem;
 	border-top: 1px solid var(--sl-color-hairline);
 	display: flex;
@@ -264,11 +345,12 @@ header.header {
 	color: var(--sl-color-text-accent);
 	text-decoration: none;
 	font-size: 0.9rem;
-	transition: opacity 0.2s;
 }
 
-.footer-links a:hover {
-	opacity: 0.8;
+@media (hover: hover) {
+	.footer-links a:hover {
+		opacity: 0.8;
+	}
 }
 
 .footer-version a {
@@ -282,12 +364,30 @@ header.header {
 	font-size: 0.8rem;
 	color: var(--sl-color-gray-2);
 	text-decoration: none;
-	transition: border-color 0.2s, color 0.2s;
 }
 
-.footer-version a:hover {
-	border-color: var(--sl-color-text-accent);
-	color: var(--sl-color-text-accent);
+@media (hover: hover) {
+	.footer-version a:hover {
+		border-color: var(--sl-color-text-accent);
+		color: var(--sl-color-text-accent);
+	}
+}
+
+/* Its padding suits a pointer; a finger needs 44px. */
+@media (pointer: coarse) {
+	.footer-version a {
+		min-block-size: 2.75rem;
+	}
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.footer-links a {
+		transition: opacity 0.2s;
+	}
+
+	.footer-version a {
+		transition: border-color 0.2s, color 0.2s;
+	}
 }
 
 /* Hero Background and Tagline Adjustment */
@@ -295,11 +395,14 @@ header.header {
 	position: relative;
 	/* Pull behind the navbar so it sticks to the top */
 	margin-top: calc(-1 * var(--sl-nav-height));
-	padding-top: calc(var(--sl-nav-height) + 2.5rem);
-	padding-bottom: 5rem;
+	/* Scaled with the viewport. This rule replaces the theme's own `clamp()`
+	   padding, and at fixed desktop values the spacing and 4rem corners took a
+	   large share of a phone screen. */
+	padding-top: calc(var(--sl-nav-height) + clamp(1rem, 5vw, 2.5rem));
+	padding-bottom: clamp(2rem, 8vw, 5rem);
 	/* Add rounding to the bottom of the block */
-	border-bottom-left-radius: 4rem;
-	border-bottom-right-radius: 4rem;
+	border-bottom-left-radius: clamp(1.5rem, 8vw, 4rem);
+	border-bottom-right-radius: clamp(1.5rem, 8vw, 4rem);
 	overflow: hidden;
 }
 
@@ -339,12 +442,23 @@ html[data-theme='dark'] .hero::before {
 /* Adjust tagline font size to be a bit smaller and add margin */
 .hero .tagline {
 	font-size: clamp(1rem, calc(0.125rem + 1.5vw), 1.25rem);
-	margin-top: 2.5rem;
+	margin-top: clamp(1rem, 4vw, 2.5rem);
 }
 
-/* 
+/* The theme sets the hero title at display-medium at every width, and on a
+   narrow phone the site name wrapped over five lines. The theme's own next
+   step down, not a size of ours. */
+@media (max-width: 34.999rem) {
+	.hero h1 {
+		font-size: var(--md-sys-typescale-display-small-size);
+		line-height: var(--md-sys-typescale-display-small-line-height);
+	}
+}
+
+/*
  * 1. Center and enlarge search bar on Desktop
- * 2. Adaptive toolbar: Hide site title on mobile to fit the toolbar
+ * 2. Adaptive toolbar: on mobile the title text gives way — to the logo on the
+ *    splash page, to the home button on docs pages
  */
 header.header > .header {
 	display: flex;
@@ -386,17 +500,37 @@ header.header > .header {
 	}
 }
 
-/* On Mobile */
-@media (max-width: 50rem) {
+/* On Mobile. 49.999rem, not 50rem: at exactly 800px both this and the desktop
+   block above matched, and this one, coming later, hid the title in what
+   Starlight lays out as the desktop header. */
+@media (max-width: 49.999rem) {
 	header.header > .header {
 		gap: 0.5rem;
 	}
-	
-	/* Hide the site title to save space for the toolbar */
-	header.header > .header > .title-wrapper .site-title {
+
+	/*
+	 * The title text gives way to make room.
+	 *
+	 * On the splash page the logo stays as the link, and the text goes only
+	 * visually: it remains the link's accessible name, which is why the logo's
+	 * alt is empty. On a docs page the logo is already hidden, so the link would
+	 * be an invisible focus stop — it goes entirely, and the home button beside
+	 * it is the way home. (Hiding this link on every page, as an earlier rule
+	 * did, left docs pages on a phone with no way home at all.)
+	 */
+	header.header > .header > .title-wrapper .site-title span {
+		position: absolute;
+		inline-size: 1px;
+		block-size: 1px;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
+	}
+
+	:root[data-has-sidebar] header.header > .header > .title-wrapper .site-title {
 		display: none;
 	}
-	
+
 	header.header > .header > .title-wrapper {
 		flex: 0 0 auto;
 	}
@@ -406,12 +540,70 @@ header.header > .header {
 		justify-content: flex-start;
 	}
 	
-	/* Override the sl-hidden utility class to always show the toolbar */
-	header.header > .header > .right-group.sl-hidden {
+	/*
+	 * Show the toolbar on pages without a sidebar only.
+	 *
+	 * Starlight hides this group below 50rem because a docs page repeats its
+	 * theme and language controls in the mobile menu. Forcing it visible on
+	 * every page pushed the group underneath the menu button, and past the edge
+	 * of a phone. The splash page has no menu, so there it is the only way to
+	 * switch.
+	 */
+	:root:not([data-has-sidebar]) header.header > .header > .right-group.sl-hidden {
 		display: flex;
 		flex: 0 0 auto;
 		justify-content: flex-end;
 		gap: 0.5rem;
+	}
+}
+
+/*
+ * Narrow phones, splash pages: search, theme switch and language select do not
+ * fit beside anything else at 320px. What gives way:
+ * - the GitHub icon, which the home page also links from a hero tile;
+ * - the language select's fixed width (Starlight's `7em`, raised by the
+ *   theme's `inline-size: max(…, 6.875rem)`), sized for labels far longer
+ *   than "EN" and "RU" — its content decides instead;
+ * - on the home page (the one with a hero), the logo link, which leads to the
+ *   page already open;
+ * - on the 404 pages, the language select instead: there the logo is the only
+ *   way home, and the page body already links the other language.
+ */
+@media (max-width: 29.999rem) {
+	:root:not([data-has-sidebar]) header.header .right-group .social-icons,
+	:root[data-has-hero] header.header > .header > .title-wrapper,
+	:root:not([data-has-sidebar]):not([data-has-hero]) header.header .right-group starlight-lang-select {
+		display: none;
+	}
+
+	:root:not([data-has-sidebar]) header.header .right-group label {
+		inline-size: auto;
+	}
+
+	:root:not([data-has-sidebar]) header.header starlight-lang-select select {
+		width: auto;
+	}
+}
+
+/* Under 360px even that is too wide. The globe is decoration next to
+   "EN"/"RU", and the select's own variables are what its padding is built
+   from, so zeroing the icon and tightening the padding moves both together. */
+@media (max-width: 22.499rem) {
+	:root:not([data-has-sidebar]) header.header .right-group label {
+		--sl-label-icon-size: 0rem;
+		--sl-inline-padding: 0.5rem;
+	}
+
+	:root:not([data-has-sidebar]) header.header .right-group label .label-icon {
+		display: none;
+	}
+}
+
+/* The theme sizes header controls from its density token, which at
+   `comfortable` leaves the select short of the 44px a finger needs. */
+@media (pointer: coarse) {
+	starlight-lang-select select {
+		min-block-size: 2.75rem;
 	}
 }
 
@@ -488,17 +680,42 @@ starlight-tabs a[role="tab"] {
 	text-decoration: none;
 	border-radius: 0.5rem;
 	border: none;
-	transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-		background 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-		box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 	position: relative;
 	white-space: nowrap;
     background: transparent;
 }
 
-starlight-tabs a[role="tab"]:hover {
-	color: var(--sl-color-text);
-	background: var(--sl-color-bg-inline-code);
+@media (hover: hover) {
+	starlight-tabs a[role="tab"]:hover {
+		color: var(--sl-color-text);
+		background: var(--sl-color-bg-inline-code);
+	}
+}
+
+/* Labels do not wrap, and at the desktop padding the third installation tab
+   ("Prebuilt binary", "Готовая сборка") ran past the edge of a narrow phone. */
+@media (max-width: 49.999rem) {
+	starlight-tabs a[role="tab"] {
+		padding-inline: 0.75rem;
+		font-size: 0.875rem;
+	}
+}
+
+/* Even so, at 320px the three labels are wider than the bar and the last one
+   sat half off-screen in a scroller nobody could see. On a phone a two-line
+   label reads better than a hidden one. */
+@media (max-width: 34.999rem) {
+	starlight-tabs a[role="tab"] {
+		white-space: normal;
+		text-align: center;
+		line-height: 1.25;
+	}
+}
+
+@media (pointer: coarse) {
+	starlight-tabs a[role="tab"] {
+		min-block-size: 2.75rem;
+	}
 }
 
 starlight-tabs a[role="tab"][aria-selected="true"] {
@@ -518,11 +735,12 @@ starlight-tabs a[role="tab"]::after {
     height: 2px;
     background: var(--sl-color-text-accent);
     border-radius: 2px;
-    transition: transform 0.3s ease;
 }
 
-starlight-tabs a[role="tab"]:not([aria-selected="true"]):hover::after {
-    transform: translateX(-50%) scaleX(1);
+@media (hover: hover) {
+	starlight-tabs a[role="tab"]:not([aria-selected="true"]):hover::after {
+		transform: translateX(-50%) scaleX(1);
+	}
 }
 
 starlight-tabs a[role="tab"][aria-selected="true"]::after {
@@ -531,8 +749,23 @@ starlight-tabs a[role="tab"][aria-selected="true"]::after {
 
 /* Tab Panel Fade Animation */
 starlight-tabs [role="tabpanel"] {
-	animation: tabFadeIn 0.35s ease-out forwards;
     display: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	starlight-tabs a[role="tab"] {
+		transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+			background 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+			box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	starlight-tabs a[role="tab"]::after {
+		transition: transform 0.3s ease;
+	}
+
+	starlight-tabs [role="tabpanel"] {
+		animation: tabFadeIn 0.35s ease-out forwards;
+	}
 }
 
 starlight-tabs [role="tabpanel"]:not([hidden]) {
@@ -559,12 +792,18 @@ starlight-tabs [role="tabpanel"]:not([hidden]) {
 	margin-bottom: 1.5rem;
 	position: relative;
 	overflow: hidden;
-	transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.sl-markdown-content .starlight-aside:hover {
-	transform: translateY(-2px);
-	box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+/* Pointer-only, since a tap would leave the aside raised; and motion-gated. */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+	.sl-markdown-content .starlight-aside {
+		transition: transform 0.2s ease, box-shadow 0.2s ease;
+	}
+
+	.sl-markdown-content .starlight-aside:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+	}
 }
 
 

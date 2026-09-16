@@ -100,23 +100,66 @@ import Default from '@astrojs/starlight/components/Search.astro';
 </script>
 
 <style is:global>
-	/* Background blur for the search modal */
 	site-search dialog::backdrop {
-		backdrop-filter: blur(8px) saturate(1.2);
 		background-color: color-mix(in srgb, var(--sl-color-backdrop-overlay) 70%, transparent);
 	}
 
-	/* Search Button Animations */
-	site-search > button {
-		transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.2s cubic-bezier(0.2, 0, 0, 1), background-color 0.2s ease;
+	/* Below 50rem Starlight makes the dialog fill the screen, so the backdrop is
+	   never visible there — a blur would be composited for nothing. */
+	@media (min-width: 50rem) {
+		site-search dialog::backdrop {
+			backdrop-filter: blur(8px) saturate(1.2);
+		}
 	}
-	site-search > button:hover {
-		transform: translateY(-1px);
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+	/*
+	 * Lifts and press feedback.
+	 *
+	 * Motion sits behind `prefers-reduced-motion`, and the hover lift behind
+	 * `hover: hover`: a touch browser keeps `:hover` after a tap, which left a
+	 * tapped card raised until the next tap elsewhere. Keyboard focus does not
+	 * stick that way, so it keeps the lift without the hover gate.
+	 *
+	 * Order matters: a pressed card is also hovered or focused, and at equal
+	 * specificity the later rule wins, so the `:active` block comes last.
+	 */
+	@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+		site-search > button:hover {
+			transform: translateY(-1px);
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+		}
+		.suggestion-card:hover,
+		#starlight__search .pagefind-ui__result-title:not(:where(.pagefind-ui__result-nested *)):hover,
+		#starlight__search .pagefind-ui__result-nested:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+		}
 	}
-	site-search > button:active {
-		transform: translateY(1px) scale(0.98);
-		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+	@media (prefers-reduced-motion: no-preference) {
+		.suggestion-card:focus-visible,
+		#starlight__search .pagefind-ui__result-title:not(:where(.pagefind-ui__result-nested *)):focus-within,
+		#starlight__search .pagefind-ui__result-nested:focus-within {
+			transform: translateY(-2px);
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+		}
+		site-search > button {
+			transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.2s cubic-bezier(0.2, 0, 0, 1), background-color 0.2s ease;
+		}
+		site-search > button:active {
+			transform: translateY(1px) scale(0.98);
+			box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+		}
+		.suggestion-card,
+		#starlight__search .pagefind-ui__result-title:not(:where(.pagefind-ui__result-nested *)),
+		#starlight__search .pagefind-ui__result-nested {
+			transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.2s, background-color 0.2s, border-color 0.2s;
+		}
+		.suggestion-card:active,
+		#starlight__search .pagefind-ui__result-title:not(:where(.pagefind-ui__result-nested *)):active,
+		#starlight__search .pagefind-ui__result-nested:active {
+			transform: translateY(0) scale(0.98);
+			box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+		}
 	}
 
 	/* --- Enhanced Quick Links (Cards) --- */
@@ -150,7 +193,6 @@ import Default from '@astrojs/starlight/components/Search.astro';
 		background: var(--md-sys-color-surface-container, var(--sl-color-bg-nav));
 		border: 1px solid var(--sl-color-hairline-shade);
 		border-radius: 1rem;
-		transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.2s, background 0.2s, border-color 0.2s;
 	}
 
 	.suggestion-title {
@@ -168,22 +210,22 @@ import Default from '@astrojs/starlight/components/Search.astro';
 		transition: color 0.2s;
 	}
 
-	.suggestion-card:hover,
 	.suggestion-card:focus-visible {
-		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 		background: var(--md-sys-color-surface-container-high, var(--sl-color-gray-6));
 		border-color: var(--sl-color-text-accent);
 		outline: none;
 	}
-	.suggestion-card:hover .suggestion-title,
 	.suggestion-card:focus-visible .suggestion-title {
 		color: var(--sl-color-text-accent);
 	}
-
-	.suggestion-card:active {
-		transform: translateY(0) scale(0.98);
-		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+	@media (hover: hover) {
+		.suggestion-card:hover {
+			background: var(--md-sys-color-surface-container-high, var(--sl-color-gray-6));
+			border-color: var(--sl-color-text-accent);
+		}
+		.suggestion-card:hover .suggestion-title {
+			color: var(--sl-color-text-accent);
+		}
 	}
 
 	#starlight__search .pagefind-ui__search-clear {
@@ -195,7 +237,6 @@ import Default from '@astrojs/starlight/components/Search.astro';
 	/* --- Unified Interactive Behaviors for Search Results --- */
 	#starlight__search .pagefind-ui__result-title:not(:where(.pagefind-ui__result-nested *)),
 	#starlight__search .pagefind-ui__result-nested {
-		transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.2s, background-color 0.2s, border-color 0.2s;
 		border: 1px solid transparent;
 	}
 
@@ -207,21 +248,22 @@ import Default from '@astrojs/starlight/components/Search.astro';
 		border-radius: var(--md-sys-shape-corner-large, 1rem);
 	}
 
-	#starlight__search .pagefind-ui__result-title:not(:where(.pagefind-ui__result-nested *)):hover,
 	#starlight__search .pagefind-ui__result-title:not(:where(.pagefind-ui__result-nested *)):focus-within,
-	#starlight__search .pagefind-ui__result-nested:hover,
 	#starlight__search .pagefind-ui__result-nested:focus-within {
 		background-color: var(--sl-color-gray-6);
 		border-color: var(--sl-color-text-accent);
 		outline: none;
-		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 	}
-
-	#starlight__search .pagefind-ui__result-title:not(:where(.pagefind-ui__result-nested *)):active,
-	#starlight__search .pagefind-ui__result-nested:active {
-		transform: translateY(0) scale(0.98);
-		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+	@media (hover: hover) {
+		#starlight__search .pagefind-ui__result-title:not(:where(.pagefind-ui__result-nested *)):hover,
+		#starlight__search .pagefind-ui__result-nested:hover {
+			background-color: var(--sl-color-gray-6);
+			border-color: var(--sl-color-text-accent);
+		}
+		#starlight__search .pagefind-ui__result-title:not(:where(.pagefind-ui__result-nested *)):hover .pagefind-ui__result-link,
+		#starlight__search .pagefind-ui__result-nested:hover .pagefind-ui__result-link {
+			color: var(--sl-color-text-accent);
+		}
 	}
 
 	/* Text color change on hover/focus */
@@ -236,9 +278,7 @@ import Default from '@astrojs/starlight/components/Search.astro';
 		outline: none;
 	}
 	
-	#starlight__search .pagefind-ui__result-title:not(:where(.pagefind-ui__result-nested *)):hover .pagefind-ui__result-link,
 	#starlight__search .pagefind-ui__result-title:not(:where(.pagefind-ui__result-nested *)):focus-within .pagefind-ui__result-link,
-	#starlight__search .pagefind-ui__result-nested:hover .pagefind-ui__result-link,
 	#starlight__search .pagefind-ui__result-nested:focus-within .pagefind-ui__result-link {
 		color: var(--sl-color-text-accent);
 	}
@@ -281,8 +321,17 @@ import Default from '@astrojs/starlight/components/Search.astro';
 </style>
 
 <style is:global>
-	/* Prevent modal jittering when results are momentarily cleared during search */
+	/* Prevent modal jittering when results are momentarily cleared during search.
+	   On a phone the on-screen keyboard covers half the screen and no viewport
+	   unit shrinks for it — `svh` tracks browser toolbars, not the keyboard — so
+	   a half-screen floor pushed the first results under it. The smaller floor is
+	   the fix, and it still stops the jitter. */
 	#starlight__search .pagefind-ui__results-area {
-		min-height: 50vh;
+		min-height: 30svh;
+	}
+	@media (min-width: 50rem) {
+		#starlight__search .pagefind-ui__results-area {
+			min-height: 50vh;
+		}
 	}
 </style>
