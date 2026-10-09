@@ -16,6 +16,11 @@
     "astro": "astro",
     "test": "node --test \"scripts/**/*.test.mjs\""
   },
+  "overrides": {
+    "starlight-llms-txt": {
+      "micromatch": "npm:picomatch@4.0.7"
+    }
+  },
   "dependencies": {
     "@astrojs/markdown-remark": "^7.3.1",
     "@astrojs/starlight": "^0.41.7",

@@ -133,11 +133,12 @@ used as its fallback. No credentials belong in tracked files.
 - [x] Independently review the change using the installed review instructions.
 - [x] Run the crate gate, website gate, agent-docs audit and inspect built pages.
 - [x] Open a draft task PR against `release/2.3.1` with local validation results.
-- [ ] Resolve the website CI dependency-audit blocker before marking the PR ready.
+- [x] Resolve the website dependency-audit blocker; monitor the final CI in PR #31.
 
-## Validation snapshot
+## Initial validation snapshot
 
-All checks below were run on 2026-10-09. No Rust or CLI behavior changed.
+These checks were run before the review follow-up below on 2026-10-09.
+No Rust or CLI behavior changed.
 
 | Check | Observed result | Exit |
 | :--- | :--- | :--- |
@@ -176,16 +177,60 @@ The mandatory `npm audit --audit-level=high` step in
 generator tests and production build passed in that same run. All other
 required PR checks passed, including both OS test jobs, MSRV and Rust security
 advisories. [Draft PR #31](https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/pull/31)
-remains blocked by the [website security step](https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/actions/runs/37903157157/job/113730200804).
+was initially blocked by the [website security step](https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/actions/runs/37903157157/job/113730200804).
 
 A compatible lockfile refresh was tested only in a temporary baseline copy:
 it reduced the findings to 13 moderate and 3 high, but the high
 `braces` → `micromatch` → `starlight-llms-txt` chain remained. The
 [braces advisory](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm)
 lists no patched version; the registry's latest is still 3.0.3, and the latest
-`starlight-llms-txt` still depends on the affected matcher. No forced downgrade,
-audit suppression or unrelated dependency repair was applied to this task.
+`starlight-llms-txt` still depends on the affected matcher. No forced downgrade or audit suppression was applied. The review follow-up
+below resolves the dependency blocker with targeted compatible updates.
 
 Docs-only changes do not require a changelog entry. Do not bump Cargo versions,
 create tags, merge into main or deploy from these branches. Keep this research
 in `.ai/plans/` until the work ships.
+
+
+## Review follow-up — 2026-10-09
+
+Independent reviews checked the bilingual explanations against Rust and shell
+sources and checked the viewer's accessibility, gestures and integration.
+One viewer defect was reproduced in Chromium: Ctrl+wheel was cancelled and
+changed the diagram scale, intercepting browser zoom on trackpads. The wheel
+handler now ignores Ctrl/Cmd/Alt, matching the existing keyboard guard.
+The failing browser scenario passed after the change.
+
+The Website dependency-audit blocker was repaired without changing the gate:
+
+- Update only Sharp, Devalue, HTTP cache semantics, Source Map JS, Undici and
+  Smol TOML within their existing dependency ranges. Astro 7.3.2, Starlight
+  0.41.7, Markdown processor 7.3.1 and MD3 0.2.1 stay at their prior versions.
+- Scope an npm override to `starlight-llms-txt`, supplying
+  `micromatch` as `npm:picomatch@4.0.7`. The plugin calls only `isMatch`, which
+  Micromatch already delegates to Picomatch; this removes runtime `braces`.
+- Add four dependency compatibility tests for homepage promotion, empty
+  selector lists, localized/multiple selectors, braces and extglobs. Document
+  the limited matcher API and the upgrade checks in `website/README.md`.
+
+The final local website gate passed: `npm ci`, 59 tests, 18 built pages and
+all internal links valid (exit 0). `npm audit --audit-level=high --json`
+passed (exit 0), with 0 high/critical, 14 moderate and 2 low findings.
+All three generated `llms*.txt` files are byte-for-byte equal to the build
+before dependency changes. The crate gate passed 94 library, 11 binary and
+37 integration tests. Agent-docs audit and `git diff --check` passed.
+
+The final production build passed all 24 Chromium contexts across both
+languages, 320/375/768/1440px, light/dark/auto, reduced motion and rotation.
+Checks cover pointer pan/pinch, wheel/keyboard modifiers, focus restoration,
+SVG descriptions, theme changes with an open viewer and page overflow.
+No browser errors or external runtime requests occurred.
+
+Additional Chromium checks passed for 12 diagram instances: scale stops at
+400% and fit, and Fit shows every SVG edge. Screenshot zoom opens and closes
+in both languages at 320px and 1440px (four cases).
+
+Safari/WebKit and the actual GitHub Mermaid renderer were not checked in this
+review session. The production build retains the Mermaid chunk-size warning
+and existing `/404` route warning. CI results and the final browser matrix
+are recorded in PR #31.

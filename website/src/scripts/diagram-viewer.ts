@@ -151,6 +151,8 @@ class DiagramViewer extends HTMLElement {
 		stage.addEventListener('pointercancel', endPointer);
 		stage.addEventListener('lostpointercapture', endPointer);
 		stage.addEventListener('wheel', event => {
+			// Trackpad browser zoom also arrives as Ctrl+wheel.
+			if (event.ctrlKey || event.metaKey || event.altKey) return;
 			event.preventDefault();
 			const delta = event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? stage.clientHeight : 1);
 			zoom(view.scale * Math.exp(-delta * 0.002), point(event));
