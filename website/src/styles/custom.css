@@ -81,6 +81,27 @@ header.header {
 	overflow-x: auto;
 }
 
+/* Scaling a sequence diagram to a phone turns its labels into tiny text.
+   Keep a readable minimum width and let the existing scroll container handle
+   the overflow. Block layout keeps the left edge reachable when it overflows. */
+.sl-markdown-content pre.mermaid {
+	display: block;
+}
+
+.sl-markdown-content pre.mermaid svg {
+	display: block;
+	min-width: 40rem;
+	margin-inline: auto;
+}
+
+/* The diagram integration's loading shimmer must follow the same motion
+   preference as the rest of the site. */
+@media (prefers-reduced-motion: reduce) {
+	.sl-markdown-content pre.mermaid:not([data-processed]) {
+		animation: none;
+	}
+}
+
 /* Screenshots of the TUI need an edge too; the terminal's own background is
    dark and otherwise bleeds into a dark page. */
 .sl-markdown-content img[src*='proxy_dashboard'] {

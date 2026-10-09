@@ -89,6 +89,29 @@ proxy on
 proxy status
 ```
 
+### Where proxy settings apply
+
+The active profile in `config.json` supplies two ways to apply proxy settings:
+
+```mermaid
+flowchart TD
+    accTitle: Where proxy settings apply
+    accDescr: Both commands read the active profile in config.json. proxy on changes the current shell and its future child commands. proxy run sets variables for one child command and its children, leaving the current shell unchanged.
+    Profile["Active profile in config.json"]
+    Profile --> On["proxy on"]
+    Profile --> Run["proxy run -- …"]
+    On --> Shell["Current shell environment"]
+    Shell --> Commands["New commands inherit variables"]
+    Run --> Child["Child command and its children"]
+```
+
+`proxy on` applies variables in your current shell; commands started there
+inherit them. `proxy run -- <cmd>` applies them to that child command and its
+children, leaving the shell unchanged. Tools must support these proxy settings.
+Other terminals and already running processes keep their environment. See the
+[shell integration guide](docs/SHELL_INTEGRATION.md) for the export and
+dashboard sequences.
+
 ---
 
 ## 🚀 Commands

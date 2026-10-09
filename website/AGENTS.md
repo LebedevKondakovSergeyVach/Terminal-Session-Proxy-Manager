@@ -258,6 +258,17 @@ Astro 7.3 moved it, and the build failed with
 `Cannot find module '@astrojs/markdown-remark'`. Keep it declared, and keep its
 minor version in step with `astro`'s.
 
+### 9. Mermaid diagrams
+
+Canonical Markdown uses fenced `mermaid` blocks, with translated `accTitle`
+and `accDescr` plus a prose explanation. GitHub renders them directly;
+`astro-mermaid` renders them in the browser on the site, in Markdown and MDX.
+Keep its integration **before** Starlight in `astro.config.mjs`: it transforms
+the fences before Expressive Code turns them into highlighted source. Its
+`autoTheme` option follows `data-theme`. A successful static build does not
+prove client rendering; check the diagrams in a browser, including a theme
+change and a narrow viewport, after changing the integration or diagram syntax.
+
 ## MCP servers
 
 `.mcp.json` at the repository root configures `astro-docs` and `context7`. Use

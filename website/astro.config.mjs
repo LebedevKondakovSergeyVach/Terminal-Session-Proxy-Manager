@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import mermaid from 'astro-mermaid';
 import { viewTransitions } from 'astro-vtbot/starlight-view-transitions';
 import { unified } from '@astrojs/markdown-remark';
 import md3Theme from 'starlight-theme-md3';
@@ -30,6 +31,9 @@ export default defineConfig({
 	// https://github.com/HiDeoo/starlight-image-zoom/issues/63
 	markdown: { processor: unified() },
 	integrations: [
+		// Transform Mermaid fences before Starlight's code-block renderer sees
+		// them. The client renderer follows the site's data-theme attribute.
+		mermaid({ autoTheme: true, enableLog: false }),
 		starlight({
 			title: 'Terminal Session Proxy Manager',
 			// The logo is the orange-flower artwork; the favicon is a separate,
