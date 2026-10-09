@@ -18,7 +18,7 @@ Run from this directory.
 | `npm run dev` | Dev server on `localhost:4321` (syncs first) |
 | `npm run build` | Production build into `dist/` (syncs first, validates links) |
 | `npm run preview` | Serve the built site |
-| `npm test` | Unit tests for the content generator |
+| `npm test` | Content generator and dependency compatibility tests |
 
 ## How content works
 
@@ -48,6 +48,16 @@ drift from its sources. The only hand-authored pages are the home pages,
 Astro 7's default Sätteri processor: `starlight-image-zoom` doesn't yet
 support Sätteri.
 
+## Dependency compatibility
+
+The `starlight-llms-txt` dependency uses only `micromatch.isMatch`, which
+delegates to Picomatch. A scoped npm override supplies Picomatch 4.0.7 directly
+to remove the unpatched `braces` dependency
+([GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm)).
+The matcher tests cover homepage promotion, empty lists and page selectors.
+Recheck the plugin's matcher API and generated `llms*.txt` files when updating
+it; compatibility with Micromatch is limited to the `isMatch` API used here.
+
 ## Structure
 
 ```text
@@ -59,10 +69,11 @@ website/
 ├── public/                # served at the site root (favicon.png, apple-touch-icon.png, og.jpg)
 └── src/
     ├── assets/            # images processed by Astro, including logo.jpg
-    ├── components/        # overrides: ThemeSelect, Search, SiteTitle
+    ├── components/        # overrides: ThemeSelect, Search, SiteTitle, MarkdownContent
     ├── content/docs/      # index.mdx and 404.md (both locales) are hand-written; the rest is generated
     ├── content/i18n/      # UI strings: pagefind.* and the site's own tspm.*
-    └── styles/custom.css  # layout, responsive layer and typography over the theme
+    ├── scripts/           # diagram viewer gestures, zoom and focus handling
+    └── styles/            # layout, responsive rules and Mermaid theme
 ```
 
 ## For agents

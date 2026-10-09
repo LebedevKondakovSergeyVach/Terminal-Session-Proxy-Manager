@@ -7,5 +7,16 @@
 	"pagefind.many_results": "Найдено результатов: [COUNT] по запросу «[SEARCH_TERM]»",
 	"pagefind.one_result": "Найден 1 результат по запросу «[SEARCH_TERM]»",
 	"pagefind.searching": "Поиск по запросу «[SEARCH_TERM]»…",
-	"tspm.home": "На главную"
+	"tspm.home": "На главную",
+	"tspm.diagram.open": "Развернуть",
+	"tspm.diagram.title": "Схема",
+	"tspm.diagram.close": "Закрыть схему",
+	"tspm.diagram.controls": "Управление масштабом схемы",
+	"tspm.diagram.zoomIn": "Увеличить",
+	"tspm.diagram.zoomOut": "Уменьшить",
+	"tspm.diagram.fit": "Вписать",
+	"tspm.diagram.actual": "Исходный размер",
+	"tspm.diagram.scale": "Масштаб",
+	"tspm.diagram.pan": "Схема: стрелки — перемещение, + и − — масштаб, 0 — вписать",
+	"tspm.diagram.hint": "Перетаскивайте схему. Масштаб — двумя пальцами или колесом. Клавиши: стрелки, +, −, 0."
 }

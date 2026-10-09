@@ -7,5 +7,16 @@
 	"pagefind.many_results": "[COUNT] results for “[SEARCH_TERM]”",
 	"pagefind.one_result": "1 result for “[SEARCH_TERM]”",
 	"pagefind.searching": "Searching for “[SEARCH_TERM]”…",
-	"tspm.home": "Home"
+	"tspm.home": "Home",
+	"tspm.diagram.open": "Expand",
+	"tspm.diagram.title": "Diagram",
+	"tspm.diagram.close": "Close diagram",
+	"tspm.diagram.controls": "Diagram zoom controls",
+	"tspm.diagram.zoomIn": "Zoom in",
+	"tspm.diagram.zoomOut": "Zoom out",
+	"tspm.diagram.fit": "Fit",
+	"tspm.diagram.actual": "Actual size",
+	"tspm.diagram.scale": "Zoom level",
+	"tspm.diagram.pan": "Diagram: use arrow keys to pan, + and − to zoom, 0 to fit",
+	"tspm.diagram.hint": "Drag to move. Pinch or scroll to zoom. Keyboard: arrows, +, −, 0."
 }
