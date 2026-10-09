@@ -73,15 +73,30 @@ the [Starlight integration catalog](https://starlight.astro.build/resources/plug
 The npm metadata was checked: its peers accept Astro >=4 and Mermaid 10 or 11.
 Mermaid 11 is explicitly selected rather than the incompatible Mermaid 12
 latest version. This integration preserves the unified pipeline and renders
-both Markdown and MDX fences in the browser, following `data-theme`.
+both Markdown and MDX fences in the browser.
 
 Place it before Starlight so it transforms Mermaid fences before Expressive
 Code. Browser verification is necessary because the static build does not
 parse diagram syntax. Check both languages, light/dark/auto, a narrow viewport,
-SVG accessibility descriptions and ordinary code blocks. Override its loading
-shimmer under reduced motion using scoped CSS without `!important`.
-Keep SVGs at a readable minimum width with horizontal scrolling inside their
-containers on narrow screens; check that both edges remain reachable.
+SVG accessibility descriptions and ordinary code blocks. Use inherited MD3
+colour and shape roles in the supported `themeCSS`, with `theme: 'base'` and
+`autoTheme: false`. Colours then follow `data-theme` without replacing the SVG
+while the reader zooms. The site's Inter font is also used for diagram labels.
+The diagram frame uses card roles, and the viewer uses dialog/control roles.
+Loading backgrounds follow the same palette without a separate shimmer.
+
+Keep inline labels at natural size; only diagrams wider than their container
+scroll. The translated Expand control opens the original SVG in a native
+dialog at 100%, with zoom in/out, Fit and Actual size. Drag, pinch, wheel and
+keyboard controls operate inside its viewport. Fit exposes all four edges;
+zoom stops between the fit scale and 400%. Preserve browser zoom shortcuts,
+keep Tab/Shift+Tab inside the viewer, and restore SVG, scroll and opener focus
+on close. Moving one SVG preserves its IDs, arrow markers and descriptions.
+
+The MarkdownContent override composes the image-zoom plugin's public override
+with the diagram viewer, preserving existing screenshot zoom. Hidden viewer UI
+is excluded from Pagefind. Check 320/375/768/1440px with touch emulation on
+the first three, both locales, all theme modes, reduced motion and rotation.
 
 The alternatives were also checked: `@pasqal-io/starlight-client-mermaid` pins
 the older Markdown processor 6 peer range, while ours is 7;
@@ -95,9 +110,14 @@ Official references checked:
 - [GitHub diagram support](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-diagrams).
 - [Astro Markdown](https://docs.astro.build/en/guides/markdown-content/).
 - [Starlight Markdown authoring](https://starlight.astro.build/guides/authoring-content/).
+- [Mermaid theme configuration](https://mermaid.js.org/config/theming.html).
+- [Native modal dialogs](https://developer.mozilla.org/en-US/docs/Web/API/HTMLDialogElement/showModal).
+- [Pointer Events](https://www.w3.org/TR/pointerevents4/).
 
 Context7 was accessed using the supplied key in an HTTP header, and the official
-Starlight library ID was resolved as `/withastro/starlight`. The `astro-docs`
+Starlight library ID was resolved as `/withastro/starlight`; the follow-up
+viewer research resolved `/mermaid-js/mermaid` and queried its theme/CSS API.
+The `astro-docs`
 MCP endpoint returned HTTP 403 / Cloudflare 1010, so official web pages were
 used as its fallback. No credentials belong in tracked files.
 
@@ -108,6 +128,8 @@ used as its fallback. No credentials belong in tracked files.
 - [x] Update main, create and push `release/2.3.1`, create the task branch.
 - [x] Add the three diagrams in English and Russian and correct adjacent prose.
 - [x] Add Mermaid site support, theme handling and reduced-motion styling.
+- [x] Match MD3 styling and add accessible zoom, pan and pinch controls.
+- [x] Verify touch viewports, rotation, keyboard and existing image zoom.
 - [x] Independently review the change using the installed review instructions.
 - [x] Run the crate gate, website gate, agent-docs audit and inspect built pages.
 - [x] Open a draft task PR against `release/2.3.1` with local validation results.
@@ -123,12 +145,16 @@ All checks below were run on 2026-10-09. No Rust or CLI behavior changed.
 | `cd website && npm ci && npm test && npm run build` | `pass 55`, `fail 0`; `All internal links are valid`; `18 page(s) built`; `Complete!` | 0 |
 | `bash .claude/skills/agent-docs-audit/audit.sh` | `No blocking problems.` | 0 |
 | `git diff --check` | No output | 0 |
-| Browser smoke of the built site | Six SVG diagrams, EN/RU, widths 1440/375, light/dark re-render, auto-theme changes, SVG titles/descriptions, reduced motion and ordinary code blocks; no browser errors or external runtime requests | 0 |
+| Browser smoke of the built site | `cases: 24`, `passed: 24`, `failed: 0`; six SVG diagrams across EN/RU, widths 320/375/768/1440, light/dark/auto, touch pan/pinch, wheel, zoom/fit/actual, keyboard, focus, rotation, SVG descriptions, reduced motion and ordinary code blocks; no browser errors or external runtime requests | 0 |
+| Additional browser regression | EN/RU screenshot zoom opens/closes; diagram zoom reaches 400% and stops at fit with disabled limit buttons | 0 |
 
-Independent source review found no high-confidence issues. Independent visual
-review of desktop and mobile screenshots found no clipping on desktop and
-readable labels in mobile scroll containers. The browser smoke also checked
-that both horizontal edges are reachable and the page itself does not overflow.
+Independent source review found interception of Ctrl/Cmd browser zoom shortcuts;
+the modifier guard was added and verified. Independent visual review of desktop
+and mobile screenshots found readable labels and complete controls at 320px.
+The browser smoke verified 44px touch controls after the theme's opening
+animation, fit containment, finite gesture geometry, stable SVG IDs through
+theme changes, and page overflow prevention. Rotation changes page layout and
+can clamp its scroll position before close; closing preserves that new position.
 
 The preview was opened in Safari. Automated DOM inspection there was blocked
 by its existing JavaScript-from-Apple-Events setting; the browser smoke used

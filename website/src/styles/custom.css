@@ -81,25 +81,174 @@ header.header {
 	overflow-x: auto;
 }
 
-/* Scaling a sequence diagram to a phone turns its labels into tiny text.
-   Keep a readable minimum width and let the existing scroll container handle
-   the overflow. Block layout keeps the left edge reachable when it overflows. */
-.sl-markdown-content pre.mermaid {
-	display: block;
+/* Diagrams consume the same card/dialog roles as the rest of the MD3 site.
+   SVG colours live in mermaid-theme.css, scoped by the renderer itself. */
+.diagram-frame {
+	margin-block: 1.5rem;
+	min-inline-size: 0;
+	overflow: hidden;
+	border-radius: var(--md3-comp-card-shape);
+	background: var(--md3-comp-card-container-color);
+	color: var(--md-sys-color-on-surface);
+	box-shadow: var(--md3-comp-card-elevation);
 }
-
-.sl-markdown-content pre.mermaid svg {
-	display: block;
-	min-width: 40rem;
-	margin-inline: auto;
+.diagram-toolbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+	padding: 0.75rem 1rem;
+	border-bottom: 1px solid var(--md-sys-color-outline-variant);
 }
-
-/* The diagram integration's loading shimmer must follow the same motion
-   preference as the rest of the site. */
-@media (prefers-reduced-motion: reduce) {
-	.sl-markdown-content pre.mermaid:not([data-processed]) {
-		animation: none;
+.diagram-caption {
+	min-inline-size: 0;
+	font-size: var(--md-sys-typescale-label-large-size);
+	font-weight: var(--md-sys-typescale-label-large-weight);
+	line-height: var(--md-sys-typescale-label-large-line-height);
+}
+.diagram-button {
+	flex: none;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+	min-block-size: 2.75rem;
+	min-inline-size: 2.75rem;
+	padding: 0.5rem 0.75rem;
+	border: 0;
+	border-radius: var(--md3-comp-header-control-shape);
+	background: var(--md3-comp-header-control-container-color);
+	color: var(--md3-comp-header-control-label-color);
+	font: inherit;
+	font-size: var(--md-sys-typescale-label-large-size);
+	cursor: pointer;
+	-webkit-tap-highlight-color: transparent;
+}
+.diagram-button svg { flex: none; }
+.diagram-button:focus-visible, .diagram-stage:focus-visible, .diagram-frame pre:focus-visible {
+	outline: 2px solid var(--md3-comp-header-control-focus-outline-color);
+	outline-offset: -2px;
+}
+@media (hover: hover) {
+	.diagram-button:hover:not(:disabled) {
+		background: var(--md3-comp-header-control-hover-container-color);
+		color: var(--md3-comp-header-control-hover-label-color);
 	}
+}
+.diagram-button:active:not(:disabled) {
+	background: var(--md3-comp-header-control-pressed-container-color);
+}
+.diagram-button:disabled {
+	background: var(--md3-comp-header-control-disabled-container-color);
+	color: var(--md3-comp-header-control-disabled-label-color);
+	cursor: default;
+}
+.sl-markdown-content .diagram-frame pre.mermaid,
+.sl-markdown-content .diagram-frame pre.mermaid[data-processed] {
+	display: block;
+	margin: 0;
+	padding: 1rem;
+	border-radius: 0;
+	background: transparent;
+	color: inherit;
+	overflow: auto;
+}
+.sl-markdown-content .diagram-frame pre.mermaid:not([data-processed]) {
+	background: var(--md3-comp-card-container-color);
+	animation: none;
+}
+.sl-markdown-content .diagram-frame pre.mermaid svg {
+	display: block;
+	margin-inline: auto;
+	max-width: none;
+	height: auto;
+}
+.diagram-dialog {
+	position: fixed;
+	inset: 0;
+	margin: auto;
+	padding: 0;
+	inline-size: min(72rem, calc(100vw - 3rem));
+	block-size: min(56rem, calc(100dvh - 3rem));
+	max-inline-size: none;
+	max-block-size: none;
+	border: 0;
+	border-radius: var(--md3-comp-dialog-shape);
+	background: var(--md3-comp-dialog-container-color);
+	color: var(--md3-comp-dialog-label-color);
+	box-shadow: var(--md3-comp-dialog-elevation);
+	overflow: hidden;
+}
+.diagram-dialog[open] {
+	display: grid;
+	grid-template-rows: auto auto auto minmax(0, 1fr);
+}
+.diagram-dialog::backdrop { background: var(--md3-comp-dialog-scrim-color); }
+.diagram-heading {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 0.75rem 1rem 0;
+}
+.diagram-heading h2 {
+	margin: 0;
+	min-inline-size: 0;
+	font-size: var(--md-sys-typescale-title-medium-size);
+	font-weight: var(--md-sys-typescale-title-medium-weight);
+	line-height: var(--md-sys-typescale-title-medium-line-height);
+}
+.diagram-icon-button { padding: 0; font-size: 1.5rem; }
+.diagram-controls {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 0.25rem;
+	padding: 0.5rem 1rem;
+}
+.diagram-scale {
+	margin-inline-start: auto;
+	min-inline-size: 3rem;
+	text-align: end;
+	font-size: var(--md-sys-typescale-label-large-size);
+	font-variant-numeric: tabular-nums;
+}
+.diagram-hint {
+	margin: 0;
+	padding: 0 1rem 0.75rem;
+	font-size: var(--md-sys-typescale-body-small-size);
+	line-height: var(--md-sys-typescale-body-small-line-height);
+	color: var(--md-sys-color-on-surface-variant);
+}
+.diagram-stage {
+	position: relative;
+	min-inline-size: 0;
+	min-block-size: 0;
+	overflow: hidden;
+	background: var(--md-sys-color-surface-container-low);
+	cursor: grab;
+	touch-action: none;
+	user-select: none;
+}
+.diagram-stage.is-panning { cursor: grabbing; }
+.diagram-canvas {
+	position: absolute;
+	inset: 0 auto auto 0;
+	transform-origin: 0 0;
+}
+.diagram-canvas svg { display: block; }
+@media (max-width: 34.999rem) {
+	.diagram-toolbar { flex-wrap: wrap; }
+	.diagram-caption { flex: 1 0 100%; }
+	.diagram-dialog {
+		inline-size: 100%;
+		block-size: 100dvh;
+		border-radius: 0;
+		padding-block: env(safe-area-inset-top) env(safe-area-inset-bottom);
+		padding-inline: env(safe-area-inset-left) env(safe-area-inset-right);
+	}
+	.diagram-heading, .diagram-controls { padding-inline: 0.75rem; }
+	.diagram-hint { padding-inline: 0.75rem; }
 }
 
 /* Screenshots of the TUI need an edge too; the terminal's own background is

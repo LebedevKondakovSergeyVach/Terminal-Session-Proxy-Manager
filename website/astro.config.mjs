@@ -8,6 +8,7 @@ import md3Theme from 'starlight-theme-md3';
 import starlightLinksValidator from 'starlight-links-validator';
 import starlightImageZoom from 'starlight-image-zoom';
 import starlightLlmsTxt from 'starlight-llms-txt';
+import { readFileSync } from 'node:fs';
 
 import { SITE, BASE, readVersion } from './site.config.mjs';
 
@@ -32,8 +33,27 @@ export default defineConfig({
 	markdown: { processor: unified() },
 	integrations: [
 		// Transform Mermaid fences before Starlight's code-block renderer sees
-		// them. The client renderer follows the site's data-theme attribute.
-		mermaid({ autoTheme: true, enableLog: false }),
+		// them. Inherited MD3 colours update the SVG without replacing its DOM
+		// while the reader is zooming or dragging it in the diagram viewer.
+		mermaid({
+			theme: 'base',
+			autoTheme: false,
+			enableLog: false,
+			mermaidConfig: {
+				fontFamily: 'var(--sl-font)',
+				themeCSS: readFileSync(new URL('./src/styles/mermaid-theme.css', import.meta.url), 'utf8'),
+				flowchart: { nodeSpacing: 24, rankSpacing: 32 },
+				sequence: {
+					actorFontFamily: 'var(--sl-font)',
+					messageFontFamily: 'var(--sl-font)',
+					noteFontFamily: 'var(--sl-font)',
+					actorMargin: 32,
+					messageMargin: 32,
+					mirrorActors: false,
+					wrap: true,
+				},
+			},
+		}),
 		starlight({
 			title: 'Terminal Session Proxy Manager',
 			// The logo is the orange-flower artwork; the favicon is a separate,
@@ -86,6 +106,7 @@ export default defineConfig({
 				ru: { label: 'RU', lang: 'ru' },
 			},
 			components: {
+				MarkdownContent: './src/components/MarkdownContent.astro',
 				ThemeSelect: './src/components/ThemeSelect.astro',
 				Search: './src/components/Search.astro',
 				SiteTitle: './src/components/SiteTitle.astro',

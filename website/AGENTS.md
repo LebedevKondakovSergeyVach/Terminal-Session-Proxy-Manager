@@ -197,7 +197,7 @@ with any numeral.
 
 ### 6b. Component overrides, the site's own UI strings, and its icons
 
-`astro.config.mjs` overrides three Starlight components, all in
+`astro.config.mjs` overrides four Starlight components, all in
 `src/components/`:
 
 | Override | Does |
@@ -205,6 +205,7 @@ with any numeral.
 | `ThemeSelect.astro` | Three-way light/auto/dark switch. Docs pages render it twice (header and mobile menu), so it updates every instance; storage is read first and the page's own choice is the fallback only when storage throws. |
 | `Search.astro` | Stock search plus the quick-links panel (rule 6a). |
 | `SiteTitle.astro` | Stock title plus a round home button on docs pages (`hasSidebar`), styled from the same theme tokens as the search button. |
+| `MarkdownContent.astro` | Composes the public image-zoom MarkdownContent override with `DiagramViewer.astro`, preserving image zoom and adding diagram controls. |
 
 The header logo shows on the splash pages only; `custom.css` hides it where the
 home button is. Below 50rem the title text is hidden — visually on the splash
@@ -264,10 +265,23 @@ Canonical Markdown uses fenced `mermaid` blocks, with translated `accTitle`
 and `accDescr` plus a prose explanation. GitHub renders them directly;
 `astro-mermaid` renders them in the browser on the site, in Markdown and MDX.
 Keep its integration **before** Starlight in `astro.config.mjs`: it transforms
-the fences before Expressive Code turns them into highlighted source. Its
-`autoTheme` option follows `data-theme`. A successful static build does not
-prove client rendering; check the diagrams in a browser, including a theme
-change and a narrow viewport, after changing the integration or diagram syntax.
+the fences before Expressive Code turns them into highlighted source. Keep
+`theme: 'base'` and `autoTheme: false`: the supported `themeCSS` in
+`src/styles/mermaid-theme.css` reads inherited MD3 roles, so colours follow
+`data-theme` without replacing the SVG while the reader pans or zooms.
+Do not introduce a second Mermaid renderer or redefine the theme's tokens.
+
+`src/scripts/diagram-viewer.ts` enhances the rendered SVG with translated
+controls and moves the original into a native dialog, then restores it and
+the opener's focus on close. Keeping one SVG preserves its IDs, arrow markers
+and accessibility descriptions. Pointer gestures belong only to the dialog's
+viewport; normal page scrolling and browser zoom shortcuts remain available.
+
+A successful static build does not prove client rendering. Check both
+languages, theme changes with an open dialog, touch pan/pinch, zoom buttons,
+fit, keyboard navigation, focus restoration and narrow-screen overflow after
+changing the viewer, integration or diagram syntax. Check image zoom too when
+changing the MarkdownContent override.
 
 ## MCP servers
 

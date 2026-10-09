@@ -1,0 +1,36 @@
+/* Mermaid scopes this supported themeCSS to each SVG. The inherited MD3 roles
+   stay live in both inline diagrams and the viewer when data-theme changes. */
+.node rect, .node polygon, .node circle, rect.actor, rect.actor-top, rect.actor-bottom {
+	fill: var(--md-sys-color-primary-container);
+	stroke: var(--md-sys-color-primary);
+	rx: var(--md-sys-shape-sm);
+}
+.node .label, .node .label text, .nodeLabel, .nodeLabel p, .nodeLabel span, text.actor, text.actor > tspan {
+	color: var(--md-sys-color-on-primary-container);
+	fill: var(--md-sys-color-on-primary-container);
+}
+.flowchart-link, .messageLine0, .messageLine1 {
+	stroke: var(--md-sys-color-on-surface-variant);
+}
+.marker, .arrowheadPath, [id$='-arrowhead'] path, #arrowhead path, #arrowhead {
+	fill: var(--md-sys-color-on-surface-variant);
+	stroke: var(--md-sys-color-on-surface-variant);
+}
+.edgeLabel, .edgeLabel p, .messageText, .messageText > tspan {
+	color: var(--md-sys-color-on-surface);
+	fill: var(--md-sys-color-on-surface);
+}
+.edgeLabel, .edgeLabel p, .labelBkg {
+	background-color: var(--md-sys-color-surface-container-low);
+}
+.actor-line {
+	stroke: var(--md-sys-color-outline);
+}
+.note {
+	fill: var(--md-sys-color-surface-container-high);
+	stroke: var(--md-sys-color-outline-variant);
+	rx: var(--md-sys-shape-sm);
+}
+.noteText, .noteText > tspan {
+	fill: var(--md-sys-color-on-surface);
+}
