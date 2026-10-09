@@ -110,7 +110,8 @@ used as its fallback. No credentials belong in tracked files.
 - [x] Add Mermaid site support, theme handling and reduced-motion styling.
 - [x] Independently review the change using the installed review instructions.
 - [x] Run the crate gate, website gate, agent-docs audit and inspect built pages.
-- [x] Prepare the verified task for review against `release/2.3.1`.
+- [x] Open a draft task PR against `release/2.3.1` with local validation results.
+- [ ] Resolve the website CI dependency-audit blocker before marking the PR ready.
 
 ## Validation snapshot
 
@@ -132,8 +133,8 @@ that both horizontal edges are reachable and the page itself does not overflow.
 The preview was opened in Safari. Automated DOM inspection there was blocked
 by its existing JavaScript-from-Apple-Events setting; the browser smoke used
 Chromium instead. The MSRV toolchain and actual GitHub Mermaid renderer were
-not run locally; the diagrams use the documented basic flowchart/sequence and
-accessibility syntax.
+not run locally; MSRV subsequently passed in CI. The diagrams use the documented
+basic flowchart/sequence and accessibility syntax.
 
 The static build warns about a Mermaid chunk over 500 kB; Mermaid is loaded
 only on pages with diagrams. The existing `/404` route warning also remains.
@@ -144,7 +145,20 @@ findings for Mermaid/KaTeX. The new advisory is
 [KaTeX trust restrictions after existing prototype pollution](https://github.com/advisories/GHSA-238p-pmpm-9mq7).
 Mermaid 11 requests KaTeX `^0.16.47`; the advisory's fixed KaTeX 0.18.2 is
 outside that range. A forced unrelated dependency upgrade was not applied.
-This audit is an additional check, separate from the passing project gates.
+The mandatory `npm audit --audit-level=high` step in
+`.github/workflows/website.yml` fails on these existing high findings. The
+generator tests and production build passed in that same run. All other
+required PR checks passed, including both OS test jobs, MSRV and Rust security
+advisories. [Draft PR #31](https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/pull/31)
+remains blocked by the [website security step](https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/actions/runs/37903157157/job/113730200804).
+
+A compatible lockfile refresh was tested only in a temporary baseline copy:
+it reduced the findings to 13 moderate and 3 high, but the high
+`braces` → `micromatch` → `starlight-llms-txt` chain remained. The
+[braces advisory](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm)
+lists no patched version; the registry's latest is still 3.0.3, and the latest
+`starlight-llms-txt` still depends on the affected matcher. No forced downgrade,
+audit suppression or unrelated dependency repair was applied to this task.
 
 Docs-only changes do not require a changelog entry. Do not bump Cargo versions,
 create tags, merge into main or deploy from these branches. Keep this research
