@@ -13,12 +13,12 @@ Run from this directory.
 
 | Command | Action |
 | :--- | :--- |
-| `npm install` | Install dependencies |
+| `npm ci` | Install the locked dependencies reproducibly |
 | `npm run sync` | Regenerate content from the repository's Markdown |
 | `npm run dev` | Dev server on `localhost:4321` (syncs first) |
 | `npm run build` | Production build into `dist/` (syncs first, validates links) |
 | `npm run preview` | Serve the built site |
-| `npm test` | Content generator and dependency compatibility tests |
+| `npm test` | Content generator, dependency compatibility and theme/navigation runtime tests |
 
 ## How content works
 
@@ -69,10 +69,10 @@ website/
 ├── public/                # served at the site root (favicon.png, apple-touch-icon.png, og.jpg)
 └── src/
     ├── assets/            # images processed by Astro, including logo.jpg
-    ├── components/        # overrides: ThemeSelect, Search, SiteTitle, MarkdownContent
+    ├── components/        # header, theme, search, Markdown and diagram dialog components
     ├── content/docs/      # index.mdx and 404.md (both locales) are hand-written; the rest is generated
     ├── content/i18n/      # UI strings: pagefind.* and the site's own tspm.*
-    ├── scripts/           # diagram viewer gestures, zoom and focus handling
+    ├── scripts/           # diagram viewer, shared theme state and navigation recovery
     └── styles/            # layout, responsive rules and Mermaid theme
 ```
 

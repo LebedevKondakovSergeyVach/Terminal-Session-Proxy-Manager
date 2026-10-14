@@ -7,6 +7,11 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [2.3.1] — 2026-10-14
+
+Documentation diagrams, more reliable website navigation and theme controls,
+and dependency security fixes.
+
 ### Security
 
 - Update locked `quinn-proto` from 0.11.17 to 0.11.18 to address
@@ -15,6 +20,39 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   [RUSTSEC-2026-0343](https://rustsec.org/advisories/RUSTSEC-2026-0343.html),
   which describe panics in its QUIC stream, ACK-delay and datagram handling.
   This optional dependency is not enabled in the CLI's current feature set.
+- **Website**: Remove the vulnerable `braces` dependency
+  ([GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm))
+  from the documentation build by using Picomatch for the `starlight-llms-txt`
+  page matcher, with compatibility tests.
+
+### Added
+
+- **Docs**: Bilingual diagrams explain where proxy environment settings apply,
+  how `proxy on` updates the current shell, and how the dashboard hands its
+  selected profile back to the shell.
+- **Website**: Mermaid diagrams follow the active theme and open in a dialog
+  with zoom, fit, drag, touch pan/pinch and keyboard controls. Closing the
+  dialog restores focus to its opener; browser zoom shortcuts stay available.
+
+### Fixed
+
+- **Website**: Documentation stays visible after Back/Forward navigation,
+  including pages restored from the browser's history cache. Cancelled page
+  transitions no longer leave outgoing content hidden.
+- **Website**: Light/Dark/Auto controls share their selection across the page,
+  browser tabs and history navigation, and keep working when storage is
+  blocked. Rapid theme changes safely replace an unfinished transition;
+  reduced-motion preferences are respected.
+
+### Changed
+
+- **Website**: Documentation headers use the homepage logo and title on
+  desktop. Mobile navigation and table of contents share a glass background;
+  theme and language controls, GitHub buttons, sidebar groups and contents
+  entries have clearer layout and boundaries.
+- **Contributing**: Agent guidance now links to focused path rules and skills;
+  release recovery, verification and ownership references match the current
+  workflows. Completed planning archives were removed.
 
 ## [2.3.0] — 2026-09-16
 
@@ -368,7 +406,8 @@ Also changed:
 
 - Default configuration uses safe generic profiles.
 
-[Unreleased]: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/compare/v2.3.0...HEAD
+[Unreleased]: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/compare/v2.3.1...HEAD
+[2.3.1]: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/compare/v2.3.0...v2.3.1
 [2.3.0]: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/compare/v2.2.2...v2.3.0
 [2.2.2]: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/compare/v2.2.1...v2.2.2
 [2.2.1]: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/compare/v2.2.0...v2.2.1
