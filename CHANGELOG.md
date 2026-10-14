@@ -36,6 +36,8 @@ and dependency security fixes.
 
 ### Fixed
 
+- **Docs**: Refresh the Views counter image URL in both READMEs so GitHub
+  requests a fresh badge instead of reusing the previous image-cache entry.
 - **Website**: Documentation stays visible after Back/Forward navigation,
   including pages restored from the browser's history cache. Cancelled page
   transitions no longer leave outgoing content hidden.

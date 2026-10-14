@@ -11,7 +11,7 @@
 [![Rust](https://img.shields.io/badge/rust-1.88%2B-orange.svg)](https://www.rust-lang.org)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey.svg)](README.md)
-![Views](https://komarev.com/ghpvc/?username=LebedevSergeyVach-proxy-cli&label=views&color=blue&style=flat)
+![Views](https://komarev.com/ghpvc/?username=LebedevSergeyVach-proxy-cli&label=Views&color=blue&style=flat)
 
 Manage proxy profiles for your terminal session from one command, in **Rust**:
 switch profiles, benchmark latency, diagnose connectivity, and control the
