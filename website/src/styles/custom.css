@@ -349,12 +349,16 @@ main > .content-panel,
 	:active-view-transition-type(forward, backward) h1 { width: auto; }
 	:active-view-transition-type(forward, backward)::view-transition-group(root) {
 		animation: none;
+		overflow: clip;
 	}
 	:active-view-transition-type(forward, backward)::view-transition-old(root) {
 		animation: tspm-page-fade-out 320ms ease-in-out both;
 	}
 	:active-view-transition-type(forward, backward)::view-transition-new(root) {
-		animation: tspm-page-fade-in 320ms ease-in-out both;
+		animation: tspm-page-enter-forward 380ms cubic-bezier(0.4, 0, 0.2, 1) both;
+	}
+	:active-view-transition-type(backward)::view-transition-new(root) {
+		animation-name: tspm-page-enter-backward;
 	}
 
 	/* Animate transition snapshots only. A DOM entrance conditionally disabled
@@ -367,8 +371,22 @@ main > .content-panel,
 	}
 }
 
-@keyframes tspm-page-fade-in {
-	from { opacity: 0; }
+@keyframes tspm-page-enter-forward {
+	from { opacity: 0; transform: translateX(24px); }
+	to { opacity: 1; transform: none; }
+}
+@keyframes tspm-page-enter-backward {
+	from { opacity: 0; transform: translateX(-24px); }
+	to { opacity: 1; transform: none; }
+}
+
+/* Separate clickable entries while retaining the translucent menu surface. */
+mobile-starlight-toc .dropdown li { margin-block: 0.25rem; }
+mobile-starlight-toc .dropdown a {
+	border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 55%, transparent);
+}
+mobile-starlight-toc .dropdown a:not([aria-current='true']) {
+	background-color: color-mix(in srgb, var(--md-sys-color-surface-container-high) 45%, transparent);
 }
 
 /* Match the other round toolbar buttons, including the mobile menu copy. */
@@ -401,8 +419,19 @@ main > .content-panel,
 		backdrop-filter: none;
 		border-bottom: 0;
 	}
-	mobile-starlight-toc nav { border-top: 0; border-block-end: 0; }
+	mobile-starlight-toc nav {
+		border-top: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 35%, transparent);
+		border-block-end: 0;
+	}
 	mobile-starlight-toc nav::before { display: none; }
+	.sidebar-content details {
+		border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 55%, transparent);
+	}
+	.sidebar-content details > summary {
+		border-radius: var(--md-sys-shape-lg);
+		background-color: var(--md-sys-color-surface-container-high);
+		font-weight: 600;
+	}
 	.mobile-preferences {
 		display: grid;
 		grid-template-columns: max-content 1fr;
@@ -412,14 +441,33 @@ main > .content-panel,
 	.mobile-preferences starlight-theme-switch { grid-column: 1; grid-row: 1; }
 	.mobile-preferences starlight-lang-select { grid-column: 1; grid-row: 2; }
 	.mobile-preferences starlight-lang-select select {
+		box-sizing: border-box;
 		inline-size: 100%;
 		margin-inline: 0;
 		min-block-size: 2.75rem;
-		border: 1px solid var(--sl-color-gray-5);
-		border-radius: var(--md-sys-shape-full);
-		background-color: var(--sl-color-gray-6);
+		border: 0;
+		border-radius: inherit;
+		background-color: transparent;
+		padding-inline: calc(var(--sl-label-icon-size) + var(--sl-inline-padding) + 0.5rem)
+			calc(var(--sl-caret-size) + var(--sl-inline-padding) + 0.5rem);
 	}
-	.mobile-preferences starlight-lang-select label { inline-size: 100%; }
+	.mobile-preferences starlight-lang-select label {
+		--sl-label-icon-size: 1rem;
+		--sl-caret-size: 1.125rem;
+		--sl-inline-padding: 0.75rem;
+		box-sizing: border-box;
+		inline-size: 100%;
+		border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 72%, transparent);
+		border-radius: var(--md3-comp-header-control-shape);
+		background-color: var(--md3-comp-header-control-container-color);
+		color: var(--md3-comp-header-control-label-color);
+	}
+	.mobile-preferences starlight-lang-select .label-icon { inset-inline-start: var(--sl-inline-padding); }
+	.mobile-preferences starlight-lang-select .caret { inset-inline-end: var(--sl-inline-padding); }
+	.mobile-preferences starlight-lang-select label:focus-within {
+		outline: 2px solid var(--md3-comp-header-control-focus-outline-color);
+		outline-offset: 2px;
+	}
 	.mobile-preferences .social-icons {
 		grid-column: 2;
 		grid-row: 1 / 3;
