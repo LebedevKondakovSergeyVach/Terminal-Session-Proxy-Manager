@@ -11,7 +11,7 @@ paths:
 
 `website/scripts/sync-docs.mjs` generates the site from these files, page for
 page, listed in `website/scripts/docs-manifest.mjs`. The same files are read on
-GitHub. Full contract: `website/AGENTS.md`, rules 1-5.
+GitHub. Full contract: `website/AGENTS.md`, "Content ownership".
 
 ## Keep them in lockstep
 
@@ -24,7 +24,8 @@ no Russian twin — the site falls back to English for it.
 
 - No JSX, no `import` line. Site-only structure — tabs, cards, steps, asides,
   badges — goes in `<!--site:…-->` comments that GitHub renders as nothing
-  (`website/AGENTS.md`, rule 3a). Tab labels and card titles stay real headings.
+  (`website/AGENTS.md`, "GitHub-readable source"). Tab labels and card titles
+  stay real headings.
 - A new link target must be in the manifest: linking `docs/NEW.md` without a
   manifest entry fails the build. Fix the manifest, not the check.
 - Do not renumber or rename headings casually — their anchors are linked.

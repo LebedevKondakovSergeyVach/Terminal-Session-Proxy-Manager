@@ -116,8 +116,8 @@
   авторства инструментов (`Co-Authored-By:`, «Generated with …»), `pre-push`
   запрещает пуш в `main` и пуш тегов: публикует релиз слияние релизной ветки.
 - **Contributing**: Единый набор инструкций для ИИ-агентов. `AGENTS.md` —
-  общий контракт; `CLAUDE.md`, `GEMINI.md` и `.cursor/rules/` — точки входа для
-  Claude Code, Antigravity и Cursor; правила по областям лежат в
+  общий контракт; `CLAUDE.md` и `.cursor/rules/` — точки входа для
+  Claude Code и Cursor; правила по областям лежат в
   `.claude/rules/`. К скиллам в `.claude/skills/` добавились
   `starlight-website` — для работы над сайтом — и `agent-docs-audit`, который
   проверяет набор инструкций на расхождения. `.mcp.json` объявляет серверы

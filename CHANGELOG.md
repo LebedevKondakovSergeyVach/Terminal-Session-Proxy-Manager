@@ -112,8 +112,8 @@ codes.
   lines (`Co-Authored-By:`, "Generated with …"); `pre-push` refuses pushes to
   `main` and tag pushes, since merging a release branch is what publishes.
 - **Contributing**: One set of instructions for AI coding agents. `AGENTS.md`
-  is the shared contract; `CLAUDE.md`, `GEMINI.md` and `.cursor/rules/` are the
-  entry points for Claude Code, Antigravity and Cursor; area rules live in
+  is the shared contract; `CLAUDE.md` and `.cursor/rules/` are the
+  entry points for Claude Code and Cursor; area rules live in
   `.claude/rules/`. The task skills in `.claude/skills/` gain
   `starlight-website`, for work on the site, and `agent-docs-audit`, which
   checks the instruction set for drift. `.mcp.json` declares the `context7`

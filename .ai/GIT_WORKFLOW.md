@@ -54,22 +54,8 @@ else is rejected.
 
 ## Everyday work
 
-Before any commit, run the local gate — the same one everywhere in this
-repository's docs:
-
-```bash
-cargo fmt --all -- --check && cargo clippy --all-targets --locked -- -D warnings && cargo test --locked
-```
-
-CI additionally passes `--all-features` to clippy and the tests. `Cargo.toml`
-has no `[features]` table, so locally the two invocations check the same code.
-
-If the change touched `README*.md`, `docs/*.md`, `CONTRIBUTING.md`,
-`CHANGELOG*.md`, `assets/` or `website/`, also run the website gate:
-
-```bash
-cd website && npm ci && npm test && npm run build
-```
+Use the required gates and commit/attribution rules in [`AGENTS.md`](../AGENTS.md)
+and the [`verify-project`](../.claude/skills/verify-project/SKILL.md) procedure.
 
 ### Maintainer: commit to the release branch
 
@@ -191,22 +177,10 @@ downloaded them.
 
 ## Rules for agents
 
-- **Never push to `main`.** Not a commit, not a merge, not a tag.
-- **Never create a tag.** Tagging is CI's job. Creating one by hand publishes a
-  release outside the review flow.
-- **Never bump the version outside a release branch,** and never as a side
-  effect of another task. The bump belongs to the release cut; a bump anywhere
-  else means the next merge to `main` publishes an unintended release.
-- **Check where you are before committing** — `git branch --show-current`. If
-  it is `main`, stop. Working for the maintainer, commit on the open
-  `release/X.Y.Z`; use a task branch and a pull request when the maintainer asks
-  for review or when you are contributing from outside.
-- **On a task branch: one task, one branch, one pull request.** Committing
-  directly: one task per commit. Either way, do not fold unrelated fixes in
-  because they were noticed along the way.
-- **A direct commit is not checked by `branch-policy.yml`.** Apply the
-  changelog rule below yourself.
-- Ask before deleting or force-updating any branch.
+The binding branch, attribution and publication restrictions are in
+[`AGENTS.md`](../AGENTS.md). Keep one task per branch/PR or direct commit;
+ask before deleting or force-updating branches. A direct release-branch
+commit receives no branch-policy check, so apply changelog rules yourself.
 
 ### Adding a changelog entry
 
@@ -228,15 +202,6 @@ people meet on first run.
 Write for the person upgrading, not the person reviewing the diff: say what
 changed for them and, for a fix, what went wrong before.
 
-## Commits
-
-[Conventional Commits](https://www.conventionalcommits.org/): `feat:`, `fix:`,
-`docs:`, `chore:`, `refactor:`, `test:`, `perf:`, `ci:`, `build:`.
-
-The subject says what changed and why it matters, not which files were touched.
-The body carries the reasoning — what was broken, what a user would have seen,
-why this fix over another.
-
 ## What CI runs, and when
 
 | Workflow | Trigger | Checks |
@@ -244,12 +209,14 @@ why this fix over another.
 | `ci.yml` | Every pull request; pushes to `main`, `release/**`, `hotfix/**`; weekly; `workflow_dispatch` | fmt, clippy, docs, tests on Linux and macOS, MSRV, `cargo audit` |
 | `branch-policy.yml` | Every pull request (only) | Branch naming, head/base pairing; changelog entry on PRs into `release/*`; release readiness on `release/*` → `main` |
 | `release.yml` | Any push to `main`; a pushed `v*` tag; `workflow_dispatch` | Decides whether to release, re-verifies, builds four targets, tags, publishes, bumps Homebrew |
-| `website.yml` | Pull requests, and pushes to `main`/`release/**`/`hotfix/**`, touching `website/`, `docs/`, `assets/`, the READMEs, `CONTRIBUTING.md` or `CHANGELOG*.md`; `workflow_dispatch` | Generator tests, full site build, internal-link validation, a check that **no generated page is tracked**, `npm audit` |
+| `website.yml` | Pull requests, and pushes to `main`/`release/**`/`hotfix/**`, touching `website/`, `docs/`, `assets/`, the READMEs, `CONTRIBUTING.md` or `CHANGELOG*.md`; `workflow_dispatch` | Generator tests, full site build, internal-link validation, a diff check after regeneration, `npm audit` |
 | `pages.yml` | Pushes to **`main`** touching those same paths; `workflow_dispatch` | Rebuilds and publishes the site to GitHub Pages |
 
-The "no generated page is tracked" step is the one that catches a committed
-`.mdx`: everything under `website/src/content/docs/` is generated and ignored,
-bar the two home pages and the two 404 pages.
+The website diff check detects tracked content changed by regeneration; it
+does not reject an unchanged tracked generated file. The local verification
+procedure checks manifest destinations against tracked files separately.
+Generated content must remain untracked; only the home and 404 pages are
+hand-authored.
 
 Warnings are failures. `ci.yml` sets `RUSTFLAGS: -D warnings` for every job;
 `release.yml` does not set `RUSTFLAGS`, and instead passes `-D warnings` to

@@ -180,6 +180,6 @@ pipeline does the rest. Never tag by hand as part of another change.
 ## Using an AI agent
 
 Point it at [`AGENTS.md`](AGENTS.md) first; it encodes the rules above in the
-form agents follow. Claude Code loads it through `CLAUDE.md`; Cursor and
-Antigravity read it directly, with `.cursor/rules/` and `GEMINI.md` adding what
-is specific to each.
+form agents follow. Claude Code loads it through `CLAUDE.md`; Cursor routes
+to it through `.cursor/rules/`. Path rules and task skills live in `.claude/`;
+`.ai/PROJECT_OVERVIEW.md` maps ownership and execution flows.

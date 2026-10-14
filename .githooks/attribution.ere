@@ -1,5 +1,6 @@
 ^[[:space:]]*(co-authored-by|claude-session)[[:space:]]*:
-^[[:space:]]*([^[:alnum:][:space:]]+[[:space:]]*)?(generated|made)[- ](with|by)[[:space:]:]+.*(claude|cursor|gemini|codex|copilot|antigravity)
+^[[:space:]]*([^[:alnum:][:space:]]+[[:space:]]*)?(generated|made)[- ]with[[:space:]:]+.+
+^[[:space:]]*([^[:alnum:][:space:]]+[[:space:]]*)?(generated|made)[- ]by[[:space:]:]+.*(claude|cursor|copilot|assistant|agent|artificial intelligence|ai([[:space:][:punct:]]|$)|https?://|@)
 cursoragent@cursor\.com
 noreply@anthropic\.com
 claude\.ai/code/session

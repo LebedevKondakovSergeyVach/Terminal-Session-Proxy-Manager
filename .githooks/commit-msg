@@ -1,5 +1,5 @@
 #!/bin/sh
-# Rejects authorship attribution in commit messages — AGENTS.md, "Conventions".
+# Rejects authorship attribution in commit messages — AGENTS.md, "Git and releases".
 # Enable once per clone: git config core.hooksPath .githooks
 # `--author` is invisible to this hook; the rule text covers that case.
 #
@@ -14,7 +14,7 @@ patterns="$(dirname "$0")/attribution.ere"
 found=$(sed '/^# -\{24\} >8 -\{24\}$/,$d' "$1" | grep -v '^#' | grep -i -E -f "$patterns")
 
 if [ -n "$found" ]; then
-    echo "commit-msg: authorship attribution is not allowed here (AGENTS.md, Conventions):" >&2
+    echo "commit-msg: authorship attribution is not allowed here (AGENTS.md, Git and releases):" >&2
     echo "$found" >&2
     echo "Remove those lines and commit again. Do not bypass this with --no-verify." >&2
     exit 1
