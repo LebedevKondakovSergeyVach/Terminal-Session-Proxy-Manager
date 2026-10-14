@@ -29,6 +29,8 @@ Loading behavior is documented in the official
   permitted files, read/write scope, branch and attribution rules; request
   concise evidence and spot-check it before reporting.
 - Use project skills from `.claude/skills/`; the trigger map is in `AGENTS.md`.
+- Use `cursor-review` for independent checks; follow the model/review policy in
+  local `SESSION.md` when present.
 - `.claude/settings.json` disables commit/PR/session attribution. Remove any
   attribution still proposed by a plugin; hooks enforce the commit rules.
 
@@ -48,3 +50,8 @@ repository's verification and release procedures.
 missing. If a plugin already supplies context7, use one instance; do not enable
 duplicate servers. Keep credentials and personal server settings out of
 tracked files.
+
+An environment API key is sent only when the selected MCP server configuration
+references it in an HTTP header. Inspect header names without printing values;
+a plugin with no auth header uses anonymous access. Keep authenticated overrides
+in explicitly authorized local/user configuration, never copy a literal key.

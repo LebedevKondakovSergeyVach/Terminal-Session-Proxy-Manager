@@ -130,6 +130,7 @@ procedures. Open the relevant `SKILL.md` before acting.
 | :--- | :--- |
 | `verify-project` | before reporting any change done |
 | `agent-docs-audit` | instruction changes or suspected drift |
+| `cursor-review` | independent Cursor/Grok checks under the session policy |
 | `starlight-website` | work under `website/` |
 | `release-manager` | opening, cutting or shipping a release |
 | `cargo-audit` | Rust dependency security work |

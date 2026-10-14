@@ -120,6 +120,8 @@ trail=$(git log -50 --format='%B' | grep -i -E -f .githooks/attribution.ere)
 if [ -n "$trail" ]; then echo "$trail" | sed 's/^/  [WARN] attribution in recent history: /'; else note OK "last 50 commits carry no attribution"; fi
 
 echo "== 9. Local links, language and nested entry point =="
+audit_utf8_locale=$(locale -a 2>/dev/null | LC_ALL=C grep -iE '^(c\.utf-?8|en_US\.utf-?8)$' | head -1)
+[ -n "$audit_utf8_locale" ] || note FAIL "no supported UTF-8 locale for the instruction language check"
 for f in $DOCS; do
   while IFS= read -r target; do
     case "$target" in http:*|https:*|mailto:*|\#*|*\<*|*\>*) continue;; esac
@@ -127,8 +129,14 @@ for f in $DOCS; do
     [ -z "$target" ] && continue
     [ -e "$(dirname "$f")/$target" ] || note FAIL "$f links to missing target: $target"
   done < <(grep -oE '\]\([^)]*\)' "$f" | sed -e 's/^](//' -e 's/)$//')
-  if grep -nE '[А-Яа-яЁё]' "$f" >/dev/null 2>&1; then
-    note FAIL "$f contains Cyrillic; agent instructions must be English"
+  if [ -n "$audit_utf8_locale" ]; then
+    LC_ALL="$audit_utf8_locale" grep -qE '[А-Яа-яЁё]' "$f" 2>/dev/null
+    audit_language_status=$?
+    case "$audit_language_status" in
+      0) note FAIL "$f contains Cyrillic; agent instructions must be English" ;;
+      1) ;;
+      *) note FAIL "$f: instruction language check could not read or match the file" ;;
+    esac
   fi
 done
 if [ -L website/CLAUDE.md ] && [ "$(readlink website/CLAUDE.md)" = AGENTS.md ]; then

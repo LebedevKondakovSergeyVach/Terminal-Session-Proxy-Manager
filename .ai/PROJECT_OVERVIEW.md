@@ -101,7 +101,9 @@ handoff. Editors and prompts run only after terminal teardown.
 Canonical Markdown (`README*.md`, `docs/`, contributing and changelogs) →
 `website/scripts/docs-manifest.mjs` → `website/scripts/sync-docs.mjs` →
 cleanup/directives/link rewriting/frontmatter → ignored content → Astro build
-and link validation.
+and link validation. Mermaid fences render in the browser; the MarkdownContent
+override composes image zoom and `DiagramViewer.astro`, with client behavior
+in `website/src/scripts/diagram-viewer.ts`.
 
 The two home and two 404 pages are hand-authored. `<!--site:…-->` comments add
 site components while sources remain readable CommonMark on GitHub. Read
