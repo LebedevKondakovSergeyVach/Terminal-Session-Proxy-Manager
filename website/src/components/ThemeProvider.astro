@@ -1,0 +1,15 @@
+<!-- Apply the initial theme before paint, including when site storage is blocked. -->
+<script is:inline>
+	(() => {
+		let preference = 'auto';
+		try {
+			const stored = localStorage.getItem('starlight-theme');
+			if (stored === 'light' || stored === 'dark') preference = stored;
+		} catch {
+			// The switch still works in memory when storage is unavailable.
+		}
+		document.documentElement.dataset.theme = preference === 'auto'
+			? (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
+			: preference;
+	})();
+</script>

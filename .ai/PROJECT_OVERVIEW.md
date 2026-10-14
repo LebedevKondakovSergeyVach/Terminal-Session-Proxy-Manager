@@ -105,6 +105,13 @@ and link validation. Mermaid fences render in the browser; the MarkdownContent
 override composes image zoom and `DiagramViewer.astro`, with client behavior
 in `website/src/scripts/diagram-viewer.ts`.
 
+The site's Head override restores MD3 route state on history reveal through
+`website/src/scripts/navigation-recovery.js`. ThemeProvider applies the theme
+before paint; ThemeSelect delegates preference synchronization and transitions
+to `website/src/scripts/theme-switch.js`.
+`website/src/scripts/navigation-scroll.js` replaces VTBot's scroll helper through
+a Vite alias, retaining scroll compensation when transitions finish or skip.
+
 The two home and two 404 pages are hand-authored. `<!--site:…-->` comments add
 site components while sources remain readable CommonMark on GitHub. Read
 [`website/AGENTS.md`](../website/AGENTS.md) before changing this pipeline.

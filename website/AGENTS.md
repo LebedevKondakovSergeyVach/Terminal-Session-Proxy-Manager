@@ -95,9 +95,11 @@ Keep fractional breakpoints below the corresponding desktop thresholds; place
 
 | Component | Contract |
 | :--- | :--- |
-| `src/components/ThemeSelect.astro` | Synchronize all rendered instances; use stored preference, falling back when storage is unavailable |
+| `src/components/Head.astro` | Compose stock head with `src/scripts/navigation-recovery.js`; clear outgoing MD3 state on history reveal |
+| `src/components/ThemeProvider.astro` | Apply a normalized stored/system theme before paint, tolerating blocked storage |
+| `src/components/ThemeSelect.astro` | `src/scripts/theme-switch.js` owns all instances, storage/system/history synchronization and cancellable theme transitions |
 | `src/components/Search.astro` | Stock Pagefind search plus quick links |
-| `src/components/SiteTitle.astro` | Stock title plus themed home button on docs pages |
+| `src/components/SiteTitle.astro` | Stock logo/title on desktop; themed home button on narrow docs pages |
 | `src/components/MarkdownContent.astro` | Compose the public image-zoom override with `DiagramViewer.astro` |
 
 The quick-links panel is a sibling of the Pagefind drawer. CSS reads
@@ -114,7 +116,12 @@ Do not leave hidden header title links as invisible keyboard focus stops.
 `astro-vtbot` uses native cross-document view transitions. There is no
 `ClientRouter`; initialize client scripts on normal document load, without
 waiting for `astro:page-load`. Theme reveal overrides stay scoped behind
-`data-theme-transition` so navigation transitions still work.
+`data-theme-transition` so navigation transitions still work. Native transitions
+own page motion; custom CSS keeps document panels visible through MD3 route
+states while preserving control/disclosure effects. History reveal clears
+transient route state, without consuming the next document's storage flags.
+The Vite alias for `@vtbag/cam-shaft` uses `src/scripts/navigation-scroll.js`
+to preserve history scroll compensation and handle skipped transition promises.
 
 Keep `markdown.processor: unified()` from the direct
 `@astrojs/markdown-remark` dependency. This preserves the image-zoom plugin's
