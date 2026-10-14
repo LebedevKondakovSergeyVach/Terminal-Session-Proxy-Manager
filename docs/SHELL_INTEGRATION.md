@@ -38,22 +38,26 @@ files are generated from `init`, but the `eval` form can never go stale.
 A background process cannot modify its parent shell's environment. This is why running the binary directly cannot export variables into your active session.
 <!--site:/aside-->
 
-To solve this, the `proxy` shell function wraps the Rust binary:
+For `proxy on`, the shell function calls `terminal-session-proxy-manager env on`.
+The binary reads the active profile and prints quoted `export` statements;
+the function evaluates that output in the current Zsh or Bash session:
 
 ```mermaid
 sequenceDiagram
+    accTitle: How proxy on updates the current shell
+    accDescr: The user runs proxy on through the shell function. It calls env on in the Rust binary, which reads the active profile and returns quoted export statements. The shell evaluates them to update its own environment.
     participant User
     participant Shell as Zsh / Bash
-    participant Proxy as Rust Binary
-    
-    User->>Shell: proxy switch
-    Shell->>Proxy: Execute binary
-    Proxy-->>Shell: Prints "export HTTP_PROXY=..."
-    Shell->>Shell: eval() applies variables
-    Shell-->>User: Environment Updated
+    participant Binary as Rust binary
+    User->>Shell: proxy on
+    Shell->>Binary: env on
+    Binary->>Binary: Read active profile
+    Binary-->>Shell: Quoted export statements
+    Shell->>Shell: eval applies variables
 ```
 
-This ensures that your terminal session receives the environment variables immediately.
+New commands inherit these variables. `proxy off` follows the same path with
+`env off` and evaluates `unset` statements instead.
 
 ---
 
@@ -70,6 +74,13 @@ so `proxy <anything>` works.
 | `proxy switch` | Interactive picker, then re-apply |
 | `proxy best` | Switch to the fastest profile, then re-apply |
 | `proxy <other>` | Anything else, passed through to the binary |
+
+For `proxy use`, `proxy switch` and `proxy best`, re-application happens only
+after successful selection and when `ALL_PROXY` is nonempty. The function first
+saves the selection through the binary, then calls `env on` and evaluates its
+output. If `ALL_PROXY` is empty, selection is saved for the next `proxy on`.
+`proxy profile use <key>` only saves the selection; use `proxy on` to apply it
+to your shell.
 
 Plus these standalone functions:
 
@@ -114,9 +125,31 @@ proxy is off.
 
 ## How `proxy dash` updates your shell
 
-`Enter` in the dashboard writes the export statements to
-`~/.terminal-session-proxy-manager-eval`. The `proxy_dash` function evaluates
-that file after the binary exits, then deletes it.
+On the Profiles tab, `Enter` saves the selected profile, writes quoted export
+statements to `~/.terminal-session-proxy-manager-eval`, and exits the dashboard.
+The `proxy` or `proxy_dash` shell function then evaluates that file and deletes it:
+
+```mermaid
+sequenceDiagram
+    accTitle: How the dashboard applies a profile on exit
+    accDescr: The shell function starts the dashboard. Enter on the Profiles tab saves the selection and writes quoted exports to ~/.terminal-session-proxy-manager-eval. After the dashboard exits, the shell reads, evaluates and deletes that file.
+    participant Shell as Zsh / Bash
+    participant Dash as Dashboard
+    participant File as Export file
+    Shell->>Dash: proxy dash
+    Note over Dash: Enter on Profiles tab
+    Dash->>Dash: Save selected profile
+    Dash->>File: Write quoted exports
+    Dash-->>Shell: Exit
+    Shell->>File: Read exports
+    File-->>Shell: Shell statements
+    Shell->>Shell: eval applies variables
+    Shell->>File: Delete file
+```
+
+`Space` saves the selected profile while keeping the dashboard open; it does
+not write exports for the shell. The environment is applied after exiting
+with `Enter`.
 
 This only works through the shell function. Running the bare binary leaves the
 file in place and your session unchanged.

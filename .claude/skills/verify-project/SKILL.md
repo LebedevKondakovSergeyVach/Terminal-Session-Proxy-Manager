@@ -27,10 +27,30 @@ cd website && npm ci && npm test && npm run build
 ```
 
 `npm run build` regenerates every page and fails on a dead internal link. The
-same gate runs in `.github/workflows/website.yml`. A release always qualifies.
+same commands run in `.github/workflows/website.yml`, which also runs
+`npm audit --audit-level=high`. A release always qualifies.
 
 After the build, `git status --short website/src/content/docs` must show nothing
-new: generated pages are ignored, and a tracked one fails CI.
+new. CI's diff check detects regeneration changes to tracked files, but an
+unchanged tracked generated page can pass it. Check manifest destinations too:
+
+```bash
+node --input-type=module <<'JS'
+import { execFileSync } from 'node:child_process';
+import { PAGES } from './website/scripts/docs-manifest.mjs';
+const tracked = new Set(execFileSync('git', ['ls-files', '-z'], { encoding: 'utf8' }).split('\0'));
+const generated = PAGES.map(({ dest }) => `website/src/content/docs/${dest}`);
+const bad = generated.filter((path) => tracked.has(path));
+if (bad.length) {
+  console.error('Generated pages are tracked:', bad.join(', '));
+  process.exitCode = 1;
+} else {
+  console.log('No manifest-generated page is tracked.');
+}
+JS
+```
+
+Run that snippet from the repository root.
 
 ## 3. What the gate does not cover
 
@@ -44,6 +64,6 @@ Check these by hand when they apply:
 
 ## 4. Reporting
 
-Paste the tail of each command with its exit status. Name every check you did
-not run and why. If something fails, report the error — do not describe the
-task as finished.
+Report each gate and its exit status; include relevant output for failures.
+Name checks you did not run and why. If something fails, report the error —
+do not describe the task as finished.

@@ -1,5 +1,5 @@
 #!/bin/sh
-# Refuses pushes to main and tag pushes — AGENTS.md, "Branching".
+# Refuses pushes to main and tag pushes — AGENTS.md, "Git and releases".
 # Merging a release branch into main publishes, and release.yml creates the
 # tag itself, so neither should ever leave a working copy by accident.
 # Enable once per clone: git config core.hooksPath .githooks

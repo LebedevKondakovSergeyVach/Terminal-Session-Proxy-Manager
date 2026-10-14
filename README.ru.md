@@ -11,7 +11,7 @@
 [![Rust](https://img.shields.io/badge/rust-1.88%2B-orange.svg)](https://www.rust-lang.org)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey.svg)](README.ru.md)
-![Views](https://komarev.com/ghpvc/?username=LebedevSergeyVach-proxy-cli&label=views&color=blue&style=flat)
+![Views](https://komarev.com/ghpvc/?username=LebedevSergeyVach-proxy-cli&label=Views&color=blue&style=flat)
 
 Управление прокси-профилями терминальной сессии одной командой, на **Rust**:
 переключение профилей, замер задержки, диагностика соединения и контроль тех
@@ -88,6 +88,30 @@ proxy profile set home --name "Домашний" --host 127.0.0.1 --port 1080
 proxy on
 proxy status
 ```
+
+### Где применяются настройки прокси
+
+Активный профиль в `config.json` задаёт настройки для двух способов применения:
+
+```mermaid
+flowchart TD
+    accTitle: Где применяются настройки прокси
+    accDescr: Обе команды читают активный профиль из config.json. proxy on меняет окружение текущей оболочки и её будущих дочерних команд. proxy run задаёт переменные одной дочерней команде и её дочерним процессам, сохраняя окружение оболочки.
+    Profile["Активный профиль в config.json"]
+    Profile --> On["proxy on"]
+    Profile --> Run["proxy run -- …"]
+    On --> Shell["Окружение текущей оболочки"]
+    Shell --> Commands["Новые команды наследуют переменные"]
+    Run --> Child["Дочерняя команда и её процессы"]
+```
+
+`proxy on` применяет переменные в текущей оболочке; запускаемые из неё команды
+наследуют их. `proxy run -- <cmd>` задаёт их для этой дочерней команды и её
+дочерних процессов, сохраняя окружение оболочки.
+Инструменты должны поддерживать эти настройки прокси.
+Другие терминалы и уже запущенные процессы сохраняют своё окружение.
+Последовательности экспорта и работы дашборда описаны в
+[руководстве по интеграции с shell](docs/SHELL_INTEGRATION.ru.md).
 
 ---
 

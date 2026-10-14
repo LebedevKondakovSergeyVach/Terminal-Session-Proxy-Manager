@@ -50,9 +50,49 @@
    prefixed form, losing the blur in Firefox. The theme's own stylesheet makes
    the same choice. On a browser old enough to need the prefix the header is
    simply translucent without the blur, which is a fine thing to degrade to. */
-header.header {
+header.header,
+mobile-starlight-toc nav::before {
 	background-color: color-mix(in srgb, var(--sl-color-bg-nav) 45%, transparent);
 	backdrop-filter: blur(18px) saturate(1.6);
+}
+
+mobile-starlight-toc nav {
+	background-color: transparent;
+}
+
+/* Paint glass on a sibling of the menu. Filtering the nav itself would make
+   it the menu's backdrop root, preventing blur of the page behind the menu. */
+mobile-starlight-toc nav::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+	pointer-events: none;
+}
+
+mobile-starlight-toc .dropdown {
+	background-color: color-mix(in srgb, var(--md-sys-color-surface-container) 70%, transparent);
+	backdrop-filter: blur(18px) saturate(1.6);
+}
+
+/* Native view transitions own page motion. MD3's pre-navigation fade would
+   hide content before the outgoing snapshot and survive a BFCache restore.
+   Keep its control/disclosure motion, but never hide the document panels. */
+main > .content-panel,
+.right-sidebar-panel {
+	opacity: 1;
+	transform: none;
+	pointer-events: auto;
+	transition: none;
+}
+
+/* MD3 also hides the desktop sidebar when arriving from the splash page. */
+@media (min-width: 50rem) {
+	.sidebar-pane {
+		opacity: 1;
+		transform: none;
+		transition-property: background-color, border-color, box-shadow;
+	}
 }
 
 /* The theme ships no `img` rules at all, so rounding content images is ours to
@@ -79,6 +119,176 @@ header.header {
    table is wider than the column. */
 .sl-markdown-content table {
 	overflow-x: auto;
+}
+
+/* Diagrams consume the same card/dialog roles as the rest of the MD3 site.
+   SVG colours live in mermaid-theme.css, scoped by the renderer itself. */
+.diagram-frame {
+	margin-block: 1.5rem;
+	min-inline-size: 0;
+	overflow: hidden;
+	border-radius: var(--md3-comp-card-shape);
+	background: var(--md3-comp-card-container-color);
+	color: var(--md-sys-color-on-surface);
+	box-shadow: var(--md3-comp-card-elevation);
+}
+.diagram-toolbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+	padding: 0.75rem 1rem;
+	border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+.diagram-caption {
+	min-inline-size: 0;
+	font-size: var(--md-sys-typescale-label-large-size);
+	font-weight: var(--md-sys-typescale-label-large-weight);
+	line-height: var(--md-sys-typescale-label-large-line-height);
+}
+.diagram-button {
+	flex: none;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+	min-block-size: 2.75rem;
+	min-inline-size: 2.75rem;
+	padding: 0.5rem 0.75rem;
+	border: 0;
+	border-radius: var(--md3-comp-header-control-shape);
+	background: var(--md3-comp-header-control-container-color);
+	color: var(--md3-comp-header-control-label-color);
+	font: inherit;
+	font-size: var(--md-sys-typescale-label-large-size);
+	cursor: pointer;
+	-webkit-tap-highlight-color: transparent;
+}
+.diagram-button svg { flex: none; }
+.diagram-button:focus-visible, .diagram-stage:focus-visible, .diagram-frame pre:focus-visible {
+	outline: 2px solid var(--md3-comp-header-control-focus-outline-color);
+	outline-offset: -2px;
+}
+@media (hover: hover) {
+	.diagram-button:hover:not(:disabled) {
+		background: var(--md3-comp-header-control-hover-container-color);
+		color: var(--md3-comp-header-control-hover-label-color);
+	}
+}
+.diagram-button:active:not(:disabled) {
+	background: var(--md3-comp-header-control-pressed-container-color);
+}
+.diagram-button:disabled {
+	background: var(--md3-comp-header-control-disabled-container-color);
+	color: var(--md3-comp-header-control-disabled-label-color);
+	cursor: default;
+}
+.sl-markdown-content .diagram-frame pre.mermaid,
+.sl-markdown-content .diagram-frame pre.mermaid[data-processed] {
+	display: block;
+	margin: 0;
+	padding: 1rem;
+	border-radius: 0;
+	background: transparent;
+	color: inherit;
+	overflow: auto;
+}
+.sl-markdown-content .diagram-frame pre.mermaid:not([data-processed]) {
+	background: var(--md3-comp-card-container-color);
+	animation: none;
+}
+.sl-markdown-content .diagram-frame pre.mermaid svg {
+	display: block;
+	margin-inline: auto;
+	max-width: none;
+	height: auto;
+}
+.diagram-dialog {
+	position: fixed;
+	inset: 0;
+	margin: auto;
+	padding: 0;
+	inline-size: min(72rem, calc(100vw - 3rem));
+	block-size: min(56rem, calc(100dvh - 3rem));
+	max-inline-size: none;
+	max-block-size: none;
+	border: 0;
+	border-radius: var(--md3-comp-dialog-shape);
+	background: var(--md3-comp-dialog-container-color);
+	color: var(--md3-comp-dialog-label-color);
+	box-shadow: var(--md3-comp-dialog-elevation);
+	overflow: hidden;
+}
+.diagram-dialog[open] {
+	display: grid;
+	grid-template-rows: auto auto auto minmax(0, 1fr);
+}
+.diagram-dialog::backdrop { background: var(--md3-comp-dialog-scrim-color); }
+.diagram-heading {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 0.75rem 1rem 0;
+}
+.diagram-heading h2 {
+	margin: 0;
+	min-inline-size: 0;
+	font-size: var(--md-sys-typescale-title-medium-size);
+	font-weight: var(--md-sys-typescale-title-medium-weight);
+	line-height: var(--md-sys-typescale-title-medium-line-height);
+}
+.diagram-icon-button { padding: 0; font-size: 1.5rem; }
+.diagram-controls {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 0.25rem;
+	padding: 0.5rem 1rem;
+}
+.diagram-scale {
+	margin-inline-start: auto;
+	min-inline-size: 3rem;
+	text-align: end;
+	font-size: var(--md-sys-typescale-label-large-size);
+	font-variant-numeric: tabular-nums;
+}
+.diagram-hint {
+	margin: 0;
+	padding: 0 1rem 0.75rem;
+	font-size: var(--md-sys-typescale-body-small-size);
+	line-height: var(--md-sys-typescale-body-small-line-height);
+	color: var(--md-sys-color-on-surface-variant);
+}
+.diagram-stage {
+	position: relative;
+	min-inline-size: 0;
+	min-block-size: 0;
+	overflow: hidden;
+	background: var(--md-sys-color-surface-container-low);
+	cursor: grab;
+	touch-action: none;
+	user-select: none;
+}
+.diagram-stage.is-panning { cursor: grabbing; }
+.diagram-canvas {
+	position: absolute;
+	inset: 0 auto auto 0;
+	transform-origin: 0 0;
+}
+.diagram-canvas svg { display: block; }
+@media (max-width: 34.999rem) {
+	.diagram-toolbar { flex-wrap: wrap; }
+	.diagram-caption { flex: 1 0 100%; }
+	.diagram-dialog {
+		inline-size: 100%;
+		block-size: 100dvh;
+		border-radius: 0;
+		padding-block: env(safe-area-inset-top) env(safe-area-inset-bottom);
+		padding-inline: env(safe-area-inset-left) env(safe-area-inset-right);
+	}
+	.diagram-heading, .diagram-controls { padding-inline: 0.75rem; }
+	.diagram-hint { padding-inline: 0.75rem; }
 }
 
 /* Screenshots of the TUI need an edge too; the terminal's own background is
@@ -113,10 +323,9 @@ header.header {
 	 *
 	 * astro-vtbot drives these with native cross-document view transitions —
 	 * `@view-transition { navigation: auto }`, not a client-side router. It
-	 * already names the groups (`main`, `title`, `header`, `current-page`) and
-	 * supplies a directional clip-path wipe, and it pins the header and the
-	 * mobile ToC so they never flicker. None of that is re-declared here; this
-	 * only sets how the motion feels.
+	 * supplies direction types and pins the header and mobile ToC. Use a
+	 * single viewport crossfade in place of its independent content geometry
+	 * and clip-path animations, which jerk when page lengths differ.
 	 *
 	 * Everything sits inside `prefers-reduced-motion: no-preference`, and vtbot
 	 * gates `@view-transition` on the same query, so a reader who asks for less
@@ -130,35 +339,141 @@ header.header {
 		animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
 	}
 
-	/* The outgoing page otherwise sits still underneath the incoming wipe.
-	   Fading it softens the edge without weakening the direction cue. */
-	:active-view-transition-type(forward, backward)::view-transition-old(main) {
-		animation: tspm-page-fade-out 320ms cubic-bezier(0.4, 0, 1, 1) both;
+	/* One viewport crossfade avoids interpolating the geometry of long pages,
+	   their titles and the selected sidebar item independently. */
+	:active-view-transition-type(forward, backward) main,
+	:active-view-transition-type(forward, backward) h1,
+	:active-view-transition-type(forward, backward) nav.sidebar [aria-current='page'] {
+		view-transition-name: none;
+	}
+	:active-view-transition-type(forward, backward) h1 { width: auto; }
+	:active-view-transition-type(forward, backward)::view-transition-group(root) {
+		animation: none;
+		overflow: clip;
+	}
+	:active-view-transition-type(forward, backward)::view-transition-old(root) {
+		animation: tspm-page-fade-out 320ms ease-in-out both;
+	}
+	:active-view-transition-type(forward, backward)::view-transition-new(root) {
+		animation: tspm-page-enter-forward 380ms cubic-bezier(0.4, 0, 0.2, 1) both;
+	}
+	:active-view-transition-type(backward)::view-transition-new(root) {
+		animation-name: tspm-page-enter-backward;
 	}
 
-	/*
-	 * There is deliberately no page-enter animation here.
-	 *
-	 * The theme already provides one: `motion.css` animates
-	 * `main > .content-panel` in from `opacity: 0; translateY(16px)`, paired
-	 * with a matching leave animation, and its `route-bootstrap` script clears
-	 * the state after two frames.
-	 *
-	 * An earlier version of this file added a second entrance on `main`,
-	 * suppressed during a navigation via
-	 * `:active-view-transition-type(forward, backward) main { animation: none }`.
-	 * That suppression is only true *while* the transition runs. The moment it
-	 * ends the selector stops matching, the entrance animation applies for the
-	 * first time, and it starts at its first keyframe — so the content blanked
-	 * and faded back in, looking like a reload. Any animation toggled by that
-	 * pseudo-class has the same flaw: it fires when the transition ends, not
-	 * when the page arrives.
-	 */
+	/* Animate transition snapshots only. A DOM entrance conditionally disabled
+	   by :active-view-transition-type would restart when the transition ends. */
 }
 
 @keyframes tspm-page-fade-out {
 	to {
 		opacity: 0;
+	}
+}
+
+@keyframes tspm-page-enter-forward {
+	from { opacity: 0; transform: translateX(24px); }
+	to { opacity: 1; transform: none; }
+}
+@keyframes tspm-page-enter-backward {
+	from { opacity: 0; transform: translateX(-24px); }
+	to { opacity: 1; transform: none; }
+}
+
+/* Separate clickable entries while retaining the translucent menu surface. */
+mobile-starlight-toc .dropdown li { margin-block: 0.25rem; }
+mobile-starlight-toc .dropdown a {
+	border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 55%, transparent);
+}
+mobile-starlight-toc .dropdown a:not([aria-current='true']) {
+	background-color: color-mix(in srgb, var(--md-sys-color-surface-container-high) 45%, transparent);
+}
+
+/* Match the other round toolbar buttons, including the mobile menu copy. */
+.social-icons a {
+	border-radius: var(--md-sys-shape-full);
+	background-color: var(--md3-comp-search-field-container-color);
+}
+@media (hover: hover) {
+	.social-icons a:hover { background-color: var(--md3-comp-search-field-container-color); }
+}
+.social-icons a:focus-visible,
+.social-icons a:active { background-color: var(--md3-comp-search-field-container-color); }
+
+@media (max-width: 49.999rem) {
+	/* One backdrop for both rows, below their controls and above the content.
+	   The dropdown retains its own filter without a filtering ancestor. */
+	:root[data-has-sidebar][data-has-toc] .page::before {
+		content: '';
+		position: fixed;
+		inset-block-start: 0;
+		inset-inline: 0;
+		block-size: calc(var(--sl-nav-height) + var(--sl-mobile-toc-height) + 0.75rem);
+		z-index: calc(var(--sl-z-index-toc) - 1);
+		background-color: color-mix(in srgb, var(--sl-color-bg-nav) 45%, transparent);
+		backdrop-filter: blur(18px) saturate(1.6);
+		pointer-events: none;
+	}
+	:root[data-has-sidebar][data-has-toc] header.header {
+		background-color: transparent;
+		backdrop-filter: none;
+		border-bottom: 0;
+	}
+	mobile-starlight-toc nav {
+		border-top: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 35%, transparent);
+		border-block-end: 0;
+	}
+	mobile-starlight-toc nav::before { display: none; }
+	.sidebar-content details {
+		border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 55%, transparent);
+	}
+	.sidebar-content details > summary {
+		border-radius: var(--md-sys-shape-lg);
+		background-color: var(--md-sys-color-surface-container-high);
+		font-weight: 600;
+	}
+	.mobile-preferences {
+		display: grid;
+		grid-template-columns: max-content 1fr;
+		gap: 0.75rem 1rem;
+		align-items: center;
+	}
+	.mobile-preferences starlight-theme-switch { grid-column: 1; grid-row: 1; }
+	.mobile-preferences starlight-lang-select { grid-column: 1; grid-row: 2; }
+	.mobile-preferences starlight-lang-select select {
+		box-sizing: border-box;
+		inline-size: 100%;
+		margin-inline: 0;
+		min-block-size: 2.75rem;
+		border: 0;
+		border-radius: inherit;
+		background-color: transparent;
+		padding-inline: calc(var(--sl-label-icon-size) + var(--sl-inline-padding) + 0.5rem)
+			calc(var(--sl-caret-size) + var(--sl-inline-padding) + 0.5rem);
+	}
+	.mobile-preferences starlight-lang-select label {
+		--sl-label-icon-size: 1rem;
+		--sl-caret-size: 1.125rem;
+		--sl-inline-padding: 0.75rem;
+		box-sizing: border-box;
+		inline-size: 100%;
+		border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 72%, transparent);
+		border-radius: var(--md3-comp-header-control-shape);
+		background-color: var(--md3-comp-header-control-container-color);
+		color: var(--md3-comp-header-control-label-color);
+	}
+	.mobile-preferences starlight-lang-select .label-icon { inset-inline-start: var(--sl-inline-padding); }
+	.mobile-preferences starlight-lang-select .caret { inset-inline-end: var(--sl-inline-padding); }
+	.mobile-preferences starlight-lang-select label:focus-within {
+		outline: 2px solid var(--md3-comp-header-control-focus-outline-color);
+		outline-offset: 2px;
+	}
+	.mobile-preferences .social-icons {
+		grid-column: 2;
+		grid-row: 1 / 3;
+		justify-self: end;
+		margin: 0;
+		padding: 0;
 	}
 }
 
@@ -303,13 +618,6 @@ header.header {
 }
 
 .site-title:has(img)::before {
-	display: none;
-}
-
-/* Docs pages carry the home button (SiteTitle.astro) instead of the logo: one
-   way home, labelled, rather than a picture and a button side by side that go
-   to the same place. The logo stays on the splash page. */
-:root[data-has-sidebar] .site-title img {
 	display: none;
 }
 

@@ -14,6 +14,19 @@ export const collections = {
 	// like Starlight's, so a component never branches on the locale itself.
 	i18n: defineCollection({
 		loader: i18nLoader(),
-		schema: i18nSchema({ extend: z.object({ 'tspm.home': z.string() }).partial() }),
+		schema: i18nSchema({ extend: z.object({
+			'tspm.home': z.string(),
+			'tspm.diagram.open': z.string(),
+			'tspm.diagram.title': z.string(),
+			'tspm.diagram.close': z.string(),
+			'tspm.diagram.controls': z.string(),
+			'tspm.diagram.zoomIn': z.string(),
+			'tspm.diagram.zoomOut': z.string(),
+			'tspm.diagram.fit': z.string(),
+			'tspm.diagram.actual': z.string(),
+			'tspm.diagram.scale': z.string(),
+			'tspm.diagram.pan': z.string(),
+			'tspm.diagram.hint': z.string(),
+		}).partial() }),
 	}),
 };

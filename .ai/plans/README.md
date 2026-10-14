@@ -1,15 +1,13 @@
-# Plans
+# Current plans
 
-Design documents and implementation plans for work that is **in flight** —
-brainstorm specs, step-by-step plans, review notes worth keeping.
+Use this directory for work still in progress, never the published `docs/`
+directory. Plans are optional; create one only when the task benefits from it.
+Name documents `YYYY-MM-DD-<topic>-design.md` or `YYYY-MM-DD-<topic>-plan.md`.
 
-Name them `YYYY-MM-DD-<topic>-design.md` and `YYYY-MM-DD-<topic>-plan.md`.
+A current plan states its goal, branch/scope, accepted decisions, remaining
+steps and validation or blockers. Keep the present state concise; replace
+outdated next steps instead of accumulating session diaries.
 
-They live here, not in `docs/`: `docs/` is the documentation site's source, and
-every file there is published or breaks the site build. Planning tools that
-default to `docs/…` (the `superpowers` plugin writes to `docs/superpowers/`)
-must be pointed here instead.
-
-When the work ships, move its documents to [`../archive/`](../archive/README.md)
-and add a row to that index. Until then, the repository — not the plan — is the
-authority on what exists.
+When finished or abandoned, preserve useful decisions in the current project
+map, rule or skill, then remove the plan. Git history holds older designs.
+The code and current contracts always outrank a plan.

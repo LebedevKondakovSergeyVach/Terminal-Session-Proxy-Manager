@@ -1,0 +1,7 @@
+---
+import Default from '@astrojs/starlight/components/Head.astro';
+import recovery from '../scripts/navigation-recovery.js?raw';
+---
+
+<Default {...Astro.props} />
+<script is:inline set:html={recovery} />

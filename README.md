@@ -11,7 +11,7 @@
 [![Rust](https://img.shields.io/badge/rust-1.88%2B-orange.svg)](https://www.rust-lang.org)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey.svg)](README.md)
-![Views](https://komarev.com/ghpvc/?username=LebedevSergeyVach-proxy-cli&label=views&color=blue&style=flat)
+![Views](https://komarev.com/ghpvc/?username=LebedevSergeyVach-proxy-cli&label=Views&color=blue&style=flat)
 
 Manage proxy profiles for your terminal session from one command, in **Rust**:
 switch profiles, benchmark latency, diagnose connectivity, and control the
@@ -88,6 +88,29 @@ proxy profile set home --name "Home" --host 127.0.0.1 --port 1080
 proxy on
 proxy status
 ```
+
+### Where proxy settings apply
+
+The active profile in `config.json` supplies two ways to apply proxy settings:
+
+```mermaid
+flowchart TD
+    accTitle: Where proxy settings apply
+    accDescr: Both commands read the active profile in config.json. proxy on changes the current shell and its future child commands. proxy run sets variables for one child command and its children, leaving the current shell unchanged.
+    Profile["Active profile in config.json"]
+    Profile --> On["proxy on"]
+    Profile --> Run["proxy run -- …"]
+    On --> Shell["Current shell environment"]
+    Shell --> Commands["New commands inherit variables"]
+    Run --> Child["Child command and its children"]
+```
+
+`proxy on` applies variables in your current shell; commands started there
+inherit them. `proxy run -- <cmd>` applies them to that child command and its
+children, leaving the shell unchanged. Tools must support these proxy settings.
+Other terminals and already running processes keep their environment. See the
+[shell integration guide](docs/SHELL_INTEGRATION.md) for the export and
+dashboard sequences.
 
 ---
 

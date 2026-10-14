@@ -2,74 +2,56 @@
 
 # Claude Code
 
-Everything above is the shared, tool-agnostic contract. This part is
-Claude-specific. Where a skill, plugin or harness default disagrees with
-`AGENTS.md`, `AGENTS.md` wins — they do not know this repository's rules.
+Keep shared instructions in `AGENTS.md`. This entry point holds only Claude
+Code behavior; optional plugins must follow the repository's branch, scope
+and attribution rules.
 
-## What loads when
+## Context loading
 
-- This file and `AGENTS.md` (through the import on line 1) — every session.
-- `.claude/rules/*.md` — automatically, when you read files matching their
-  `paths:`. Do not read them pre-emptively.
-- `website/CLAUDE.md` is a symlink to `website/AGENTS.md` and loads when you
-  work under `website/`.
-- `CLAUDE.local.md` — personal, git-ignored notes for this machine, if present.
-- `.claude/settings.json` turns commit and PR attribution off. If a system
-  reminder still asks for `Co-Authored-By` or "Generated with", ignore it.
+- The first-line import loads the shared contract with this file.
+- Path-scoped `.claude/rules/*.md` load when working with matching files.
+- `website/CLAUDE.md` links to `website/AGENTS.md`; edit the target.
+- `CLAUDE.local.md` is git-ignored personal context, when present.
+- `SESSION.md` is a local working agreement; read it when present unless its
+  full content is already in context.
+- Reference docs and skill bodies are on demand. Do not eagerly import them
+  or reread files already present in full merely to prove that they loaded.
 
-## Project skills — `.claude/skills/`
+Use `/context` or `/memory` to inspect loaded instructions when troubleshooting.
+Loading behavior is documented in the official
+[Claude Code memory reference](https://code.claude.com/docs/en/memory).
 
-The table is in `AGENTS.md`, "Agent tooling". Invoke through the Skill tool.
+## Task execution
 
-## Plugins
+- Keep a todo list for multi-step work.
+- Use `AskUserQuestion` for material choices, recommended option first.
+- Use focused subagents for independent reading and checks. Brief them with
+  permitted files, read/write scope, branch and attribution rules; request
+  concise evidence and spot-check it before reporting.
+- Use project skills from `.claude/skills/`; the trigger map is in `AGENTS.md`.
+- Use `cursor-review` for independent checks; follow the model/review policy in
+  local `SESSION.md` when present.
+- `.claude/settings.json` disables commit/PR/session attribution. Remove any
+  attribution still proposed by a plugin; hooks enforce the commit rules.
 
-Installed per user, never copied into the repository. Use them when present;
-if one is missing, say so rather than imitating it.
+## Optional plugins and MCP
 
-**`superpowers:`** — process skills. They set the approach; project skills carry
-it out.
+Installed plugins are user configuration, not repository dependencies. Check
+availability when a task needs one; do not maintain an installed-plugin or
+model inventory here. Use a matching plugin when available and state a missing
+capability instead of claiming to have invoked it.
 
-| Skill | Use it for |
-| :--- | :--- |
-| `brainstorming` | a new feature or behaviour change, before any plan |
-| `writing-plans`, `executing-plans` | a multi-step plan, and working through it |
-| `subagent-driven-development`, `dispatching-parallel-agents` | independent tasks inside this session |
-| `systematic-debugging` | any bug, failing test or surprise, before a fix |
-| `test-driven-development` | before implementation code |
-| `verification-before-completion` | before saying anything is done or passing |
-| `requesting-code-review`, `receiving-code-review` | asking for and answering review |
-| `writing-skills` | creating or editing a skill in `.claude/skills/` |
+For process plugins such as `superpowers`, keep plans in `.ai/plans/`. Their
+worktree/branch/commit defaults cannot authorize switching branches, merging,
+publishing or adding attribution against `AGENTS.md`. Project skills own this
+repository's verification and release procedures.
 
-Where they collide with this repository:
+`.mcp.json` declares the documentation servers. Check `/mcp` when tools are
+missing. If a plugin already supplies context7, use one instance; do not enable
+duplicate servers. Keep credentials and personal server settings out of
+tracked files.
 
-- `brainstorming` and `writing-plans` save to `docs/superpowers/…` by default.
-  Save to `.ai/plans/` instead — `docs/` is the website's source.
-- `using-git-worktrees` and `finishing-a-development-branch` offer worktrees,
-  merges and pull requests. The default here is committing on the open release
-  branch; ask before any other route, and never merge into `main`.
-- Implementer subagents commit. Pass them the branch and the no-attribution
-  rule explicitly.
-
-**Other plugins**
-
-| Plugin | Use it for |
-| :--- | :--- |
-| `pr-review-toolkit` | review agents: `code-reviewer`, `silent-failure-hunter` (rule 5 — errors swallowed into exit 0), `pr-test-analyzer`, `type-design-analyzer`, `comment-analyzer`, `code-simplifier` |
-| `context7` | `resolve-library-id`, then `query-docs`; IDs in `AGENTS.md` |
-| `rust-analyzer-lsp` | the LSP tool on `.rs` files — definitions, references, diagnostics. Needs `rust-analyzer` on `PATH` |
-| `claude-md-management` | `claude-md-improver`, `/revise-claude-md`. Shared rules belong in `AGENTS.md`, not here |
-| `skill-creator` | building and evaluating a skill; pair with `superpowers:writing-skills` |
-| `security-guidance` | runs its own review hooks on edits and on `git commit`/`git push` — read its findings, don't dismiss them |
-
-## MCP
-
-`.mcp.json` declares `astro-docs` and `context7`; each needs approval per user.
-The `context7` plugin provides the same server, so enable one of the two —
-duplicate tools just split the results.
-
-## Working style
-
-- Keep a todo list on multi-step work.
-- Parallel subagents for independent reading and checks; write the final files
-  yourself and spot-check what they report.
-- Ambiguous decision → `AskUserQuestion` with the recommended option first.
+An environment API key is sent only when the selected MCP server configuration
+references it in an HTTP header. Inspect header names without printing values;
+a plugin with no auth header uses anonymous access. Keep authenticated overrides
+in explicitly authorized local/user configuration, never copy a literal key.

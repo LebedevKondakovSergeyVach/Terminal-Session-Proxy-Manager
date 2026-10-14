@@ -1,12 +1,15 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import mermaid from 'astro-mermaid';
 import { viewTransitions } from 'astro-vtbot/starlight-view-transitions';
 import { unified } from '@astrojs/markdown-remark';
 import md3Theme from 'starlight-theme-md3';
 import starlightLinksValidator from 'starlight-links-validator';
 import starlightImageZoom from 'starlight-image-zoom';
 import starlightLlmsTxt from 'starlight-llms-txt';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
 import { SITE, BASE, readVersion } from './site.config.mjs';
 
@@ -24,18 +27,52 @@ export default defineConfig({
 	// same way the static build on GitHub Pages does.
 	trailingSlash: 'always',
 	build: { format: 'directory' },
+	vite: {
+		resolve: {
+			// VTBot 3.1's scroll helper leaves skipped ready promises unhandled.
+			// Replace only that helper; keep its native transition integration.
+			alias: [{
+				// The helper is imported with ?url&no-inline; string aliases
+				// do not match a package name followed by a query suffix.
+				find: /^@vtbag\/cam-shaft(?=\?|$)/,
+				replacement: fileURLToPath(new URL('./src/scripts/navigation-scroll.js', import.meta.url)),
+			}],
+		},
+	},
 	// starlight-image-zoom injects a rehype plugin and does not yet support
 	// Sätteri, Astro 7's default Markdown processor. Fall back to the
 	// remark/rehype pipeline it does support.
 	// https://github.com/HiDeoo/starlight-image-zoom/issues/63
 	markdown: { processor: unified() },
 	integrations: [
+		// Transform Mermaid fences before Starlight's code-block renderer sees
+		// them. Inherited MD3 colours update the SVG without replacing its DOM
+		// while the reader is zooming or dragging it in the diagram viewer.
+		mermaid({
+			theme: 'base',
+			autoTheme: false,
+			enableLog: false,
+			mermaidConfig: {
+				fontFamily: 'var(--sl-font)',
+				themeCSS: readFileSync(new URL('./src/styles/mermaid-theme.css', import.meta.url), 'utf8'),
+				flowchart: { nodeSpacing: 24, rankSpacing: 32 },
+				sequence: {
+					actorFontFamily: 'var(--sl-font)',
+					messageFontFamily: 'var(--sl-font)',
+					noteFontFamily: 'var(--sl-font)',
+					actorMargin: 32,
+					messageMargin: 32,
+					mirrorActors: false,
+					wrap: true,
+				},
+			},
+		}),
 		starlight({
 			title: 'Terminal Session Proxy Manager',
 			// The logo is the orange-flower artwork; the favicon is a separate,
 			// simpler mark (the orange cube), because the flower turns to a blur
-			// at tab size. The logo shows on the splash page only — docs pages
-			// have the home button instead (custom.css, SiteTitle.astro). The alt
+			// at tab size. Narrow docs headers use a home button; desktop keeps
+			// the same logo and title as the splash page. The alt
 			// stays empty because the title text is still in the link for screen
 			// readers, even where it is hidden visually — an alt would read the
 			// name twice.
@@ -82,6 +119,9 @@ export default defineConfig({
 				ru: { label: 'RU', lang: 'ru' },
 			},
 			components: {
+				Head: './src/components/Head.astro',
+				MarkdownContent: './src/components/MarkdownContent.astro',
+				ThemeProvider: './src/components/ThemeProvider.astro',
 				ThemeSelect: './src/components/ThemeSelect.astro',
 				Search: './src/components/Search.astro',
 				SiteTitle: './src/components/SiteTitle.astro',

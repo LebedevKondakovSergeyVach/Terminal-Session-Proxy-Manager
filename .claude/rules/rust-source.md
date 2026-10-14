@@ -7,7 +7,8 @@ paths:
 
 # Rust source, tests and locales
 
-The invariants are rules 1-7 in `AGENTS.md`. This file is the mechanics.
+The invariants are in `AGENTS.md`, "Product invariants". This file holds the
+mechanics.
 
 ## Translations
 
@@ -16,7 +17,8 @@ The invariants are rules 1-7 in `AGENTS.md`. This file is the mechanics.
 - Tests in `src/config/i18n.rs` assert both locales define the same keys and no
   value is empty; `main.rs` asserts every subcommand has a `cmd_<name>` key.
   Without that key `--help` prints the raw key.
-- `src/cli.rs` doc comments stay bilingual: `/// English text | Русский текст`.
+- `src/cli.rs` doc comments stay bilingual, using the format
+  `/// English translation | Russian translation`.
   They are the static fallback; `main.rs` swaps in `cmd_<name>` at runtime.
 - Error text inside `ProxyError` is English. Attach the translated sentence as
   `anyhow` context so the user reads their language first:
@@ -39,7 +41,7 @@ patch release (`.ai/GIT_WORKFLOW.md`, "Choosing the number").
 ## Tests
 
 - Named as sentences stating the guarantee
-  (`using_an_unknown_profile_exits_non_zero`); one assertion each.
+  (`using_an_unknown_profile_exits_non_zero`); one behavior per test.
 - Pure logic: `#[cfg(test)] mod tests` beside the code. Argv, exit codes, files:
   `tests/cli.rs`.
 - Integration tests isolate state through `TSPM_CONFIG`, `TSPM_SETTINGS` and
@@ -61,9 +63,11 @@ Know this before changing path resolution:
 
 - `config.json`: `--config-file` → `TSPM_CONFIG` → `config_path` in
   `settings.json` → OS config dir.
-- `settings.json`: `--settings-file` → `TSPM_SETTINGS` → OS config dir →
-  `./settings.json` in the working directory (last on purpose).
+- `settings.json`: `--settings-file` → `TSPM_SETTINGS` → existing OS settings
+  file → existing `./settings.json` → OS default path for first-run creation.
 - Language: `--lang` → `TSPM_LANG` → `lang` in `settings.json` → `ru`.
+
+A relative settings `config_path` resolves against the settings file directory.
 
 `--config-file`, `--settings-file` and `--lang` are read from raw argv by
 `main::preparse` before clap parses, because help text is localised while the
@@ -71,6 +75,6 @@ command tree is built.
 
 ## Library APIs
 
-Look crate APIs up through context7 (IDs in `AGENTS.md`, "Agent tooling")
+Look crate APIs up through context7 (`AGENTS.md`, "Skills and documentation tools")
 rather than recalling them. Check the version in `Cargo.toml` first and prefer a
-version-pinned ID when one exists (`/websites/rs_ratatui_0_30_0`).
+version-specific documentation when available; resolve the ID at query time.
