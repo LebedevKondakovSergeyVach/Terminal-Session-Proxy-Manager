@@ -7,6 +7,15 @@
 
 ## [Unreleased]
 
+### Безопасность
+
+- Зафиксированная версия `quinn-proto` обновлена с 0.11.17 до 0.11.18 для
+  устранения [RUSTSEC-2026-0338](https://rustsec.org/advisories/RUSTSEC-2026-0338.html),
+  [RUSTSEC-2026-0340](https://rustsec.org/advisories/RUSTSEC-2026-0340.html) и
+  [RUSTSEC-2026-0343](https://rustsec.org/advisories/RUSTSEC-2026-0343.html):
+  паник при обработке QUIC-потоков, задержки ACK и дейтаграмм.
+  Эта необязательная зависимость не включена в текущем наборе возможностей CLI.
+
 ## [2.3.0] — 2026-09-16
 
 Релиз, в котором у проекта появился собственный сайт. Двуязычный сайт
@@ -116,8 +125,8 @@
   авторства инструментов (`Co-Authored-By:`, «Generated with …»), `pre-push`
   запрещает пуш в `main` и пуш тегов: публикует релиз слияние релизной ветки.
 - **Contributing**: Единый набор инструкций для ИИ-агентов. `AGENTS.md` —
-  общий контракт; `CLAUDE.md`, `GEMINI.md` и `.cursor/rules/` — точки входа для
-  Claude Code, Antigravity и Cursor; правила по областям лежат в
+  общий контракт; `CLAUDE.md` и `.cursor/rules/` — точки входа для
+  Claude Code и Cursor; правила по областям лежат в
   `.claude/rules/`. К скиллам в `.claude/skills/` добавились
   `starlight-website` — для работы над сайтом — и `agent-docs-audit`, который
   проверяет набор инструкций на расхождения. `.mcp.json` объявляет серверы

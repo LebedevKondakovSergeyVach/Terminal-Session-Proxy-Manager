@@ -1,162 +1,128 @@
-# Terminal Session Proxy Manager — Architecture Overview
+# Project map
 
-Reference material for AI agents and new contributors. The binding rules are in
-[`AGENTS.md`](../AGENTS.md); this document explains the shape of the codebase and
-why it is arranged the way it is.
+Ownership, execution flows and change entry points for Terminal Session Proxy
+Manager. The binding rules are in [`AGENTS.md`](../AGENTS.md). This is a map,
+not a file inventory: verify the relevant flow in source before changing it.
+Update this document in the same change when a named owner or flow changes.
+Dependency versions and feature flags come from `Cargo.toml` and the lockfiles.
 
-## 1. Purpose
+## Boundaries and ownership
 
-A single-binary Rust CLI for managing proxy connections (SOCKS5, HTTP) inside a
-terminal session. It stores named proxy profiles, switches between them,
-benchmarks their latency, picks the fastest one, diagnoses connectivity, and
-generates the configuration that `curl`, Docker, Git, JVM tooling and the shell
-itself need.
+The binary manages saved proxy profiles and emits configuration for consumers.
+A child process cannot modify its parent shell, so selecting a profile and
+applying its environment are separate operations.
 
-## 2. Technology stack
+| Owner | Responsibility |
+| :--- | :--- |
+| `src/main.rs` | Global flag preparse, localized clap tree, dispatch; inline `run`, `prompt`, `debug`, `config` |
+| `src/lib.rs`, `src/cmd/mod.rs`, `src/config/mod.rs` | Public module boundaries |
+| `src/cli.rs` | clap command tree and bilingual help fallback |
+| `src/config/app.rs` | Profile configuration, defaults, path resolution, load/save guard |
+| `src/config/settings.rs` | Language/config-path settings, path resolution, load/save guard |
+| `src/config/profile.rs` | Profile data and validation |
+| `src/config/i18n.rs`, `locales/` | Embedded translations and placeholder substitution |
+| `src/proxy_env.rs` | Managed variables, values and shell quoting |
+| `src/shell_handoff.rs` | Home-directory handoff/debug marker files |
+| `src/error.rs` | Typed `ProxyError` variants |
+| `src/cmd/profile.rs` | Profile operations, benchmark and fastest-profile selection |
+| `src/cmd/dash.rs` | TUI, terminal guard and post-teardown actions |
+| `src/cmd/env.rs`, `src/cmd/init.rs` | Export/unset output and shell wrapper with embedded completions |
+| `src/cmd/completions.rs` | Standalone `completions` subcommand |
+| `src/cmd/import_cmd.rs`, `src/cmd/export_cmd.rs` | Import formats and exported configuration |
+| `src/cmd/settings.rs`, `src/cmd/git_cmd.rs` | Settings/language and global Git proxy settings |
+| `src/cmd/status.rs`, `src/cmd/ping.rs`, `src/cmd/diagnose.rs`, `src/cmd/monitor.rs`, `src/cmd/speedtest.rs` | Network reports and monitoring |
+| `tests/cli.rs` | Tests spawning the binary with isolated configuration |
+| `shell/`, `configs/` | Shipped shell functions and default configuration |
+| `website/` | Generated bilingual documentation site; own contract |
 
-| Concern | Crate | Notes |
-| :--- | :--- | :--- |
-| Language | Rust, edition 2024 | MSRV `1.88`, declared as `rust-version` in `Cargo.toml` and checked in CI |
-| CLI parsing | `clap` 4 (derive, `env`, `wrap_help`) | Deep subcommand tree in `src/cli.rs` |
-| Async runtime | `tokio` | Only `macros`, `rt-multi-thread`, `time` — not `full` |
-| HTTP | `reqwest` (`json`, `socks`) | Latency probes, geolocation, throughput |
-| TUI | `ratatui` + `crossterm` | The `dash` dashboard |
-| Prompts | `dialoguer` | Interactive profile selection |
-| Progress | `indicatif` | Spinners and the speedtest bar |
-| Serialization | `serde` + `serde_json` | Both config files |
-| Paths | `dirs` | OS config directory |
-| Errors | `anyhow` + `thiserror` | Application boundary vs typed variants |
+There is no separate `best` or `benchmark` module. `lang` shares the settings
+handler. `main.rs` has binary-local tests in addition to library and CLI tests.
+SOCKS support comes from reqwest's `socks` feature; raw port checks use
+`std::net::TcpStream::connect_timeout`.
 
-There is no `tokio-socks` dependency; SOCKS support comes from the `socks`
-feature of `reqwest`. Raw port checks use `std::net::TcpStream::connect_timeout`.
+## Execution flows
 
-## 3. Codebase structure
+### Startup and configuration
 
-### `src/` — entry point and cross-cutting modules
+`main::run` → `preparse` path flags → `AppSettings::load` → choose language →
+`localised_command` → clap parsing → `AppConfig::load` → `dispatch`.
 
-- **`main.rs`** — Resolves config paths and language from raw argv
-  (`preparse`), builds a localised clap command, parses, and dispatches through
-  one flat `match` in `dispatch`. Returns `ExitCode`. Most arms call into
-  `src/cmd/`, but a few subcommands are implemented here in full: `debug`
-  (inline in `dispatch`, toggling the marker file through `shell_handoff`),
-  `config path` and `config show` (inline), `prompt` (`print_prompt_segment`)
-  and `run` (`run_through_proxy`, which propagates the child's exit status).
-- **`lib.rs`** — Library root. Most of what is worth testing lives beneath it.
-  The code in `main.rs` is outside the library, so it is covered by `main.rs`'s
-  own `#[cfg(test)]` module and by the end-to-end tests in `tests/cli.rs`
-  (which exercise `run` and `config`, for example).
-- **`cli.rs`** — The clap command tree only. Doc comments here are bilingual
-  (`English | Русский`) and act as the static fallback; `main.rs` overrides
-  subcommand descriptions at runtime from the `cmd_*` locale keys.
-- **`proxy_env.rs`** — The single definition of which environment variables this
-  tool manages and how they are rendered and quoted for a shell. `env`, `run`
-  and `dash` all go through it.
-- **`shell_handoff.rs`** — Owns the `$HOME` marker files. A child process cannot
-  modify its parent's environment, so the dashboard writes `export` lines to
-  `~/.terminal-session-proxy-manager-eval` and the shell function installed by
-  `init` evaluates and deletes that file on exit.
-- **`error.rs`** — `ProxyError`. Only errors a caller might match on earn a
-  variant; anything merely displayed stays an `anyhow` error.
+Preparse stops at `run` or `--`, so child arguments do not retarget the manager.
+Global path and language flags are needed before parsing localized help.
 
-### `src/config/` — state
+| Setting | Precedence |
+| :--- | :--- |
+| Profile config | `--config-file` → `TSPM_CONFIG` → settings `config_path` → OS config directory |
+| Settings | `--settings-file` → `TSPM_SETTINGS` → existing OS settings → existing working-directory settings → OS default path |
+| Language | `--lang` → `TSPM_LANG` → settings `lang` → `ru` |
 
-- **`app.rs`** — `config.json`: profiles, ping targets, diagnostic endpoints,
-  geolocation APIs, and the IPv4/IPv6/health-check/speedtest URLs. Owns path
-  resolution and the load/save cycle.
-- **`settings.rs`** — `settings.json`: interface language and an optional custom
-  config path.
-- **`profile.rs`** — The `Profile` struct and `validate`, which allowlists the
-  characters a host may contain and checks port and protocol.
-- **`i18n.rs`** — Loads `locales/*.json`, embedded with `include_str!`. `t` looks
-  up a key; `format` substitutes `{}` placeholders in order.
+A relative settings `config_path` resolves against the settings file's parent,
+not the command's working directory. The OS settings file outranks an existing
+`./settings.json`.
 
-### `src/cmd/` — subcommand implementations
+For both configuration types: `load_from` distinguishes absence from failure.
+Absence may write defaults; failure reports the error, returns defaults marked
+`load_failed`, and `save` refuses to overwrite the original file.
 
-Roughly one module per subcommand, with exceptions: several subcommands share a
-module, and `debug`, `config`, `prompt` and `run` have none (see `main.rs`
-above).
+### Saved selection and parent-shell environment
 
-- **`dash.rs`** — The TUI. An RAII `TerminalGuard` plus a panic hook guarantee
-  the terminal is restored on every exit path. Long actions that need a normal
-  terminal (an editor, a prompt) are returned as a `DashAction` and performed
-  after teardown, not inside the alternate screen.
-- **`profile.rs`** — Listing, selecting, adding, removing, and the concurrent
-  benchmark. `benchmark_profiles` returns `BenchmarkResult`, whose `avg_ms` is
-  an `Option` so an unreachable proxy is distinguishable from a slow one.
-  `best` and `benchmark` live here — there is no `best.rs` or `benchmark.rs`.
-- **`git_cmd.rs`** — Global Git proxy configuration. Named `git_cmd` to avoid
-  colliding with the `git` subcommand name.
-- **`env.rs`** — Emits `export` / `unset` statements for `eval`.
-- **`import_cmd.rs`** — Parses a full config, a profile map, a profile array, or
-  a plain list of proxy URLs, from a file or a URL.
-- **`status.rs`**, **`ping.rs`**, **`diagnose.rs`**, **`monitor.rs`**,
-  **`speedtest.rs`** — The network-facing reports.
-- **`init.rs`**, **`completions.rs`** — Shell integration and completions.
-- **`settings.rs`**, **`export_cmd.rs`** — Settings management and export
-  formats. The top-level `lang` subcommand lives in `settings.rs` too
-  (`set_lang`), shared with `settings set --lang`.
+Profile mutations → validate new/imported data → `config.save()`.
+Saving selection alone does not modify the shell environment.
 
-### `locales/`
+`proxy on` shell wrapper → binary `env on` → `proxy_env::export_statements` →
+`shell_quote` → shell `eval`. `env off` emits unsets from `MANAGED_ENV_VARS`.
 
-`en.json` and `ru.json`. Key sets must be identical and no value may be empty;
-tests enforce both.
+The wrapper's `use`/`switch`/`best` branches save selection, preserve command
+status, and reapply exports only after success when `ALL_PROXY` is nonempty.
+Read `src/cmd/init.rs` for wrapper behavior; direct binary commands cannot
+change their parent environment.
 
-## 4. Design constraints
+### Child command
 
-**No private data in defaults.** `AppConfig::default` may reference only
-loopback addresses and well-known public endpoints. A personal VPS address or an
-unusual port committed here would ship to every user and silently point them at
-someone else's proxy. A test asserts every default profile is `127.0.0.1`.
+`dispatch` → `run_through_proxy` → `proxy_env::proxy_env_vars` →
+`std::process::Command::envs` → child status → `ExitCode`.
 
-**Stateless execution.** The CLI is ephemeral. It cannot mutate the calling
-shell, so `env on` prints statements intended for `eval`, and the dashboard uses
-the hand-off file described above.
+The environment applies to that child. The parent shell stays unchanged;
+signal termination is represented as failure because `ExitCode` cannot carry
+a signal.
 
-**Never destroy user configuration.** Defaults are written only when a config
-file is absent. A file that exists but fails to parse is reported and left
-untouched.
+### Dashboard handoff
 
-**Everything a shell evaluates is quoted.** Profile fields originate in a JSON
-file that can be edited by hand or imported from a URL, and the output is passed
-to `eval`. `shell_quote` at the boundary and `Profile::validate` at the point of
-entry are two independent layers of the same defence.
+`dash::run_dashboard` → terminal guard/event loop → selected `DashAction` →
+terminal teardown → `handle_action`.
 
-**Graceful degradation.** Network checks time out rather than hang, and a failed
-probe is reported as a failure rather than crashing the command.
+Enter saves selection and returns `Apply`; that action writes quoted exports
+through `shell_handoff::write_exports`. The shell wrapper evaluates and removes
+the handoff file after the binary returns. Space saves selection without that
+handoff. Editors and prompts run only after terminal teardown.
 
-**Exit codes are interface.** Failure means a non-zero exit, because these
-commands are used inside shell conditionals.
+### Documentation generation
 
-## 5. The documentation website
+Canonical Markdown (`README*.md`, `docs/`, contributing and changelogs) →
+`website/scripts/docs-manifest.mjs` → `website/scripts/sync-docs.mjs` →
+cleanup/directives/link rewriting/frontmatter → ignored content → Astro build
+and link validation. Mermaid fences render in the browser; the MarkdownContent
+override composes image zoom and `DiagramViewer.astro`, with client behavior
+in `website/src/scripts/diagram-viewer.ts`.
 
-`website/` holds an Astro Starlight site, published to GitHub Pages as a
-project page at `/Terminal-Session-Proxy-Manager/`, bilingual like the CLI.
+The two home and two 404 pages are hand-authored. `<!--site:…-->` comments add
+site components while sources remain readable CommonMark on GitHub. Read
+[`website/AGENTS.md`](../website/AGENTS.md) before changing this pipeline.
 
-It is **generated**, not written. `website/scripts/sync-docs.mjs` builds every
-page from the repository's own Markdown — `README*.md`, `docs/*.md`,
-`CONTRIBUTING.md`, `CHANGELOG*.md` — listed in `scripts/docs-manifest.mjs`.
-The generated pages are Git-ignored, so the site cannot drift from its sources.
-Only four pages are hand-authored: the two home pages and the two 404 pages.
+## Where to start a change
 
-The constraint that shapes the design: those sources are read on GitHub too, so
-they stay plain CommonMark. Anything the site needs and GitHub does not — tabs,
-cards, steps, asides — is written as a `<!--site:…-->` comment that GitHub
-renders as nothing and the generator expands into a Starlight component. An
-earlier attempt put the JSX straight in the documents; GitHub rendered the
-`import` line as body text and stripped the components, losing the labels held
-in their attributes.
+| Task | Entry points and related updates |
+| :--- | :--- |
+| Command or flag | `src/cli.rs`, dispatch/handler, both locales, `tests/cli.rs`, bilingual user docs/changelogs |
+| Config path or malformed-file behavior | `src/main.rs`, `src/config/app.rs`, `src/config/settings.rs`, isolated CLI tests |
+| Proxy values or quoting | `src/proxy_env.rs`, `src/config/profile.rs`, env/run/dashboard callers |
+| Profile import or fastest selection | `src/cmd/import_cmd.rs`, `src/cmd/profile.rs`, validation and failure status |
+| Shell integration | `src/cmd/init.rs`, `src/shell_handoff.rs`, both shipped functions in `shell/` |
+| TUI action | `src/cmd/dash.rs`, terminal cleanup, translations, handoff and screenshot impact |
+| Site content, theme or generator | Canonical Markdown, manifest, `website/astro.config.mjs`, website rules/skill |
+| Dependency, CI or release | Cargo/npm manifest and lockfile, workflow source, CI rule and release/security skills |
+| Agent instructions | Root/area contract, matching rule/pointer/skill, instruction audit |
 
-Rules for working there are in `website/AGENTS.md`.
-
-## 6. Configuration precedence
-
-- `config.json` — `--config-file` → `TSPM_CONFIG` → `config_path` from
-  `settings.json` → OS config directory.
-- `settings.json` — `--settings-file` → `TSPM_SETTINGS` → OS config directory →
-  `./settings.json` in the working directory.
-- Language — `--lang` → `TSPM_LANG` → `lang` from `settings.json` → `ru`.
-
-The working-directory entry is last on purpose: `settings.json` is a common
-filename, and letting an arbitrary directory outrank the user's own
-configuration would make the tool behave differently depending on where it was
-invoked from.
+Use `tests/cli.rs`'s `Cli` helper for binary tests: it isolates config, settings,
+language and color. Existing network-facing commands are not exercised there;
+test their pure logic without external network access.

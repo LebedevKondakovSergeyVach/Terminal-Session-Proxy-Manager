@@ -7,6 +7,15 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Security
+
+- Update locked `quinn-proto` from 0.11.17 to 0.11.18 to address
+  [RUSTSEC-2026-0338](https://rustsec.org/advisories/RUSTSEC-2026-0338.html),
+  [RUSTSEC-2026-0340](https://rustsec.org/advisories/RUSTSEC-2026-0340.html) and
+  [RUSTSEC-2026-0343](https://rustsec.org/advisories/RUSTSEC-2026-0343.html),
+  which describe panics in its QUIC stream, ACK-delay and datagram handling.
+  This optional dependency is not enabled in the CLI's current feature set.
+
 ## [2.3.0] — 2026-09-16
 
 The release that gives the project a home on the web. A bilingual documentation
@@ -112,8 +121,8 @@ codes.
   lines (`Co-Authored-By:`, "Generated with …"); `pre-push` refuses pushes to
   `main` and tag pushes, since merging a release branch is what publishes.
 - **Contributing**: One set of instructions for AI coding agents. `AGENTS.md`
-  is the shared contract; `CLAUDE.md`, `GEMINI.md` and `.cursor/rules/` are the
-  entry points for Claude Code, Antigravity and Cursor; area rules live in
+  is the shared contract; `CLAUDE.md` and `.cursor/rules/` are the
+  entry points for Claude Code and Cursor; area rules live in
   `.claude/rules/`. The task skills in `.claude/skills/` gain
   `starlight-website`, for work on the site, and `agent-docs-audit`, which
   checks the instruction set for drift. `.mcp.json` declares the `context7`

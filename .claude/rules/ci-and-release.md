@@ -20,8 +20,9 @@ what a job does — names are not behaviour. Reference: `.ai/GIT_WORKFLOW.md`,
 - `release.yml` — runs on any push to `main`, a pushed `v*` tag, or manual
   dispatch. Re-verifies, builds four targets, **then** creates the tag in the
   `publish` job, publishes and bumps the Homebrew tap.
-- `website.yml` — generator tests, site build, link validation, no tracked
-  generated pages, `npm audit`.
+- `website.yml` — generator tests, site build, link validation, a diff check
+  after content regeneration, `npm audit`. The diff does not detect unchanged
+  tracked generated pages; local verification checks the manifest separately.
 - `pages.yml` — publishes the site from `main`. Its `workflow_dispatch` can
   deploy another ref; treat that as a deliberate act.
 

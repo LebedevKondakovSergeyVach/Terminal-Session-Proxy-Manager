@@ -36,7 +36,7 @@ Only after the previous release has merged into `main`.
    ```
 
    A heading without its reference renders as literal `[X.Y.Z]` on GitHub and
-   on the site; 2.2.1 and 2.2.2 shipped that way.
+   on the site.
 5. Run the `verify-project` skill — both parts. The changelogs are site pages.
 6. Commit `chore: release X.Y.Z` — no attribution lines — and push the release
    branch.

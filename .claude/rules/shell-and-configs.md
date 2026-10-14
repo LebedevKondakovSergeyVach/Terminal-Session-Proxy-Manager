@@ -30,8 +30,9 @@ Must equal `AppConfig::default()`; the test
 them. Never edit it by hand — regenerate:
 
 ```bash
-cargo run -- --config-file /dev/null config show > configs/config.default.json
+cargo run -- --settings-file /dev/null --config-file /dev/null config show > configs/config.default.json
 ```
 
-`/dev/null` fails to parse, so a warning goes to stderr; stdout is still the
-defaults. Defaults reference only loopback and well-known public endpoints.
+Both paths use `/dev/null` to avoid reading or creating personal state. Parse
+warnings go to stderr; stdout is the default config. Defaults reference only
+loopback and well-known public endpoints.
