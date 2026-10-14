@@ -1,9 +1,8 @@
 ---
 import Default from '@astrojs/starlight/components/SiteTitle.astro';
 
-// A round home button beside the title, on docs pages only; there it replaces
-// the logo (custom.css), and on a phone the title too. The splash page is home
-// already, so it gets no button.
+// Narrow docs headers use a home button in place of the logo and title.
+// Desktop uses the stock title, exactly as on the splash page.
 const { hasSidebar, siteTitleHref } = Astro.locals.starlightRoute;
 const label = Astro.locals.t('tspm.home');
 ---
@@ -32,7 +31,7 @@ const label = Astro.locals.t('tspm.home');
 		isolation: isolate;
 		overflow: hidden;
 		flex: none;
-		display: flex;
+		display: none;
 		align-items: center;
 		justify-content: center;
 		inline-size: 3rem;
@@ -52,10 +51,9 @@ const label = Astro.locals.t('tspm.home');
 		opacity: 0;
 		pointer-events: none;
 	}
-	/* Space from the title text, which is only shown from 50rem. */
-	@media (min-width: 50rem) {
+	@media (max-width: 49.999rem) {
 		.home-button {
-			margin-inline-start: 0.5rem;
+			display: flex;
 		}
 	}
 	.home-button svg {
