@@ -2,7 +2,7 @@
 # crates.io name (`cargo install tspm`). The command and the Rust library keep
 # their own names below; collapsing them would break shell init and imports.
 name = "tspm"
-version = "2.3.1"
+version = "2.4.0"
 edition = "2024"
 # Set by the highest MSRV in the resolved tree (ratatui 0.30 requires 1.88).
 rust-version = "1.88"

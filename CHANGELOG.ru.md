@@ -7,6 +7,8 @@
 
 ## [Unreleased]
 
+## [2.4.0] — 2026-10-18
+
 ### Безопасность
 
 - Зафиксированный `rustls` обновлён с 0.23.45 до 0.23.46 из-за
@@ -356,7 +358,8 @@
 
 - Конфигурация по умолчанию использует безопасные стандартные профили.
 
-[Unreleased]: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/compare/v2.3.1...HEAD
+[Unreleased]: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/compare/v2.4.0...HEAD
+[2.4.0]: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/compare/v2.3.1...v2.4.0
 [2.3.1]: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/compare/v2.3.0...v2.3.1
 [2.3.0]: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/compare/v2.2.2...v2.3.0
 [2.2.2]: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/compare/v2.2.1...v2.2.2
