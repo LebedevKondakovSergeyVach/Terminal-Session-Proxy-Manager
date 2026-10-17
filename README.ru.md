@@ -49,8 +49,11 @@ brew install LebedevKondakovSergeyVach/tap/terminal-session-proxy-manager
 **Cargo** (требуется Rust 1.88+):
 
 ```bash title="Terminal" frame="terminal"
-cargo install --git https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager.git
+cargo install tspm
 ```
+
+Команда — `terminal-session-proxy-manager`. Если этот бинарник уже установлен
+из git, сначала выполните `cargo uninstall terminal-session-proxy-manager`.
 
 **Из исходников:**
 

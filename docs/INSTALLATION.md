@@ -22,12 +22,25 @@ Requires Rust **1.88 or newer** (the project uses edition 2024). Install a
 toolchain from [rustup.rs](https://rustup.rs), then:
 
 ```bash title="Terminal" frame="terminal"
-cargo install --git https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager.git
+cargo install tspm
 ```
 
-This puts the binary in `~/.cargo/bin`, which rustup normally adds to your
-`PATH`. If `terminal-session-proxy-manager` is not found afterwards, see
+This puts `terminal-session-proxy-manager` in `~/.cargo/bin`, which rustup
+normally adds to your `PATH`. If that command is not found afterwards, see
 [PATH setup](#-path-setup) below.
+
+If Cargo says the binary already exists, a previous git install is using it:
+
+```bash title="Terminal" frame="terminal"
+cargo uninstall terminal-session-proxy-manager
+cargo install tspm
+```
+
+To build a git revision instead of the crates.io release:
+
+```bash title="Terminal" frame="terminal"
+cargo install --git https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager.git
+```
 
 ## Prebuilt binary
 
@@ -128,8 +141,8 @@ proxy status
 # Homebrew
 brew uninstall terminal-session-proxy-manager
 
-# Cargo
-cargo uninstall terminal-session-proxy-manager
+# Cargo (crates.io)
+cargo uninstall tspm
 
 # Manual
 sudo rm /usr/local/bin/terminal-session-proxy-manager

@@ -140,7 +140,8 @@ git checkout -b fix/dashboard-empty-list
 ```
 
 `main` only ever moves when a release branch is merged into it, and that merge
-publishes a release. CI rejects a pull request that targets the wrong branch or
+publishes the GitHub release, the Homebrew tap and the `tspm` crate. CI rejects
+a pull request that targets the wrong branch or
 uses an unrecognised branch prefix. Valid task prefixes: `feat/`, `fix/`,
 `docs/`, `chore/`, `refactor/`, `test/`, `perf/`, `ci/`, `build/`.
 
