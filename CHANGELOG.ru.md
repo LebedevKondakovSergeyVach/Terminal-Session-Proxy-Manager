@@ -7,6 +7,13 @@
 
 ## [Unreleased]
 
+### Добавлено
+
+- **Установка**: `cargo install tspm` ставит этот релиз из crates.io. Команда
+  по-прежнему `terminal-session-proxy-manager`. Прежняя установка
+  `cargo install --git` занимает тот же бинарник; перед `cargo install tspm`
+  удалите её командой `cargo uninstall terminal-session-proxy-manager`.
+
 ## [2.3.1] — 2026-10-14
 
 Диаграммы в документации, более надёжная навигация и переключение темы сайта,

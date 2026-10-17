@@ -22,12 +22,26 @@ brew upgrade terminal-session-proxy-manager
 Установите тулчейн с [rustup.rs](https://rustup.rs), затем выполните:
 
 ```bash title="Terminal" frame="terminal"
-cargo install --git https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager.git
+cargo install tspm
 ```
 
-Бинарник будет помещён в `~/.cargo/bin`, который rustup обычно сам добавляет в
-ваш `PATH`. Если после этого утилита не найдена, см. раздел
+В `~/.cargo/bin` появится `terminal-session-proxy-manager`. rustup обычно сам
+добавляет этот каталог в `PATH`. Если после этого команда не найдена, см. раздел
 [Настройка PATH](#-настройка-path) ниже.
+
+Если Cargo сообщает, что бинарник уже существует, его занимает прежняя
+установка из git:
+
+```bash title="Terminal" frame="terminal"
+cargo uninstall terminal-session-proxy-manager
+cargo install tspm
+```
+
+Чтобы собрать ревизию из git, а не релиз с crates.io:
+
+```bash title="Terminal" frame="terminal"
+cargo install --git https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager.git
+```
 
 ## Готовая сборка
 
@@ -130,8 +144,8 @@ proxy status
 # Homebrew
 brew uninstall terminal-session-proxy-manager
 
-# Cargo
-cargo uninstall terminal-session-proxy-manager
+# Cargo (crates.io)
+cargo uninstall tspm
 
 # Ручная установка
 sudo rm /usr/local/bin/terminal-session-proxy-manager

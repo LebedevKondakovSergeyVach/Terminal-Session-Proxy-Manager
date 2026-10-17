@@ -2548,31 +2548,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "terminal-session-proxy-manager"
-version = "2.3.1"
-dependencies = [
- "anyhow",
- "assert_cmd",
- "clap",
- "clap_complete",
- "colored",
- "crossterm",
- "dialoguer",
- "dirs",
- "futures",
- "indicatif",
- "predicates",
- "ratatui",
- "reqwest",
- "serde",
- "serde_json",
- "tempfile",
- "thiserror 2.0.20",
- "tokio",
- "url",
-]
-
-[[package]]
 name = "terminal_size"
 version = "0.4.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2856,6 +2831,31 @@ name = "try-lock"
 version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e421abadd41a4225275504ea4d6566923418b7f05506fbc9c0fe86ba7396114b"
+
+[[package]]
+name = "tspm"
+version = "2.3.1"
+dependencies = [
+ "anyhow",
+ "assert_cmd",
+ "clap",
+ "clap_complete",
+ "colored",
+ "crossterm",
+ "dialoguer",
+ "dirs",
+ "futures",
+ "indicatif",
+ "predicates",
+ "ratatui",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror 2.0.20",
+ "tokio",
+ "url",
+]
 
 [[package]]
 name = "typenum"

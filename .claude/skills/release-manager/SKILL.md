@@ -44,9 +44,12 @@ Only after the previous release has merged into `main`.
 ## C. Shipping
 
 Merging `release/X.Y.Z` into `main` runs `release.yml`: it builds four targets,
-then tags `vX.Y.Z`, publishes the GitHub release, bumps the Homebrew tap, and
-`pages.yml` redeploys the site. **Say this to the user and get an explicit yes
-before opening the pull request.**
+then tags `vX.Y.Z`, publishes the GitHub release, bumps the Homebrew tap,
+publishes the `tspm` crate to crates.io, and `pages.yml` redeploys the site.
+**Say this to the user and get an explicit yes before opening the pull request.**
+If the crate upload fails after the tag exists, re-run the `crates` job only.
+A new dispatch on the tag repeats the GitHub release and the Homebrew bump
+(`.ai/GIT_WORKFLOW.md`, "If the release job fails").
 
 ```bash
 gh auth status            # gh must be logged in; if not, ask the user to run `gh auth login`
@@ -65,3 +68,4 @@ with" line. Never merge it yourself, never push `main`, never create a tag —
 | Updating only `CHANGELOG.md` | `CHANGELOG.ru.md` is a published page; CI does not check it at release time |
 | Forgetting the footer references | headings render as bracketed text |
 | Skipping the website build | a dead changelog link surfaces only after the merge, in `pages.yml` |
+| Re-dispatching `release.yml` on the tag after `crates` failed | `publish` repeats the GitHub release and Homebrew bump; re-run the `crates` job |

@@ -7,6 +7,13 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added
+
+- **Install**: `cargo install tspm` installs this release from crates.io. The
+  command is still `terminal-session-proxy-manager`. An earlier
+  `cargo install --git` already uses that binary; remove it with
+  `cargo uninstall terminal-session-proxy-manager` before installing `tspm`.
+
 ## [2.3.1] — 2026-10-14
 
 Documentation diagrams, more reliable website navigation and theme controls,

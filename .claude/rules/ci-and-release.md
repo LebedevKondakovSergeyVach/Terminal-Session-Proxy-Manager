@@ -19,7 +19,13 @@ what a job does — names are not behaviour. Reference: `.ai/GIT_WORKFLOW.md`,
   (pull requests into `release/*` only), release readiness (release → `main`).
 - `release.yml` — runs on any push to `main`, a pushed `v*` tag, or manual
   dispatch. Re-verifies, builds four targets, **then** creates the tag in the
-  `publish` job, publishes and bumps the Homebrew tap.
+  `publish` job, publishes the GitHub release and bumps the Homebrew tap.
+  The `crates` job runs after that and uploads the crate (`cargo publish
+  --locked`). Its token is the `CARGO_API_KEY` secret, mapped to
+  `CARGO_REGISTRY_TOKEN`. That job's `contents: read` cannot push a tag or
+  edit the GitHub release, so a failed upload is retried by re-running `crates`
+  alone. A full re-dispatch on the tag repeats `publish`. Details:
+  `.ai/GIT_WORKFLOW.md`, "If the release job fails".
 - `website.yml` — generator tests, site build, link validation, a diff check
   after content regeneration, `npm audit`. The diff does not detect unchanged
   tracked generated pages; local verification checks the manifest separately.
@@ -28,6 +34,20 @@ what a job does — names are not behaviour. Reference: `.ai/GIT_WORKFLOW.md`,
 
 Never point `pages.yml` or `release.yml` at a release or task branch, and never
 widen a workflow's `permissions` beyond what a step demonstrably needs.
+
+## Crate identity
+
+Three names, kept apart on purpose:
+
+| Role | Name |
+| :--- | :--- |
+| crates.io package (`cargo install`, `cargo uninstall`) | `tspm` |
+| Binary target, shell init, Homebrew, release archives | `terminal-session-proxy-manager` |
+| Rust library import path | `terminal_session_proxy_manager` |
+
+`tspm.io` is the project domain. It does not serve the documentation site, so
+`homepage` and `documentation` stay on the GitHub Pages site. Do not point
+them at `tspm.io` until that host serves these pages.
 
 ## Versions
 

@@ -88,6 +88,11 @@ jobs:
             exit 1
           fi
 
+      # Packages and compiles the crate the way crates.io will, without uploading.
+      # Still before the tag, so a bad package publishes nothing.
+      - name: Check the crates.io package
+        run: cargo publish --dry-run --locked
+
   build:
     name: Build ${{ matrix.artifact_name }}
     needs: [resolve, verify]
@@ -194,3 +199,21 @@ jobs:
           download-url: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/releases/download/${{ needs.resolve.outputs.tag }}/terminal-session-proxy-manager-macos-x86_64.tar.gz
         env:
           COMMITTER_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+
+  crates:
+    name: Publish to crates.io
+    needs: [resolve, publish]
+    if: needs.resolve.outputs.should_release == 'true'
+    runs-on: ubuntu-latest
+    # Retrying this job must not be able to push a tag or edit the GitHub
+    # release. The registry token is the only credential the upload uses.
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Publish to crates.io
+        run: cargo publish --locked
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_API_KEY }}
