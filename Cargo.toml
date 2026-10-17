@@ -1,19 +1,31 @@
 [package]
-name = "terminal-session-proxy-manager"
+# crates.io name (`cargo install tspm`). The command and the Rust library keep
+# their own names below; collapsing them would break shell init and imports.
+name = "tspm"
 version = "2.3.1"
 edition = "2024"
 # Set by the highest MSRV in the resolved tree (ratatui 0.30 requires 1.88).
 rust-version = "1.88"
 authors = ["LebedevKondakovSergeyVach <sergejlebedev31838@gmail.com>"]
-description = "Universal, configurable CLI proxy management toolkit in Rust"
-license = "AGPL-3.0"
+description = "Terminal-session SOCKS/HTTP proxy profiles, latency checks and shell environment exports"
+license = "AGPL-3.0-only"
 repository = "https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager"
-homepage = "https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager"
-documentation = "https://docs.rs/terminal-session-proxy-manager"
+homepage = "https://lebedevkondakovsergeyvach.github.io/Terminal-Session-Proxy-Manager/"
+documentation = "https://lebedevkondakovsergeyvach.github.io/Terminal-Session-Proxy-Manager/"
 readme = "README.md"
 keywords = ["proxy", "cli", "socks5", "tui", "shell"]
 categories = ["command-line-utilities", "network-programming"]
-exclude = ["/assets", "/.github", "/.ai", "/docs"]
+exclude = ["/assets", "/.github", "/.ai", "/docs", "/website"]
+
+# Rust import path. Independent of the crates.io name.
+[lib]
+name = "terminal_session_proxy_manager"
+path = "src/lib.rs"
+
+# Installed command. Shell init, Homebrew and the release archives use this name.
+[[bin]]
+name = "terminal-session-proxy-manager"
+path = "src/main.rs"
 
 [dependencies]
 anyhow = "1.0"

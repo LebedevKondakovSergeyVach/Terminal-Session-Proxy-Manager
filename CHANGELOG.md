@@ -7,6 +7,25 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Security
+
+- Update locked `rustls` from 0.23.45 to 0.23.46 to address
+  [RUSTSEC-2026-0346](https://rustsec.org/advisories/RUSTSEC-2026-0346.html),
+  [RUSTSEC-2026-0347](https://rustsec.org/advisories/RUSTSEC-2026-0347.html),
+  [RUSTSEC-2026-0348](https://rustsec.org/advisories/RUSTSEC-2026-0348.html) and
+  [RUSTSEC-2026-0349](https://rustsec.org/advisories/RUSTSEC-2026-0349.html).
+  These describe `Debug` output of TLS secrets, application data sent to the
+  outer server after an Encrypted Client Hello rejection, a large allocation
+  during certificate decompression before authentication, and a key-exchange
+  downgrade from an unauthenticated ServerHello.
+
+### Added
+
+- **Install**: `cargo install tspm` installs this release from crates.io. The
+  command is still `terminal-session-proxy-manager`. An earlier
+  `cargo install --git` already uses that binary; remove it with
+  `cargo uninstall terminal-session-proxy-manager` before installing `tspm`.
+
 ## [2.3.1] — 2026-10-14
 
 Documentation diagrams, more reliable website navigation and theme controls,

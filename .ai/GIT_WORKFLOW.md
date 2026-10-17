@@ -29,9 +29,10 @@ Three rules, and everything else follows:
 ### Why not merge task branches into main
 
 Merging `release/X.Y.Z` into `main` is the release trigger: CI reads the version
-from `Cargo.toml`, builds four targets, creates `vX.Y.Z` and bumps the Homebrew
-tap. If task branches went straight to `main`, every merged bugfix would try to
-publish, and `main` would hold half-finished versions between releases.
+from `Cargo.toml`, builds four targets, creates `vX.Y.Z`, bumps the Homebrew
+tap and publishes the `tspm` crate. If task branches went straight to `main`,
+every merged bugfix would try to publish, and `main` would hold half-finished
+versions between releases.
 
 ## Branch names
 
@@ -140,10 +141,12 @@ It does not look at `CHANGELOG.ru.md`, and neither does `release.yml` — the
 Russian changelog is checked only by you.
 
 Merging it runs `release.yml`: `resolve` sees `main` at a version with no tag;
-`verify` re-runs fmt, clippy and tests and checks `CHANGELOG.md` for the
-section; `build` produces macOS and Linux binaries for x86_64 and arm64 with
-SHA-256 checksums; and only then `publish` creates and pushes the annotated tag,
-creates the GitHub release with those files, and bumps the Homebrew tap.
+`verify` re-runs fmt, clippy and tests, checks `CHANGELOG.md` for the section
+and runs `cargo publish --dry-run --locked`; `build` produces macOS and Linux
+binaries for x86_64 and arm64 with SHA-256 checksums; `publish` creates and
+pushes the annotated tag, creates the GitHub release with those files, and
+bumps the Homebrew tap; `crates` then runs `cargo publish --locked`. The token
+is the `CARGO_API_KEY` actions secret, passed as `CARGO_REGISTRY_TOKEN`.
 
 **Nothing is published until that merge.** Pushing a `v*` tag by hand also
 starts `release.yml` — `resolve` then requires the tag to match `Cargo.toml` and
@@ -156,10 +159,11 @@ After the release, delete the release branch and open the next one from `main`.
 
 **Before the tag.** `resolve`, `verify` and `build` all run before `publish`
 creates the tag, so a failure in any of them leaves no tag and nothing
-published. Fix the cause and run the release again: re-run the workflow for a
-transient failure, or, for a code fix, get it onto `main` the only way anything
-reaches `main` — merged from a release or hotfix branch. Either way `resolve`
-still sees no tag and releases.
+published. The dry-run in `verify` does not upload the crate. Fix the cause
+and run the release again: re-run the workflow for a transient failure, or,
+for a code fix, get it onto `main` the only way anything reaches `main` —
+merged from a release or hotfix branch. Either way `resolve` still sees no
+tag and releases.
 
 **After the tag.** If `publish` fails once `Create tag` has pushed `vX.Y.Z`, a
 new run from `main` will not help: `resolve` finds `refs/tags/vX.Y.Z`, sets
@@ -174,6 +178,14 @@ published before starting another.
 
 Do not reuse a tag that already has published artifacts — people may have
 downloaded them.
+
+**crates.io.** `crates` starts only after `publish` has pushed the tag. It
+checks out that same commit and uploads the `tspm` crate. A version cannot be
+uploaded twice. If `crates` fails, re-run that job. Do not `workflow_dispatch`
+the tag to retry it: that enters `publish` again and repeats the GitHub
+release and the Homebrew bump, and `publish` does not check whether those
+already exist. A new run from `main` never reaches `crates` once the tag
+exists, because `should_release` is then false.
 
 ## Rules for agents
 
@@ -208,7 +220,7 @@ changed for them and, for a fix, what went wrong before.
 | :--- | :--- | :--- |
 | `ci.yml` | Every pull request; pushes to `main`, `release/**`, `hotfix/**`; weekly; `workflow_dispatch` | fmt, clippy, docs, tests on Linux and macOS, MSRV, `cargo audit` |
 | `branch-policy.yml` | Every pull request (only) | Branch naming, head/base pairing; changelog entry on PRs into `release/*`; release readiness on `release/*` → `main` |
-| `release.yml` | Any push to `main`; a pushed `v*` tag; `workflow_dispatch` | Decides whether to release, re-verifies, builds four targets, tags, publishes, bumps Homebrew |
+| `release.yml` | Any push to `main`; a pushed `v*` tag; `workflow_dispatch` | Decides whether to release, re-verifies (including `cargo publish --dry-run`), builds four targets, tags, publishes the GitHub release, bumps Homebrew, then `cargo publish` of `tspm` |
 | `website.yml` | Pull requests, and pushes to `main`/`release/**`/`hotfix/**`, touching `website/`, `docs/`, `assets/`, the READMEs, `CONTRIBUTING.md` or `CHANGELOG*.md`; `workflow_dispatch` | Generator tests, full site build, internal-link validation, a diff check after regeneration, `npm audit` |
 | `pages.yml` | Pushes to **`main`** touching those same paths; `workflow_dispatch` | Rebuilds and publishes the site to GitHub Pages |
 

@@ -7,6 +7,25 @@
 
 ## [Unreleased]
 
+### Безопасность
+
+- Зафиксированный `rustls` обновлён с 0.23.45 до 0.23.46 из-за
+  [RUSTSEC-2026-0346](https://rustsec.org/advisories/RUSTSEC-2026-0346.html),
+  [RUSTSEC-2026-0347](https://rustsec.org/advisories/RUSTSEC-2026-0347.html),
+  [RUSTSEC-2026-0348](https://rustsec.org/advisories/RUSTSEC-2026-0348.html) и
+  [RUSTSEC-2026-0349](https://rustsec.org/advisories/RUSTSEC-2026-0349.html).
+  В них описаны вывод секретов TLS через `Debug`, отправка данных приложения
+  внешнему серверу после отказа Encrypted Client Hello, большое выделение
+  памяти при распаковке сертификата до аутентификации и понижение обмена
+  ключами из-за неаутентифицированного ServerHello.
+
+### Добавлено
+
+- **Установка**: `cargo install tspm` ставит этот релиз из crates.io. Команда
+  по-прежнему `terminal-session-proxy-manager`. Прежняя установка
+  `cargo install --git` занимает тот же бинарник; перед `cargo install tspm`
+  удалите её командой `cargo uninstall terminal-session-proxy-manager`.
+
 ## [2.3.1] — 2026-10-14
 
 Диаграммы в документации, более надёжная навигация и переключение темы сайта,

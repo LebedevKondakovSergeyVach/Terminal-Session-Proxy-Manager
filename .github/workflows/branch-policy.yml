@@ -5,8 +5,8 @@ name: Branch policy
 #   main  <--  release/X.Y.Z  <--  task branches
 #
 # Task branches never target main directly, because main is only ever advanced
-# by a release, and merging a release into main is what triggers the tag and
-# the Homebrew bump.
+# by a release, and merging a release into main is what triggers the tag, the
+# Homebrew bump and the crates.io publish.
 on:
   pull_request:
     types: [opened, edited, reopened, synchronize]
