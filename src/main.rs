@@ -357,6 +357,52 @@ mod tests {
     }
 
     #[test]
+    fn preparse_stops_at_run_so_a_child_flag_cannot_retarget_the_manager() {
+        let argv = args(&[
+            "tspm",
+            "--lang",
+            "en",
+            "run",
+            "--lang",
+            "ru",
+            "--config-file",
+            "/tmp/child.json",
+            "--settings-file",
+            "/tmp/child-settings.json",
+        ]);
+
+        assert_eq!(preparse(&argv, "--lang"), Some("en"));
+        assert_eq!(preparse(&argv, "--config-file"), None);
+        assert_eq!(preparse(&argv, "--settings-file"), None);
+    }
+
+    #[test]
+    fn preparse_stops_at_double_dash() {
+        let argv = args(&["tspm", "--", "--lang", "en", "--config-file", "/tmp/c.json"]);
+
+        assert_eq!(preparse(&argv, "--lang"), None);
+        assert_eq!(preparse(&argv, "--config-file"), None);
+    }
+
+    #[test]
+    fn preparse_still_reads_a_flag_placed_before_run() {
+        let argv = args(&["tspm", "--settings-file", "/tmp/s.json", "run", "echo"]);
+
+        assert_eq!(preparse(&argv, "--settings-file"), Some("/tmp/s.json"));
+    }
+
+    #[test]
+    fn bilingual_help_keeps_english_unless_the_language_is_russian() {
+        assert_eq!(translate_bilingual("Check | Проверить", false), "Check");
+        assert_eq!(translate_bilingual("Check | Проверить", true), "Проверить");
+    }
+
+    #[test]
+    fn text_without_a_language_separator_is_left_unchanged() {
+        assert_eq!(translate_bilingual("already local", true), "already local");
+    }
+
+    #[test]
     fn every_subcommand_has_a_localised_description_in_both_languages() {
         // The `debug` subcommand once printed the literal key `cmd_debug` in
         // `--help` because its translation was never added.

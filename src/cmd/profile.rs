@@ -453,4 +453,46 @@ mod tests {
         assert_eq!(results[0].key, "slow");
         assert!(results[0].is_reachable());
     }
+
+    #[tokio::test]
+    async fn an_empty_target_list_reaches_nobody_and_leaves_the_active_profile() {
+        // No ping targets means there is nothing to dial. `best` must report
+        // failure and keep the current selection instead of inventing a winner.
+        let mut config = AppConfig::default();
+        config.ping_targets.clear();
+        config.active_profile = "a".to_string();
+        config.profiles.clear();
+        config.profiles.insert(
+            "a".to_string(),
+            Profile {
+                name: "A".to_string(),
+                host: "127.0.0.1".to_string(),
+                port: 1080,
+                protocol: "socks5".to_string(),
+            },
+        );
+        config.profiles.insert(
+            "b".to_string(),
+            Profile {
+                name: "B".to_string(),
+                host: "127.0.0.1".to_string(),
+                port: 1081,
+                protocol: "http".to_string(),
+            },
+        );
+
+        let results = benchmark_profiles_quiet(&config).await;
+
+        assert_eq!(results.len(), 2);
+        assert!(
+            results
+                .iter()
+                .all(|r| r.avg_ms.is_none() && r.success_rate == 0.0)
+        );
+
+        select_best_profile(&mut config, &I18n::load("en"))
+            .await
+            .unwrap();
+        assert_eq!(config.active_profile, "a");
+    }
 }

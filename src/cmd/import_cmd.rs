@@ -147,10 +147,14 @@ fn parse_proxy_urls(content: &str) -> BTreeMap<String, Profile> {
             continue;
         };
 
-        let protocol = if scheme.starts_with("socks") {
-            "socks5"
-        } else {
-            "http"
+        // reqwest dials `socks4` and `socks4a` differently from `socks5`.
+        // A bare `socks://` URL has no such scheme, so it is stored as socks5.
+        // `socks5h` is the same handshake with remote DNS. `https://` is stored
+        // as `http` because the proxy URL scheme here is not TLS.
+        let protocol = match scheme.as_str() {
+            "socks" | "socks5" | "socks5h" => "socks5",
+            "socks4" | "socks4a" => scheme.as_str(),
+            _ => "http",
         };
 
         map.insert(
@@ -259,6 +263,7 @@ mod tests {
 
         assert_eq!(map.len(), 3);
         assert_eq!(map["socks5h_1"].protocol, "socks5");
+        assert_eq!(map["socks4_2"].protocol, "socks4");
         assert_eq!(map["https_3"].protocol, "http");
     }
 
@@ -286,5 +291,21 @@ mod tests {
         for (key, profile) in &map {
             assert!(profile.validate(key).is_ok());
         }
+    }
+
+    #[test]
+    fn socks_aliases_keep_the_handshake_reqwest_will_dial() {
+        // A bare `socks://` URL is not a reqwest scheme. `socks4` and `socks4a`
+        // are, and collapsing them to socks5 would open the wrong handshake.
+        let map = parse_proxy_urls(
+            "socks://a.example:1\nsocks4://b.example:2\nsocks4a://c.example:3\nhttps://d.example:4",
+        );
+
+        assert_eq!(map["socks_1"].protocol, "socks5");
+        assert_eq!(map["socks4_2"].protocol, "socks4");
+        assert_eq!(map["socks4a_3"].protocol, "socks4a");
+        assert_eq!(map["https_4"].protocol, "http");
+        assert_eq!(map["socks4_2"].host, "b.example");
+        assert_eq!(map["https_4"].port, 4);
     }
 }

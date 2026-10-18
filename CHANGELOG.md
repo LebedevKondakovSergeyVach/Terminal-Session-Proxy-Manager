@@ -7,6 +7,20 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Fixed
+
+- Importing a `socks4://` or `socks4a://` URL keeps that protocol. Previously
+  every `socks*` URL was stored as `socks5`, so a SOCKS4 proxy was dialed with
+  a SOCKS5 handshake.
+
+### Changed
+
+- Update `dirs` from 6 to 7. Config and home directories stay the same: both
+  versions call `dirs-sys` 0.5.
+- Update locked `clap` to 4.6.7, `clap_complete` to 4.6.11, `futures` to
+  0.3.34, `reqwest` to 0.13.5, `serde_json` to 1.0.154, `thiserror` to 2.0.21
+  and `tokio` to 1.53.3.
+
 ## [2.4.0] — 2026-10-18
 
 ### Security

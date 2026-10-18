@@ -703,3 +703,331 @@ fn the_config_flag_takes_precedence_over_the_environment() {
         .success()
         .stdout(predicate::str::contains(explicit.to_str().unwrap()));
 }
+
+fn config_json(cli: &Cli) -> serde_json::Value {
+    serde_json::from_str(&cli.config_contents()).expect("config should be JSON")
+}
+
+fn git_env(cli: &Cli, git_config: &Path) -> Command {
+    let mut cmd = cli.cmd();
+    cmd.env("GIT_CONFIG_GLOBAL", git_config)
+        .env("GIT_CONFIG_NOSYSTEM", "1")
+        .env("HOME", cli.settings_path.parent().unwrap());
+    cmd
+}
+
+#[test]
+fn a_malformed_settings_file_is_not_overwritten() {
+    let broken = "{ \"lang\": ";
+
+    for args in [
+        vec!["lang", "en"],
+        vec!["settings", "set", "--config-path", "elsewhere.json"],
+    ] {
+        let cli = Cli::new();
+        fs::write(&cli.settings_path, broken).unwrap();
+
+        cli.cmd()
+            .args(&args)
+            .assert()
+            .failure()
+            .stderr(predicate::str::contains("refusing to overwrite"));
+
+        assert_eq!(
+            fs::read_to_string(&cli.settings_path).unwrap(),
+            broken,
+            "`{}` rewrote an unparsable settings file",
+            args.join(" ")
+        );
+    }
+}
+
+#[test]
+fn settings_config_path_is_used_when_the_environment_override_is_absent() {
+    let cli = Cli::new();
+    let chosen = cli.settings_path.parent().unwrap().join("chosen.json");
+    let path = chosen.to_str().unwrap();
+
+    cli.cmd()
+        .args(["settings", "set", "--config-path", path])
+        .assert()
+        .success();
+
+    cli.cmd()
+        .env_remove("TSPM_CONFIG")
+        .args(["config", "path"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(path));
+}
+
+#[test]
+fn a_relative_settings_config_path_resolves_beside_the_settings_file() {
+    let cli = Cli::new();
+
+    cli.cmd()
+        .args(["settings", "set", "--config-path", "beside.json"])
+        .assert()
+        .success();
+
+    let expected = cli.settings_path.parent().unwrap().join("beside.json");
+    cli.cmd()
+        .env_remove("TSPM_CONFIG")
+        .args(["config", "path"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(expected.to_str().unwrap()));
+}
+
+#[test]
+fn import_of_a_missing_file_leaves_the_config_unchanged() {
+    let cli = Cli::new().with_config(ONE_PROFILE);
+    let before = cli.config_contents();
+    let missing = cli.settings_path.parent().unwrap().join("missing.json");
+
+    cli.cmd()
+        .args(["import", missing.to_str().unwrap()])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("not found"));
+
+    assert_eq!(cli.config_contents(), before);
+}
+
+#[test]
+fn import_keeps_valid_rows_and_does_not_adopt_the_file_active_profile() {
+    let cli = Cli::new().with_config(ONE_PROFILE);
+    let source = cli.settings_path.parent().unwrap().join("import.json");
+    fs::write(
+        &source,
+        r#"{
+            "active_profile": "extra",
+            "profiles": {
+                "work": {"name": "Replaced", "host": "10.1.1.1", "port": 1, "protocol": "http"},
+                "bad": {"name": "Bad", "host": "bad host", "port": 1, "protocol": "http"},
+                "extra": {"name": "Extra", "host": "10.2.2.2", "port": 2, "protocol": "socks5"}
+            }
+        }"#,
+    )
+    .unwrap();
+
+    cli.cmd()
+        .args(["import", source.to_str().unwrap()])
+        .assert()
+        .success();
+
+    let saved = config_json(&cli);
+    assert_eq!(saved["active_profile"], "work");
+    assert_eq!(saved["profiles"]["work"]["host"], "10.1.1.1");
+    assert_eq!(saved["profiles"]["work"]["name"], "Replaced");
+    assert_eq!(saved["profiles"]["extra"]["host"], "10.2.2.2");
+    assert!(saved["profiles"].get("bad").is_none());
+}
+
+#[test]
+fn import_refuses_to_overwrite_a_malformed_config() {
+    let broken = "{ not json";
+    let cli = Cli::new().with_config(broken);
+    let source = cli.settings_path.parent().unwrap().join("import.json");
+    fs::write(
+        &source,
+        r#"{"profiles":{"n":{"name":"N","host":"127.0.0.1","port":1080,"protocol":"socks5"}}}"#,
+    )
+    .unwrap();
+
+    cli.cmd()
+        .args(["import", source.to_str().unwrap()])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("refusing to overwrite"));
+
+    assert_eq!(cli.config_contents(), broken);
+}
+
+#[test]
+fn profile_set_with_no_fields_stores_the_loopback_default_and_activates_it() {
+    let cli = Cli::new().with_config(ONE_PROFILE);
+
+    cli.cmd().args(["profile", "set", "lab"]).assert().success();
+
+    let saved = config_json(&cli);
+    assert_eq!(saved["active_profile"], "lab");
+    assert_eq!(saved["profiles"]["lab"]["host"], "127.0.0.1");
+    assert_eq!(saved["profiles"]["lab"]["port"], 1080);
+    assert_eq!(saved["profiles"]["lab"]["protocol"], "socks5");
+    assert_eq!(saved["profiles"]["work"]["host"], "127.0.0.1");
+}
+
+#[test]
+fn profile_set_port_keeps_the_existing_host_and_name() {
+    let cli = Cli::new().with_config(ONE_PROFILE);
+
+    cli.cmd()
+        .args(["profile", "set", "work", "--port", "9050"])
+        .assert()
+        .success();
+
+    let saved = config_json(&cli);
+    assert_eq!(saved["active_profile"], "work");
+    assert_eq!(saved["profiles"]["work"]["name"], "Work");
+    assert_eq!(saved["profiles"]["work"]["host"], "127.0.0.1");
+    assert_eq!(saved["profiles"]["work"]["port"], 9050);
+    assert_eq!(saved["profiles"]["work"]["protocol"], "socks5");
+}
+
+#[test]
+fn removing_the_active_profile_adopts_the_first_remaining_key() {
+    let cli = Cli::new().with_config(
+        r#"{
+            "active_profile": "m",
+            "profiles": {
+                "m": {"name": "M", "host": "127.0.0.1", "port": 1080, "protocol": "socks5"},
+                "a": {"name": "A", "host": "127.0.0.1", "port": 1081, "protocol": "socks5"},
+                "z": {"name": "Z", "host": "127.0.0.1", "port": 1082, "protocol": "socks5"}
+            }
+        }"#,
+    );
+
+    cli.cmd()
+        .args(["profile", "remove", "m"])
+        .assert()
+        .success();
+
+    let saved = config_json(&cli);
+    assert_eq!(saved["active_profile"], "a");
+    assert!(saved["profiles"].get("m").is_none());
+}
+
+#[test]
+fn removing_the_last_profile_leaves_the_active_key_dangling() {
+    let cli = Cli::new().with_config(ONE_PROFILE);
+
+    cli.cmd()
+        .args(["profile", "remove", "work"])
+        .assert()
+        .success();
+
+    let saved = config_json(&cli);
+    assert_eq!(saved["active_profile"], "work");
+    assert!(saved["profiles"].as_object().unwrap().is_empty());
+
+    cli.cmd()
+        .args(["env", "on"])
+        .assert()
+        .failure()
+        .stdout(predicate::str::is_empty());
+}
+
+#[test]
+fn run_does_not_start_the_child_when_no_profile_is_active() {
+    let cli = Cli::new().with_config(r#"{"active_profile":"missing","profiles":{}}"#);
+    let marker = cli.settings_path.parent().unwrap().join("child-ran");
+
+    cli.cmd()
+        .args(["run", "touch", marker.to_str().unwrap()])
+        .assert()
+        .failure()
+        .stdout(predicate::str::is_empty())
+        .stderr(predicate::str::contains("Failed to load proxy settings!"));
+
+    assert!(!marker.exists());
+}
+
+#[test]
+fn switch_and_profile_select_list_profiles_when_there_is_no_terminal() {
+    for args in [vec!["switch"], vec!["profile", "select"]] {
+        let cli = Cli::new().with_config(ONE_PROFILE);
+
+        cli.cmd()
+            .args(&args)
+            .assert()
+            .success()
+            .stdout(predicate::str::contains("work"))
+            .stdout(predicate::str::contains("Work"));
+    }
+}
+
+#[test]
+fn switch_with_no_profiles_exits_cleanly() {
+    let cli = Cli::new().with_config(r#"{"active_profile":"none","profiles":{}}"#);
+
+    cli.cmd()
+        .arg("switch")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("No available profiles in config!"));
+}
+
+#[test]
+fn git_on_without_a_profile_does_not_write_git_config() {
+    let cli = Cli::new().with_config(r#"{"active_profile":"missing","profiles":{}}"#);
+    let git_config = cli.settings_path.parent().unwrap().join("gitconfig");
+
+    git_env(&cli, &git_config)
+        .args(["git", "on"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("Failed to load proxy settings!"));
+
+    assert!(!git_config.exists());
+}
+
+#[test]
+fn git_on_writes_both_proxy_keys_for_the_active_profile() {
+    let cli = Cli::new().with_config(ONE_PROFILE);
+    let git_config = cli.settings_path.parent().unwrap().join("gitconfig");
+
+    git_env(&cli, &git_config)
+        .args(["git", "on"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Git global proxy set to"));
+
+    let text = fs::read_to_string(&git_config).unwrap();
+    assert!(text.contains("[http]"));
+    assert!(text.contains("[https]"));
+    assert_eq!(text.matches("socks5://127.0.0.1:1080").count(), 2);
+}
+
+#[test]
+fn git_off_clears_a_proxy_and_succeeds_when_the_keys_are_already_absent() {
+    let cli = Cli::new().with_config(ONE_PROFILE);
+    let git_config = cli.settings_path.parent().unwrap().join("gitconfig");
+
+    git_env(&cli, &git_config)
+        .args(["git", "on"])
+        .assert()
+        .success();
+    git_env(&cli, &git_config)
+        .args(["git", "off"])
+        .assert()
+        .success();
+
+    let cleared = fs::read_to_string(&git_config).unwrap();
+    assert!(!cleared.contains("socks5://127.0.0.1:1080"));
+
+    git_env(&cli, &git_config)
+        .args(["git", "off"])
+        .assert()
+        .success();
+}
+
+#[test]
+fn git_status_does_not_write_a_proxy() {
+    let cli = Cli::new().with_config(ONE_PROFILE);
+    let git_config = cli.settings_path.parent().unwrap().join("gitconfig");
+
+    git_env(&cli, &git_config)
+        .arg("git")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("http.proxy"));
+
+    if git_config.exists() {
+        let text = fs::read_to_string(&git_config).unwrap();
+        assert!(
+            !text.contains("socks5://"),
+            "status wrote a proxy into {text}"
+        );
+    }
+}
