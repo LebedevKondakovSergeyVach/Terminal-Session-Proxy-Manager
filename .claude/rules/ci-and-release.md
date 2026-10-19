@@ -19,7 +19,8 @@ what a job does — names are not behaviour. Reference: `.ai/GIT_WORKFLOW.md`,
   (pull requests into `release/*` only), release readiness (release → `main`).
 - `release.yml` — runs on any push to `main`, a pushed `v*` tag, or manual
   dispatch. Re-verifies, builds four targets, **then** creates the tag in the
-  `publish` job, publishes the GitHub release and bumps the Homebrew tap.
+  `publish` job, publishes bilingual notes from both changelogs and bumps
+  the Homebrew tap. Both changelogs must have the release section.
   The `crates` job runs after that and uploads the crate (`cargo publish
   --locked`). Its token is the `CARGO_API_KEY` secret, mapped to
   `CARGO_REGISTRY_TOKEN`. That job's `contents: read` cannot push a tag or
@@ -37,13 +38,13 @@ widen a workflow's `permissions` beyond what a step demonstrably needs.
 
 ## Crate identity
 
-Three names, kept apart on purpose:
+The package, library and installed command share one name:
 
 | Role | Name |
 | :--- | :--- |
 | crates.io package (`cargo install`, `cargo uninstall`) | `tspm` |
-| Binary target, shell init, Homebrew, release archives | `terminal-session-proxy-manager` |
-| Rust library import path | `terminal_session_proxy_manager` |
+| Binary target, shell init, Homebrew, release archives | `tspm` |
+| Rust library import path | `tspm` |
 
 `tspm.io` is the project domain. It does not serve the documentation site, so
 `homepage` and `documentation` stay on the GitHub Pages site. Do not point

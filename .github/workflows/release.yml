@@ -83,10 +83,12 @@ jobs:
 
       - name: Changelog documents this release
         run: |
-          if ! grep -q "## \[${{ needs.resolve.outputs.version }}\]" CHANGELOG.md; then
-            echo "::error::CHANGELOG.md has no section for ${{ needs.resolve.outputs.version }}"
-            exit 1
-          fi
+          for changelog in CHANGELOG.md CHANGELOG.ru.md; do
+            if ! grep -Fq "## [${{ needs.resolve.outputs.version }}]" "$changelog"; then
+              echo "::error::$changelog has no section for ${{ needs.resolve.outputs.version }}"
+              exit 1
+            fi
+          done
 
       # Packages and compiles the crate the way crates.io will, without uploading.
       # Still before the tag, so a bad package publishes nothing.
@@ -104,16 +106,16 @@ jobs:
         include:
           - target: x86_64-apple-darwin
             os: macos-latest
-            artifact_name: terminal-session-proxy-manager-macos-x86_64.tar.gz
+            artifact_name: tspm-macos-x86_64.tar.gz
           - target: aarch64-apple-darwin
             os: macos-latest
-            artifact_name: terminal-session-proxy-manager-macos-arm64.tar.gz
+            artifact_name: tspm-macos-arm64.tar.gz
           - target: x86_64-unknown-linux-gnu
             os: ubuntu-latest
-            artifact_name: terminal-session-proxy-manager-linux-x86_64.tar.gz
+            artifact_name: tspm-linux-x86_64.tar.gz
           - target: aarch64-unknown-linux-gnu
             os: ubuntu-latest
-            artifact_name: terminal-session-proxy-manager-linux-arm64.tar.gz
+            artifact_name: tspm-linux-arm64.tar.gz
             cross: true
 
     steps:
@@ -142,7 +144,7 @@ jobs:
       - name: Package with checksum
         run: |
           tar -czf "${{ matrix.artifact_name }}" \
-            -C "target/${{ matrix.target }}/release" terminal-session-proxy-manager
+            -C "target/${{ matrix.target }}/release" tspm
           shasum -a 256 "${{ matrix.artifact_name }}" > "${{ matrix.artifact_name }}.sha256"
 
       - uses: actions/upload-artifact@v4
@@ -163,6 +165,26 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Read bilingual release notes from the changelogs
+        env:
+          RELEASE_VERSION: ${{ needs.resolve.outputs.version }}
+        run: |
+          python3 - <<'PY'
+          import os
+          import re
+          from pathlib import Path
+
+          version = re.escape(os.environ["RELEASE_VERSION"])
+          pattern = rf"^## \[{version}\][^\n]*\n(.*?)(?=^## |\Z)"
+          sections = []
+          for language, filename in [("English", "CHANGELOG.md"), ("Русский", "CHANGELOG.ru.md")]:
+              match = re.search(pattern, Path(filename).read_text(), re.MULTILINE | re.DOTALL)
+              if not match or not match[1].strip():
+                  raise SystemExit(f"Missing release notes in {filename}")
+              sections.append(f"## {language}\n\n{match[1].strip()}")
+          Path("release-notes.md").write_text("\n\n".join(sections) + "\n")
+          PY
 
       # Deliberately after `build`. Tagging first meant a failing matrix leg
       # left the tag pushed with nothing published, and every retry then saw
@@ -186,17 +208,17 @@ jobs:
           tag_name: ${{ needs.resolve.outputs.tag }}
           name: Release ${{ needs.resolve.outputs.tag }}
           files: release-artifacts/*/*
-          generate_release_notes: true
+          body_path: release-notes.md
           draft: false
           prerelease: false
 
       - name: Update Homebrew formula
         uses: mislav/bump-homebrew-formula-action@v3
         with:
-          formula-name: terminal-session-proxy-manager
+          formula-name: tspm
           tag-name: ${{ needs.resolve.outputs.tag }}
           homebrew-tap: LebedevKondakovSergeyVach/homebrew-tap
-          download-url: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/releases/download/${{ needs.resolve.outputs.tag }}/terminal-session-proxy-manager-macos-x86_64.tar.gz
+          download-url: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/releases/download/${{ needs.resolve.outputs.tag }}/tspm-macos-x86_64.tar.gz
         env:
           COMMITTER_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
 

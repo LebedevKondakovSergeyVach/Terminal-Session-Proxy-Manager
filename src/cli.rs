@@ -8,7 +8,7 @@ use crate::config::{CONFIG_PATH_ENV, SETTINGS_PATH_ENV};
 /// Top-level CLI configuration | Конфигурация CLI
 #[derive(Parser, Debug)]
 #[command(
-    name = "terminal-session-proxy-manager",
+    name = env!("CARGO_PKG_NAME"),
     author = "LebedevKondakovSergeyVach",
     version = env!("CARGO_PKG_VERSION"),
     about = "Universal, configurable CLI proxy management toolkit in Rust | Универсальный инструментарий управления прокси на Rust",

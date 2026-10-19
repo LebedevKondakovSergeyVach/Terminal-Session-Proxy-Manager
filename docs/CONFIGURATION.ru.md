@@ -7,8 +7,8 @@
 
 | ОС | Директория |
 | :--- | :--- |
-| macOS | `~/Library/Application Support/terminal-session-proxy-manager/` |
-| Linux | `~/.config/terminal-session-proxy-manager/` (учитывается `XDG_CONFIG_HOME`) |
+| macOS | `~/Library/Application Support/tspm/` |
+| Linux | `~/.config/tspm/` (учитывается `XDG_CONFIG_HOME`) |
 
 ### Порядок разрешения путей
 

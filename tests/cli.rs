@@ -2,7 +2,7 @@
 //!
 //! Every test runs against a throwaway config and settings file supplied
 //! through `TSPM_CONFIG` / `TSPM_SETTINGS`, so nothing here can read or modify
-//! the developer's own `~/.config/terminal-session-proxy-manager`.
+//! the developer's own `~/.config/tspm`.
 //!
 //! Commands that reach the network (`status`, `ping`, `speedtest`, `monitor`,
 //! `benchmark`) are deliberately not exercised here — they would be slow and
@@ -43,8 +43,7 @@ impl Cli {
     }
 
     fn cmd(&self) -> Command {
-        let mut cmd = Command::cargo_bin("terminal-session-proxy-manager")
-            .expect("the binary should be built");
+        let mut cmd = Command::cargo_bin("tspm").expect("the binary should be built");
         cmd.env("TSPM_CONFIG", &self.config_path)
             .env("TSPM_SETTINGS", &self.settings_path)
             // Keep assertions about output text stable regardless of the
@@ -75,7 +74,7 @@ fn version_reports_the_crate_version() {
         .arg("--version")
         .assert()
         .success()
-        .stdout(predicate::str::contains(env!("CARGO_PKG_VERSION")));
+        .stdout(format!("tspm {}\n", env!("CARGO_PKG_VERSION")));
 }
 
 #[test]
@@ -140,6 +139,60 @@ fn config_path_reports_the_overridden_location() {
         .assert()
         .success()
         .stdout(predicate::str::contains(cli.config_path.to_str().unwrap()));
+}
+
+#[test]
+fn default_paths_ignore_the_previous_config_directory() {
+    let cli = Cli::new();
+    let home = cli._dir.path();
+    let config_root = if cfg!(target_os = "macos") {
+        home.join("Library/Application Support")
+    } else {
+        home.join(".config")
+    };
+    let legacy = config_root.join("terminal-session-proxy-manager");
+    fs::create_dir_all(&legacy).unwrap();
+    fs::write(legacy.join("config.json"), ONE_PROFILE).unwrap();
+    let old_settings = r#"{"lang":"ru","config_path":"config.json"}"#;
+    fs::write(legacy.join("settings.json"), old_settings).unwrap();
+
+    let isolated = || {
+        let mut cmd = cli.cmd();
+        cmd.env_remove("TSPM_CONFIG")
+            .env_remove("TSPM_SETTINGS")
+            .env("HOME", home)
+            .env("XDG_CONFIG_HOME", &config_root)
+            .current_dir(home);
+        cmd
+    };
+    let new_dir = config_root.join("tspm");
+    isolated()
+        .args(["config", "path"])
+        .assert()
+        .success()
+        .stdout(predicate::str::ends_with(format!(
+            "{}\n",
+            new_dir.join("config.json").display()
+        )));
+    isolated()
+        .args(["settings", "path"])
+        .assert()
+        .success()
+        .stdout(predicate::str::ends_with(format!(
+            "{}\n",
+            new_dir.join("settings.json").display()
+        )));
+    let config: serde_json::Value =
+        serde_json::from_str(&fs::read_to_string(new_dir.join("config.json")).unwrap()).unwrap();
+    assert!(config["profiles"].get("work").is_none());
+    assert_eq!(
+        fs::read_to_string(legacy.join("config.json")).unwrap(),
+        ONE_PROFILE
+    );
+    assert_eq!(
+        fs::read_to_string(legacy.join("settings.json")).unwrap(),
+        old_settings
+    );
 }
 
 #[test]
@@ -555,7 +608,8 @@ fn completions_are_generated_for_every_advertised_shell() {
             .args(["completions", shell])
             .assert()
             .success()
-            .stdout(predicate::str::is_empty().not());
+            .stdout(predicate::str::contains("tspm"))
+            .stdout(predicate::str::contains("terminal-session-proxy-manager").not());
     }
 }
 
@@ -570,6 +624,16 @@ fn init_emits_a_sourceable_shell_function() {
             script.contains("proxy()"),
             "{shell} init defines no proxy()"
         );
+        assert!(script.contains("command -v tspm"));
+        assert!(script.contains(".tspm-eval"));
+        assert!(script.contains(".tspm-debug-enabled"));
+        assert!(!script.contains("terminal-session-proxy-manager"));
+        let binding = if shell == "zsh" {
+            "compdef _tspm proxy"
+        } else {
+            "complete -F _tspm proxy"
+        };
+        assert!(script.contains(binding));
 
         // The script is meant to be `eval`'d in the user's login shell, so a
         // syntax error would break every new terminal they open.
@@ -596,12 +660,14 @@ fn the_shell_wrapper_reports_the_binary_exit_status() {
     let bin_dir = dir.path().join("bin");
     fs::create_dir_all(&bin_dir).unwrap();
 
-    let stub = bin_dir.join("terminal-session-proxy-manager");
+    let stub = bin_dir.join("tspm");
     fs::write(
         &stub,
         concat!(
             "#!/bin/sh\n",
-            "[ \"$1\" = env ] && exit 0\n",
+            "if [ \"$1\" = run ]; then shift; [ \"$1\" = -- ] && shift; exec \"$@\"; fi\n",
+            "if [ \"$1\" = dash ]; then printf 'export TSPM_HANDOFF=applied\\n' > \"$HOME/.tspm-eval\"; exit 7; fi\n",
+            "if [ \"$1\" = env ]; then [ \"$2\" = on ] && exit 7; exit 0; fi\n",
             "[ \"$1\" = profile ] && [ \"$3\" = ok ] && exit 0\n",
             "exit 1\n",
         ),
@@ -614,42 +680,60 @@ fn the_shell_wrapper_reports_the_binary_exit_status() {
     }
 
     let cli = Cli::new();
-    let script =
-        String::from_utf8(cli.cmd().args(["init", "bash"]).output().unwrap().stdout).unwrap();
-    // Keep only the function definitions; the completion dump below them needs
-    // bash-completion loaded to source cleanly.
-    let functions = &script[..script.find("proxy_run()").unwrap()];
-    let script_path = dir.path().join("init.bash");
-    fs::write(&script_path, functions).unwrap();
-
     let path = format!("{}:{}", bin_dir.display(), std::env::var("PATH").unwrap());
-    let status_of = |proxy: &str, sub: &str, key: &str| -> Option<i32> {
-        let program = format!(
-            ". {}; export ALL_PROXY={}; proxy {} {}",
-            script_path.display(),
-            proxy,
-            sub,
-            key
-        );
-        Command::new("bash")
-            .arg("-c")
-            .arg(program)
-            .env("PATH", &path)
-            .status()
-            .unwrap()
-            .code()
-    };
+    for shell in ["bash", "zsh"] {
+        if shell == "zsh" && Command::new(shell).arg("--version").output().is_err() {
+            continue;
+        }
+        let script =
+            String::from_utf8(cli.cmd().args(["init", shell]).output().unwrap().stdout).unwrap();
+        // Only the wrappers: completions require the shell's completion setup.
+        let functions = &script[..script.find("proxy_run()").unwrap()];
+        let script_path = dir.path().join(format!("init.{shell}"));
+        fs::write(&script_path, functions).unwrap();
+        let status_of = |proxy: &str, invocation: &[&str]| -> Option<i32> {
+            Command::new(shell)
+                .args([
+                    "-c",
+                    ". \"$1\"; export ALL_PROXY=\"$2\"; shift 2; \"$@\"",
+                    "tspm-wrapper-test",
+                ])
+                .arg(&script_path)
+                .arg(proxy)
+                .args(invocation)
+                .env("PATH", &path)
+                .env("HOME", dir.path())
+                .status()
+                .unwrap()
+                .code()
+        };
 
-    assert_eq!(
-        status_of("", "use", "ok"),
-        Some(0),
-        "success became failure"
-    );
-    assert_eq!(
-        status_of("socks5://127.0.0.1:1080", "use", "nope"),
-        Some(1),
-        "failure was masked as success"
-    );
+        assert_eq!(status_of("", &["proxy", "use", "ok"]), Some(0));
+        assert_eq!(
+            status_of("socks5://127.0.0.1:1080", &["proxy", "use", "nope"]),
+            Some(1)
+        );
+        for invocation in [&["proxy", "on"][..], &["proxy_on"][..]] {
+            assert_eq!(status_of("", invocation), Some(7));
+        }
+        assert_eq!(status_of("", &["proxy", "off"]), Some(0));
+        assert_eq!(
+            status_of("socks5://127.0.0.1:1080", &["proxy", "use", "ok"]),
+            Some(7)
+        );
+        for code in ["0", "7"] {
+            let child = format!("exit {code}");
+            assert_eq!(
+                status_of("", &["proxy", "run", "--", "sh", "-c", &child]),
+                Some(code.parse().unwrap()),
+                "{shell} masked the child's exit status"
+            );
+        }
+        for invocation in [&["proxy", "dash"][..], &["proxy_dash"][..]] {
+            assert_eq!(status_of("", invocation), Some(7));
+            assert!(!dir.path().join(".tspm-eval").exists());
+        }
+    }
 }
 
 // -------------------------------------------------------------- settings ---

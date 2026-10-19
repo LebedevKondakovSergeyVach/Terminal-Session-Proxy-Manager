@@ -7,16 +7,30 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [3.0.0] — 2026-10-19
+
 ### Fixed
 
 - Importing a `socks4://` or `socks4a://` URL keeps that protocol. Previously
   every `socks*` URL was stored as `socks5`, so a SOCKS4 proxy was dialed with
   a SOCKS5 handshake.
+- Shell wrappers preserve command and child-process exit codes after handling
+  the dashboard handoff. Failures from `env on` also reach the caller.
 
 ### Changed
 
-- Update `dirs` from 6 to 7. Config and home directories stay the same: both
-  versions call `dirs-sys` 0.5.
+- **Breaking:** the command is now `tspm`, including Homebrew installs and
+  `cargo install tspm`. Run `eval "$(tspm init zsh)"` (or `bash`) in your shell
+  startup file. The `proxy` function and `TSPM_*` variables keep their names.
+- **Breaking:** configuration lives in `~/Library/Application Support/tspm/`
+  on macOS and `${XDG_CONFIG_HOME:-~/.config}/tspm/` on Linux. The program
+  does not read or migrate the previous directory. To keep your profiles,
+  move that directory yourself and update any absolute `config_path` in
+  `settings.json`. Explicit config/settings path overrides still work.
+- Shell handoff and debug files are `~/.tspm-eval`, `~/.tspm-debug-enabled`
+  and `~/.tspm-debug.log`. Previous files are ignored. Release archives and
+  the Homebrew formula use the `tspm` name; the Rust library import is `tspm`.
+- Update `dirs` from 6 to 7; both versions use `dirs-sys` 0.5.
 - Update locked `clap` to 4.6.7, `clap_complete` to 4.6.11, `futures` to
   0.3.34, `reqwest` to 0.13.5, `serde_json` to 1.0.154, `thiserror` to 2.0.21
   and `tokio` to 1.53.3.
@@ -443,7 +457,8 @@ Also changed:
 
 - Default configuration uses safe generic profiles.
 
-[Unreleased]: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/compare/v2.4.0...HEAD
+[Unreleased]: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/compare/v3.0.0...HEAD
+[3.0.0]: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/compare/v2.4.0...v3.0.0
 [2.4.0]: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/compare/v2.3.1...v2.4.0
 [2.3.1]: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/compare/v2.3.0...v2.3.1
 [2.3.0]: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/compare/v2.2.2...v2.3.0

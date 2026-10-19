@@ -6,8 +6,8 @@ Fixes land on the latest release. Please upgrade before reporting.
 
 | Version | Supported |
 | :--- | :--- |
-| 2.3.x | Yes |
-| < 2.3 | No |
+| 3.0.x | Yes |
+| < 3.0 | No |
 
 ## Reporting a vulnerability
 
@@ -16,7 +16,7 @@ Please **do not** open a public issue.
 Use [GitHub's private vulnerability reporting](https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/security/advisories/new),
 or email <sergejlebedev31838@gmail.com>.
 
-Please include the version (`terminal-session-proxy-manager --version`), your OS
+Please include the version (`tspm --version`), your OS
 and shell, what an attacker gains, and the steps to reproduce. You can expect an
 acknowledgement within a week, and credit in the release notes unless you would
 rather stay anonymous.

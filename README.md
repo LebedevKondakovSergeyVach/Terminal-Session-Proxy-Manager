@@ -43,7 +43,7 @@ environment variables your tools actually read — on **macOS** and **Linux**
 **Homebrew (macOS / Linux):**
 
 ```bash title="Terminal" frame="terminal"
-brew install LebedevKondakovSergeyVach/tap/terminal-session-proxy-manager
+brew install LebedevKondakovSergeyVach/tap/tspm
 ```
 
 **Cargo** (requires Rust 1.88+):
@@ -52,8 +52,7 @@ brew install LebedevKondakovSergeyVach/tap/terminal-session-proxy-manager
 cargo install tspm
 ```
 
-The command is `terminal-session-proxy-manager`. If that binary is already
-installed from git, run `cargo uninstall terminal-session-proxy-manager` first.
+This installs the `tspm` command into `~/.cargo/bin`.
 
 **From source:**
 
@@ -72,13 +71,13 @@ to your shell configuration:
 **Zsh** (`~/.zshrc`):
 
 ```bash title="Terminal" frame="terminal"
-eval "$(terminal-session-proxy-manager init zsh)"
+eval "$(tspm init zsh)"
 ```
 
 **Bash** (`~/.bashrc`):
 
 ```bash title="Terminal" frame="terminal"
-eval "$(terminal-session-proxy-manager init bash)"
+eval "$(tspm init bash)"
 ```
 
 Restart your terminal or run `source ~/.zshrc`. You now have `proxy on`,
@@ -203,8 +202,8 @@ Two files, both JSON:
 - **`settings.json`** — interface language and an optional custom config path.
 
 Both live in your OS configuration directory
-(`~/Library/Application Support/terminal-session-proxy-manager` on macOS,
-`~/.config/terminal-session-proxy-manager` on Linux). Run `proxy config path` to
+(`~/Library/Application Support/tspm` on macOS,
+`~/.config/tspm` on Linux). Run `proxy config path` to
 see exactly which file is in use.
 
 Resolution order for `config.json`: `--config-file` → `TSPM_CONFIG` →

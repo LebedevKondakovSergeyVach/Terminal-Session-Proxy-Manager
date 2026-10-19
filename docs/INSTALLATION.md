@@ -7,13 +7,13 @@
 The easiest route, on both macOS and Linux:
 
 ```bash title="Terminal" frame="terminal"
-brew install LebedevKondakovSergeyVach/tap/terminal-session-proxy-manager
+brew install LebedevKondakovSergeyVach/tap/tspm
 ```
 
 To upgrade later:
 
 ```bash title="Terminal" frame="terminal"
-brew upgrade terminal-session-proxy-manager
+brew upgrade tspm
 ```
 
 ## Cargo
@@ -25,16 +25,9 @@ toolchain from [rustup.rs](https://rustup.rs), then:
 cargo install tspm
 ```
 
-This puts `terminal-session-proxy-manager` in `~/.cargo/bin`, which rustup
+This puts `tspm` in `~/.cargo/bin`, which rustup
 normally adds to your `PATH`. If that command is not found afterwards, see
 [PATH setup](#-path-setup) below.
-
-If Cargo says the binary already exists, a previous git install is using it:
-
-```bash title="Terminal" frame="terminal"
-cargo uninstall terminal-session-proxy-manager
-cargo install tspm
-```
 
 To build a git revision instead of the crates.io release:
 
@@ -51,10 +44,10 @@ Builds are published for macOS (x86_64, arm64) and Linux (x86_64, arm64).
 Each archive ships with a `.sha256` file. Verify before installing:
 
 ```bash title="Terminal" frame="terminal"
-shasum -a 256 -c terminal-session-proxy-manager-macos-arm64.tar.gz.sha256
+shasum -a 256 -c tspm-macos-arm64.tar.gz.sha256
 
-tar -xzf terminal-session-proxy-manager-macos-arm64.tar.gz
-sudo mv terminal-session-proxy-manager /usr/local/bin/
+tar -xzf tspm-macos-arm64.tar.gz
+sudo mv tspm /usr/local/bin/
 ```
 
 <!--site:/tabs-->
@@ -62,7 +55,7 @@ sudo mv terminal-session-proxy-manager /usr/local/bin/
 On macOS, Gatekeeper may quarantine a downloaded binary. Clear it with:
 
 ```bash title="Terminal" frame="terminal"
-xattr -d com.apple.quarantine /usr/local/bin/terminal-session-proxy-manager
+xattr -d com.apple.quarantine /usr/local/bin/tspm
 ```
 
 ---
@@ -96,7 +89,7 @@ For a manual install into `/usr/local/bin`, that directory is usually on `PATH`
 already. Confirm which binary is being used with:
 
 ```bash title="Terminal" frame="terminal"
-which terminal-session-proxy-manager
+which tspm
 ```
 
 ---
@@ -110,13 +103,13 @@ However you installed it, add the init script to your shell configuration so `pr
 **Zsh** (`~/.zshrc`):
 
 ```bash title="~/.zshrc" frame="code"
-eval "$(terminal-session-proxy-manager init zsh)"
+eval "$(tspm init zsh)"
 ```
 
 **Bash** (`~/.bashrc`):
 
 ```bash title="~/.bashrc" frame="code"
-eval "$(terminal-session-proxy-manager init bash)"
+eval "$(tspm init bash)"
 ```
 
 Restart your terminal or run `source ~/.zshrc` to apply. Details and the full
@@ -127,7 +120,7 @@ list of functions are in [SHELL_INTEGRATION.md](SHELL_INTEGRATION.md).
 ## 🔍 Verifying the installation
 
 ```bash title="Terminal" frame="terminal"
-terminal-session-proxy-manager --version
+tspm --version
 type proxy          # should report a shell function
 proxy config path   # shows which config.json is in use
 proxy status
@@ -139,13 +132,13 @@ proxy status
 
 ```bash title="Terminal" frame="terminal"
 # Homebrew
-brew uninstall terminal-session-proxy-manager
+brew uninstall tspm
 
 # Cargo (crates.io)
 cargo uninstall tspm
 
 # Manual
-sudo rm /usr/local/bin/terminal-session-proxy-manager
+sudo rm /usr/local/bin/tspm
 ```
 
 Then remove the `eval "$(... init ...)"` line from your shell rc file.
@@ -154,7 +147,7 @@ Configuration is left behind on purpose. Remove it too if you want:
 
 ```bash title="Terminal" frame="terminal"
 # macOS
-rm -rf ~/Library/Application\ Support/terminal-session-proxy-manager
+rm -rf ~/Library/Application\ Support/tspm
 # Linux
-rm -rf ~/.config/terminal-session-proxy-manager
+rm -rf ~/.config/tspm
 ```

@@ -1,7 +1,7 @@
 //! Terminal Session Proxy Manager — binary entry point.
 //!
 //! Deliberately thin: it resolves configuration, localises the help text, and
-//! dispatches to [`terminal_session_proxy_manager::cmd`]. Logic lives in the
+//! dispatches to [`tspm::cmd`]. Logic lives in the
 //! library so it can be tested without spawning a process.
 
 use std::process::ExitCode;
@@ -9,17 +9,15 @@ use std::process::ExitCode;
 use anyhow::Result;
 use clap::{CommandFactory, FromArgMatches};
 use colored::Colorize;
-use terminal_session_proxy_manager::cli::{
-    Cli, Commands, ConfigCommands, EnvMode, ProfileCommands, SettingsCommands,
-};
-use terminal_session_proxy_manager::cmd::{
+use tspm::cli::{Cli, Commands, ConfigCommands, EnvMode, ProfileCommands, SettingsCommands};
+use tspm::cmd::{
     completions, dash, diagnose, env as env_cmd, export_cmd, git_cmd, import_cmd, init, monitor,
     ping, profile, settings, speedtest, status,
 };
-use terminal_session_proxy_manager::config::{
+use tspm::config::{
     AppConfig, AppSettings, I18n, set_config_path_override, set_settings_path_override,
 };
-use terminal_session_proxy_manager::{proxy_env, shell_handoff};
+use tspm::{proxy_env, shell_handoff};
 
 #[tokio::main]
 async fn main() -> ExitCode {
@@ -312,7 +310,7 @@ fn run_through_proxy(cmd: &[String], config: &AppConfig, i18n: &I18n) -> Result<
 #[cfg(test)]
 mod tests {
     use super::*;
-    use terminal_session_proxy_manager::cli::LangCode;
+    use tspm::cli::LangCode;
 
     fn args(items: &[&str]) -> Vec<String> {
         items.iter().map(|s| (*s).to_string()).collect()

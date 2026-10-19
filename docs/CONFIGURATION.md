@@ -7,8 +7,8 @@ which ones are in use.
 
 | OS | Directory |
 | :--- | :--- |
-| macOS | `~/Library/Application Support/terminal-session-proxy-manager/` |
-| Linux | `~/.config/terminal-session-proxy-manager/` (respects `XDG_CONFIG_HOME`) |
+| macOS | `~/Library/Application Support/tspm/` |
+| Linux | `~/.config/tspm/` (respects `XDG_CONFIG_HOME`) |
 
 ### Resolution order
 

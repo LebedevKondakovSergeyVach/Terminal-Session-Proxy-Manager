@@ -10,12 +10,12 @@ what the binary printed. Without it, `proxy on` cannot affect your session.
 
 1. **Add the init script to Zsh** (`~/.zshrc`):
    ```zsh
-   eval "$(terminal-session-proxy-manager init zsh)"
+   eval "$(tspm init zsh)"
    ```
 
 2. **Or to Bash** (`~/.bashrc`):
    ```bash
-   eval "$(terminal-session-proxy-manager init bash)"
+   eval "$(tspm init bash)"
    ```
 
 3. **Restart your terminal** or `source` the file. This also installs tab
@@ -26,8 +26,8 @@ what the binary printed. Without it, `proxy on` cannot affect your session.
 > Compatible with Powerlevel10k instant prompt — nothing is printed at startup.
 
 If you would rather not run a command at shell startup, copy
-[`shell/terminal-session-proxy-manager.zsh`](../shell/terminal-session-proxy-manager.zsh)
-or [`.bash`](../shell/terminal-session-proxy-manager.bash) and source it. Those
+[`shell/tspm.zsh`](../shell/tspm.zsh)
+or [`.bash`](../shell/tspm.bash) and source it. Those
 files are generated from `init`, but the `eval` form can never go stale.
 
 ---
@@ -38,7 +38,7 @@ files are generated from `init`, but the `eval` form can never go stale.
 A background process cannot modify its parent shell's environment. This is why running the binary directly cannot export variables into your active session.
 <!--site:/aside-->
 
-For `proxy on`, the shell function calls `terminal-session-proxy-manager env on`.
+For `proxy on`, the shell function calls `tspm env on`.
 The binary reads the active profile and prints quoted `export` statements;
 the function evaluates that output in the current Zsh or Bash session:
 
@@ -109,13 +109,13 @@ Show the active proxy in your prompt. Zsh:
 
 ```zsh
 setopt PROMPT_SUBST
-RPROMPT='$(terminal-session-proxy-manager prompt)'
+RPROMPT='$(tspm prompt)'
 ```
 
 Bash:
 
 ```bash
-PS1='$(terminal-session-proxy-manager prompt)'"$PS1"
+PS1='$(tspm prompt)'"$PS1"
 ```
 
 It prints nothing when no proxy is set, so your prompt is unchanged while the
@@ -126,13 +126,13 @@ proxy is off.
 ## How `proxy dash` updates your shell
 
 On the Profiles tab, `Enter` saves the selected profile, writes quoted export
-statements to `~/.terminal-session-proxy-manager-eval`, and exits the dashboard.
+statements to `~/.tspm-eval`, and exits the dashboard.
 The `proxy` or `proxy_dash` shell function then evaluates that file and deletes it:
 
 ```mermaid
 sequenceDiagram
     accTitle: How the dashboard applies a profile on exit
-    accDescr: The shell function starts the dashboard. Enter on the Profiles tab saves the selection and writes quoted exports to ~/.terminal-session-proxy-manager-eval. After the dashboard exits, the shell reads, evaluates and deletes that file.
+    accDescr: The shell function starts the dashboard. Enter on the Profiles tab saves the selection and writes quoted exports to ~/.tspm-eval. After the dashboard exits, the shell reads, evaluates and deletes that file.
     participant Shell as Zsh / Bash
     participant Dash as Dashboard
     participant File as Export file
@@ -159,7 +159,7 @@ If it does not work, turn on logging:
 ```bash
 proxy debug on
 proxy dash
-cat ~/.terminal-session-proxy-manager-debug.log
+cat ~/.tspm-debug.log
 proxy debug off
 ```
 
@@ -170,7 +170,7 @@ proxy debug off
 **`proxy: command not found`** — the init line is missing from your rc file, or
 you have not reloaded it. Check with `type proxy`.
 
-**`terminal-session-proxy-manager binary not found in PATH`** — the function is
+**`tspm binary not found in PATH`** — the function is
 installed but the binary is not on `PATH`. See
 [INSTALLATION.md](INSTALLATION.md).
 
