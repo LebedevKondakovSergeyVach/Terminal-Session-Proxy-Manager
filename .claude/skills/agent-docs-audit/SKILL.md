@@ -23,6 +23,7 @@ that the documented behavior matches the source.
 | `.cursor/rules/cursor.mdc` | Cursor routing to the shared contract |
 | `.claude/rules/*.md` | path-specific mechanics; matching Cursor pointers |
 | `.claude/skills/*/SKILL.md` | task procedures; `.agents/skills/` aliases |
+| `.claude/hooks/`, `.cursor/hooks/` | Claude Code git guard and its tests; headless Cursor guard |
 | `.ai/PROJECT_OVERVIEW.md` | semantic project map, flows and change entry points |
 | `.ai/GIT_WORKFLOW.md` | CI/release reference |
 | `.ai/WORKFLOW_GUIDE.md` | test entry points and verification references |
@@ -34,7 +35,9 @@ that the documented behavior matches the source.
 
 The script checks startup size, imports, skill frontmatter/aliases, path-rule
 applicability and Cursor parity, local paths/links, instruction language,
-verification-command consistency and attribution guards. Local notes are
+verification-command consistency, attribution guards, the guard tests and hook
+wiring, the `cursor-delegate` default model policy, and that `.mcp.json` holds
+no unauthenticated Context7 server. Local notes are
 included when present, without inspecting credential or permission files.
 
 Keep startup files compact. Reference material belongs in the map, path rules

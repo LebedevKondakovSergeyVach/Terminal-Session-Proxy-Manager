@@ -25,10 +25,21 @@ nothing here replaces it.
 
 ## MCP
 
-Configure `context7` and, for website work, `astro-docs`
-(`https://mcp.docs.astro.build/mcp`) in your own Cursor MCP settings or through
-the Cursor context7 plugin — once, not both. Usage rules: `AGENTS.md`,
-"Skills and documentation tools".
+Context7 requires the API key. Use a user-level server that sends it from the
+environment, e.g. `"headers": {"Context7-API-Key": "${env:CONTEXT7_API_KEY}"}`
+in `~/.cursor/mcp.json`; the Cursor Context7 plugin authenticates with OAuth,
+which the CLI cannot complete. Add `astro-docs`
+(`https://mcp.docs.astro.build/mcp`) for website work. Usage rules:
+`AGENTS.md`, "Skills and documentation tools".
+
+## Headless runs
+
+Started by skill `cursor-delegate` (`CURSOR_DELEGATE=1`), you run without
+anyone to approve a prompt. `.cursor/hooks/delegate-guard.sh` denies git
+mutations, GitHub writes, publishing and `rm -r`. On a denial or a decision
+you cannot take from the brief, `AGENTS.md` or the code, stop and make the last
+line of your answer `QUESTION: <question with options>`. Never retry a denied
+command in another form.
 
 ## Authorship
 

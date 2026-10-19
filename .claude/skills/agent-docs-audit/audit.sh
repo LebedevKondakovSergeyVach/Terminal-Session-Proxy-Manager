@@ -86,6 +86,8 @@ for f in $DOCS; do
     # actions, placeholders (X.Y.Z, NEW, X.md) and hypothetical future filenames.
     case "$p" in /*|*X.Y.Z*|http*|*/|refs/*|origin/*|release/*|feat/*|fix/*|rustsec/*) continue;; esac
     case "$p" in docs/superpowers/*|*/NEW.*|*/X.*|*_v[0-9]*.png|./settings.json) continue;; esac
+    # Paths in the Homebrew tap repository, and a file the docs forbid creating.
+    case "$p" in Formula/*|.cursor/cli.json) continue;; esac
     # Site docs name paths relative to website/ and its content directory.
     [ -e "$p" ] || [ -e "$(dirname "$f")/$p" ] || [ -e "website/$p" ] || [ -e "website/src/content/docs/$p" ] \
       || { note FAIL "$f names missing path: $p"; miss=1; }
@@ -142,6 +144,25 @@ done
 if [ -L website/CLAUDE.md ] && [ "$(readlink website/CLAUDE.md)" = AGENTS.md ]; then
   note OK "website/CLAUDE.md resolves to the area contract"
 else note FAIL "website/CLAUDE.md must link to AGENTS.md"; fi
+
+echo "== 10. Hooks, delegation policy and MCP =="
+if grep -q 'hooks/guard-git.sh' .claude/settings.json 2>/dev/null; then
+  r=$(bash .claude/hooks/tests/guard-git-test.sh .claude/hooks/guard-git.sh 2>&1 | tail -1)
+  case "$r" in *" fail=0") note OK "guard-git.sh wired in .claude/settings.json; tests: $r" ;;
+    *) note FAIL "guard-git.sh tests: $r" ;; esac
+else note FAIL ".claude/settings.json does not run .claude/hooks/guard-git.sh"; fi
+if grep -q 'delegate-guard.sh' .cursor/hooks.json 2>/dev/null && grep -q '"failClosed": true' .cursor/hooks.json; then
+  r=$(bash .cursor/hooks/tests/delegate-guard-test.sh .cursor/hooks/delegate-guard.sh 2>&1 | tail -1)
+  case "$r" in *" fail=0") note OK ".cursor/hooks.json runs delegate-guard.sh fail-closed; tests: $r" ;;
+    *) note FAIL "delegate-guard.sh tests: $r" ;; esac
+else note FAIL ".cursor/hooks.json must run .cursor/hooks/delegate-guard.sh with failClosed"; fi
+run=.claude/skills/cursor-delegate/run.sh
+if grep -q '^effort=xhigh; context=256k; fast=false;' "$run" 2>/dev/null; then
+  note OK "cursor-delegate defaults: xhigh, 256k, Fast off"
+else note FAIL "$run defaults differ from the documented policy (xhigh, 256k, Fast off)"; fi
+if grep -qi 'context7' .mcp.json 2>/dev/null; then
+  note FAIL ".mcp.json declares Context7; it needs a per-user API key (AGENTS.md)"
+else note OK ".mcp.json declares no unauthenticated Context7 server"; fi
 note INFO "Behavior claims require source review; this script checks structure only."
 
 echo; if [ "$fail" -eq 0 ]; then echo "No blocking problems."; else echo "Blocking problems found."; fi
