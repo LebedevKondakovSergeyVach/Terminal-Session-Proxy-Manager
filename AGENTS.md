@@ -102,8 +102,9 @@ the branch before editing; do not discard existing work.
 - Never push to `main` or create/push a tag. Bump the version only during an
   explicitly requested release cut. Merging a release/hotfix into `main`
   runs the publishing pipeline.
-- Never bypass hooks (`--no-verify`, `commit -n`, `core.hooksPath`). Enable
-  them once per clone with `git config core.hooksPath .githooks`. In Claude
+- Never bypass hooks (`--no-verify`, `commit -n`, a `core.hooksPath` other
+  than `.githooks`). Enable them once per clone with
+  `git config core.hooksPath .githooks`. In Claude
   Code, `.claude/hooks/guard-git.sh` blocks bypasses and author overrides.
 - Commits and PRs carry no tool authorship: no `Co-Authored-By:`, "Generated
   with" line, tool name or `--author`. Brief committing subagents explicitly.

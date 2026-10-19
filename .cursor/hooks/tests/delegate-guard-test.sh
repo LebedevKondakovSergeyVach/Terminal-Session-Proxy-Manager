@@ -138,6 +138,12 @@ cases=(
   'DENY|git grep -1O foo'
   'DENY|git grep --op foo'
   'ALLOW|git grep --or -e a -e b'
+  # --- final review
+  'ALLOW|echo $HOME'
+  'ALLOW|ls "$HOME/.cursor"'
+  'ALLOW|git remote -h'
+  'DENY|git remote rename origin x'
+  'DENY|git remote set-url origin x'
   # --- second review: reads that must pass
   'ALLOW|git remote -v'
   'ALLOW|git remote get-url origin'

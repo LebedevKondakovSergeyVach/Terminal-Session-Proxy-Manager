@@ -178,7 +178,8 @@ def check_git(args, depth, assignments=()):
     if (sub == "hash-object" and "-w" in rest) or (sub == "reflog" and rest[:1] in (["delete"], ["expire"])) \
             or (sub in ("commit-graph", "multi-pack-index") and "write" in rest):
         raise Deny("git " + sub + " writes objects or refs")
-    if sub == "remote" and rest and rest[0] not in ("-v", "--verbose", "show", "get-url"):
+    if sub == "remote" and rest[:1] and rest[0] in ("add", "remove", "rm", "rename", "set-url", "set-head",
+                                                     "set-branches", "prune", "update"):
         raise Deny("git remote " + rest[0] + " changes remotes")
     if sub == "tag" and rest and not set(rest) & TAG_READS and not rest[0].startswith("-n"):
         raise Deny("git tag changes tags")
@@ -234,7 +235,7 @@ def check_rm(args):
 
 def check_command(tokens, depth):
     for t in tokens:
-        name = t.split("=", 1)[0].lstrip("$")
+        name = t.split("=", 1)[0]  # $HOME reads a variable; HOME or HOME=x sets one
         if EXEC_NAME_RE.match(name):
             raise Deny(name + " decides which program git or a pager runs")
         if "$(" in t:
