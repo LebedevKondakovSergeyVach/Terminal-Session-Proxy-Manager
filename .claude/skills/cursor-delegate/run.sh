@@ -47,8 +47,9 @@ if [ -n "$answer" ]; then
     [ -z "$picked" ] || { echo "--answer reuses the start's model and flags ($base.args); drop the other options" >&2; exit 2; }
     session=$(head -1 "$base.session" 2>/dev/null)
     [ -n "$session" ] || { echo "no session in $base.session - start the run first" >&2; exit 2; }
-    # A start round has the brief name in its argv, an answer round the session id.
-    pgrep -f "cursor-agent -p.*($session|$name\.md)" >/dev/null && { echo "a round of $name is still running - wait for it" >&2; exit 2; }
+    # A start round has the brief name in its argv, an answer round the session id. The launcher puts
+    # its own options before -p (cursor-agent --use-system-ca .../index.js -p ...).
+    pgrep -f "cursor-agent.* -p .*($session|$name\.md)" >/dev/null && { echo "a round of $name is still running - wait for it" >&2; exit 2; }
     flags=$(cat "$base.args")
     # The agent can write files in its workspace: accept only the one line a start writes, never --force.
     case "$flags" in *$'\n'*) echo "$base.args has more than one line - refusing to resume" >&2; exit 2 ;; esac

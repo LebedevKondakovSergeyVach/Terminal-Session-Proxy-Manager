@@ -108,8 +108,8 @@ concrete fix; regressions separate from existing issues; no cosmetic findings.
    `--answer` refuses a `.args` file holding anything but the flags a start writes.
 3. `QUESTION`: answer from the brief, `AGENTS.md` or the code; a decision that is the user's goes
    to them first (Claude Code: AskUserQuestion). Then `--answer`.
-4. Stuck run: stop its background task, or `pkill -f 'cursor-agent -p.*<NN-slug>.md'` (start round)
-   / `pkill -f 'cursor-agent -p.*<session-id>'` (answer round; the id is line 1 of
+4. Stuck run: stop its background task, or `pkill -f 'cursor-agent.* -p .*<NN-slug>.md'` (start
+   round) / `pkill -f 'cursor-agent.* -p .*<session-id>'` (answer round; the id is line 1 of
    `logs-NN/NN-<slug>.session`). Continue with `--answer`. No `.session` file: repeat the start.
 5. After `DONE`: read the result, spot-check its key claims (`path:line`, `ls`), fix confirmed issues
    in the parent session, run the gates, and request a focused re-check for substantive fixes.
