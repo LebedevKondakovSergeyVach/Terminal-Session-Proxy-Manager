@@ -144,6 +144,9 @@ cases=(
   'ALLOW|git remote -h'
   'DENY|git remote rename origin x'
   'DENY|git remote set-url origin x'
+  'DENY|git remote -v add x y'
+  'DENY|git remote --verbose rename a b'
+  'ALLOW|git remote show origin'
   # --- second review: reads that must pass
   'ALLOW|git remote -v'
   'ALLOW|git remote get-url origin'

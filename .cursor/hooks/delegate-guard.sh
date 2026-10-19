@@ -178,9 +178,12 @@ def check_git(args, depth, assignments=()):
     if (sub == "hash-object" and "-w" in rest) or (sub == "reflog" and rest[:1] in (["delete"], ["expire"])) \
             or (sub in ("commit-graph", "multi-pack-index") and "write" in rest):
         raise Deny("git " + sub + " writes objects or refs")
-    if sub == "remote" and rest[:1] and rest[0] in ("add", "remove", "rm", "rename", "set-url", "set-head",
-                                                     "set-branches", "prune", "update"):
-        raise Deny("git remote " + rest[0] + " changes remotes")
+    if sub == "remote":  # allowlist: listing flags, then nothing, show or get-url
+        words = [a for a in rest if not a.startswith("-")]
+        flags = [a for a in rest if a.startswith("-")]
+        if any(a not in ("-v", "--verbose", "-h", "--help", "-n") for a in flags) \
+                or (words and words[0] not in ("show", "get-url")):
+            raise Deny("git remote " + " ".join(rest) + " may change remotes")
     if sub == "tag" and rest and not set(rest) & TAG_READS and not rest[0].startswith("-n"):
         raise Deny("git tag changes tags")
     if sub == "worktree" and rest[:1] != ["list"]:
