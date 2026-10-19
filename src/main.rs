@@ -1,7 +1,7 @@
 //! Terminal Session Proxy Manager — binary entry point.
 //!
 //! Deliberately thin: it resolves configuration, localises the help text, and
-//! dispatches to [`terminal_session_proxy_manager::cmd`]. Logic lives in the
+//! dispatches to [`tspm::cmd`]. Logic lives in the
 //! library so it can be tested without spawning a process.
 
 use std::process::ExitCode;
@@ -9,17 +9,15 @@ use std::process::ExitCode;
 use anyhow::Result;
 use clap::{CommandFactory, FromArgMatches};
 use colored::Colorize;
-use terminal_session_proxy_manager::cli::{
-    Cli, Commands, ConfigCommands, EnvMode, ProfileCommands, SettingsCommands,
-};
-use terminal_session_proxy_manager::cmd::{
+use tspm::cli::{Cli, Commands, ConfigCommands, EnvMode, ProfileCommands, SettingsCommands};
+use tspm::cmd::{
     completions, dash, diagnose, env as env_cmd, export_cmd, git_cmd, import_cmd, init, monitor,
     ping, profile, settings, speedtest, status,
 };
-use terminal_session_proxy_manager::config::{
+use tspm::config::{
     AppConfig, AppSettings, I18n, set_config_path_override, set_settings_path_override,
 };
-use terminal_session_proxy_manager::{proxy_env, shell_handoff};
+use tspm::{proxy_env, shell_handoff};
 
 #[tokio::main]
 async fn main() -> ExitCode {
@@ -312,7 +310,7 @@ fn run_through_proxy(cmd: &[String], config: &AppConfig, i18n: &I18n) -> Result<
 #[cfg(test)]
 mod tests {
     use super::*;
-    use terminal_session_proxy_manager::cli::LangCode;
+    use tspm::cli::LangCode;
 
     fn args(items: &[&str]) -> Vec<String> {
         items.iter().map(|s| (*s).to_string()).collect()
@@ -354,6 +352,52 @@ mod tests {
     #[test]
     fn preparse_tolerates_a_trailing_flag_with_no_value() {
         assert_eq!(preparse(&args(&["tspm", "--lang"]), "--lang"), None);
+    }
+
+    #[test]
+    fn preparse_stops_at_run_so_a_child_flag_cannot_retarget_the_manager() {
+        let argv = args(&[
+            "tspm",
+            "--lang",
+            "en",
+            "run",
+            "--lang",
+            "ru",
+            "--config-file",
+            "/tmp/child.json",
+            "--settings-file",
+            "/tmp/child-settings.json",
+        ]);
+
+        assert_eq!(preparse(&argv, "--lang"), Some("en"));
+        assert_eq!(preparse(&argv, "--config-file"), None);
+        assert_eq!(preparse(&argv, "--settings-file"), None);
+    }
+
+    #[test]
+    fn preparse_stops_at_double_dash() {
+        let argv = args(&["tspm", "--", "--lang", "en", "--config-file", "/tmp/c.json"]);
+
+        assert_eq!(preparse(&argv, "--lang"), None);
+        assert_eq!(preparse(&argv, "--config-file"), None);
+    }
+
+    #[test]
+    fn preparse_still_reads_a_flag_placed_before_run() {
+        let argv = args(&["tspm", "--settings-file", "/tmp/s.json", "run", "echo"]);
+
+        assert_eq!(preparse(&argv, "--settings-file"), Some("/tmp/s.json"));
+    }
+
+    #[test]
+    fn bilingual_help_keeps_english_unless_the_language_is_russian() {
+        assert_eq!(translate_bilingual("Check | Проверить", false), "Check");
+        assert_eq!(translate_bilingual("Check | Проверить", true), "Проверить");
+    }
+
+    #[test]
+    fn text_without_a_language_separator_is_left_unchanged() {
+        assert_eq!(translate_bilingual("already local", true), "already local");
     }
 
     #[test]

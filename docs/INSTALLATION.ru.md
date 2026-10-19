@@ -7,13 +7,13 @@
 Самый простой способ для macOS и Linux:
 
 ```bash title="Terminal" frame="terminal"
-brew install LebedevKondakovSergeyVach/tap/terminal-session-proxy-manager
+brew install LebedevKondakovSergeyVach/tap/tspm
 ```
 
 Обновление в дальнейшем:
 
 ```bash title="Terminal" frame="terminal"
-brew upgrade terminal-session-proxy-manager
+brew upgrade tspm
 ```
 
 ## Cargo
@@ -25,17 +25,9 @@ brew upgrade terminal-session-proxy-manager
 cargo install tspm
 ```
 
-В `~/.cargo/bin` появится `terminal-session-proxy-manager`. rustup обычно сам
+В `~/.cargo/bin` появится `tspm`. rustup обычно сам
 добавляет этот каталог в `PATH`. Если после этого команда не найдена, см. раздел
 [Настройка PATH](#-настройка-path) ниже.
-
-Если Cargo сообщает, что бинарник уже существует, его занимает прежняя
-установка из git:
-
-```bash title="Terminal" frame="terminal"
-cargo uninstall terminal-session-proxy-manager
-cargo install tspm
-```
 
 Чтобы собрать ревизию из git, а не релиз с crates.io:
 
@@ -52,10 +44,10 @@ cargo install --git https://github.com/LebedevKondakovSergeyVach/Terminal-Sessio
 Каждый архив сопровождается файлом `.sha256`. Проверьте его перед установкой:
 
 ```bash title="Terminal" frame="terminal"
-shasum -a 256 -c terminal-session-proxy-manager-macos-arm64.tar.gz.sha256
+shasum -a 256 -c tspm-macos-arm64.tar.gz.sha256
 
-tar -xzf terminal-session-proxy-manager-macos-arm64.tar.gz
-sudo mv terminal-session-proxy-manager /usr/local/bin/
+tar -xzf tspm-macos-arm64.tar.gz
+sudo mv tspm /usr/local/bin/
 ```
 
 <!--site:/tabs-->
@@ -63,7 +55,7 @@ sudo mv terminal-session-proxy-manager /usr/local/bin/
 В macOS Gatekeeper может поместить скачанный файл в карантин. Чтобы снять его:
 
 ```bash title="Terminal" frame="terminal"
-xattr -d com.apple.quarantine /usr/local/bin/terminal-session-proxy-manager
+xattr -d com.apple.quarantine /usr/local/bin/tspm
 ```
 
 ---
@@ -98,7 +90,7 @@ export PATH="$HOME/.cargo/bin:$PATH"
 Проверьте, какой именно бинарник используется:
 
 ```bash title="Terminal" frame="terminal"
-which terminal-session-proxy-manager
+which tspm
 ```
 
 ---
@@ -112,13 +104,13 @@ which terminal-session-proxy-manager
 **Zsh** (`~/.zshrc`):
 
 ```bash title="~/.zshrc" frame="code"
-eval "$(terminal-session-proxy-manager init zsh)"
+eval "$(tspm init zsh)"
 ```
 
 **Bash** (`~/.bashrc`):
 
 ```bash title="~/.bashrc" frame="code"
-eval "$(terminal-session-proxy-manager init bash)"
+eval "$(tspm init bash)"
 ```
 
 Перезапустите терминал или выполните `source ~/.zshrc` для применения изменений.
@@ -130,7 +122,7 @@ eval "$(terminal-session-proxy-manager init bash)"
 ## 🔍 Проверка установки
 
 ```bash title="Terminal" frame="terminal"
-terminal-session-proxy-manager --version
+tspm --version
 type proxy          # должен сообщить, что это shell-функция
 proxy config path   # покажет, какой config.json используется
 proxy status
@@ -142,13 +134,13 @@ proxy status
 
 ```bash title="Terminal" frame="terminal"
 # Homebrew
-brew uninstall terminal-session-proxy-manager
+brew uninstall tspm
 
 # Cargo (crates.io)
 cargo uninstall tspm
 
 # Ручная установка
-sudo rm /usr/local/bin/terminal-session-proxy-manager
+sudo rm /usr/local/bin/tspm
 ```
 
 Затем удалите строку `eval "$(... init ...)"` из файла конфигурации вашей
@@ -158,7 +150,7 @@ sudo rm /usr/local/bin/terminal-session-proxy-manager
 
 ```bash title="Terminal" frame="terminal"
 # macOS
-rm -rf ~/Library/Application\ Support/terminal-session-proxy-manager
+rm -rf ~/Library/Application\ Support/tspm
 # Linux
-rm -rf ~/.config/terminal-session-proxy-manager
+rm -rf ~/.config/tspm
 ```

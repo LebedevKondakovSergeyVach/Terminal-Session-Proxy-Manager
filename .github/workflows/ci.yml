@@ -52,6 +52,9 @@ jobs:
       - name: Check documentation builds
         run: cargo doc --no-deps --all-features --locked
 
+      - name: Test release automation
+        run: python3 -m unittest discover -s .github/scripts -p 'test_*.py'
+
   test:
     name: Test (${{ matrix.os }})
     runs-on: ${{ matrix.os }}

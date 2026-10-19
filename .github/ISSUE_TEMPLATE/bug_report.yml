@@ -15,7 +15,7 @@ body:
     attributes:
       label: Steps to reproduce
       placeholder: |
-        1. terminal-session-proxy-manager profile use work
+        1. tspm profile use work
         2. proxy on
         3. ...
     validations:
@@ -25,7 +25,7 @@ body:
     id: version
     attributes:
       label: Version
-      description: Output of `terminal-session-proxy-manager --version`
+      description: Output of `tspm --version`
     validations:
       required: true
 
@@ -48,6 +48,6 @@ body:
     attributes:
       label: Configuration
       description: >
-        Output of `terminal-session-proxy-manager config show`.
+        Output of `tspm config show`.
         Remove any host, port, or credential you do not want to publish.
       render: json

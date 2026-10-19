@@ -65,7 +65,7 @@ with" line. Never merge it yourself, never push `main`, never create a tag —
 | Mistake | Consequence |
 | :--- | :--- |
 | Bumping the version on a task branch or while opening the release | the next merge to `main` publishes early |
-| Updating only `CHANGELOG.md` | `CHANGELOG.ru.md` is a published page; CI does not check it at release time |
+| Updating only `CHANGELOG.md` | release verification also requires the Russian section; both supply the GitHub release notes |
 | Forgetting the footer references | headings render as bracketed text |
 | Skipping the website build | a dead changelog link surfaces only after the merge, in `pages.yml` |
 | Re-dispatching `release.yml` on the tag after `crates` failed | `publish` repeats the GitHub release and Homebrew bump; re-run the `crates` job |

@@ -11,7 +11,7 @@ use std::sync::OnceLock;
 pub const CONFIG_PATH_ENV: &str = "TSPM_CONFIG";
 
 /// Directory created under the OS config directory.
-pub(crate) const APP_DIR: &str = "terminal-session-proxy-manager";
+pub(crate) const APP_DIR: &str = "tspm";
 
 static CONFIG_PATH_OVERRIDE: OnceLock<PathBuf> = OnceLock::new();
 
@@ -459,6 +459,26 @@ mod tests {
 
         assert_eq!(config.get_socks_url().unwrap(), "socks5://[::1]:1080");
         assert_eq!(config.get_http_url().unwrap(), "http://[::1]:1080");
+    }
+
+    #[test]
+    fn the_default_config_directory_is_tspm() {
+        let resolved = resolve_config_path(None, None, None, Path::new("/default"));
+
+        assert_eq!(resolved, PathBuf::from("/default/tspm/config.json"));
+    }
+
+    #[test]
+    fn an_absolute_config_path_is_not_rewritten() {
+        let custom = "/tmp/terminal-session-proxy-manager/config.json";
+        let resolved = resolve_config_path(
+            None,
+            Some(custom),
+            Some(Path::new("/tmp/settings")),
+            Path::new("/default"),
+        );
+
+        assert_eq!(resolved, PathBuf::from(custom));
     }
 
     #[test]

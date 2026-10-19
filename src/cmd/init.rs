@@ -8,169 +8,177 @@ pub fn generate_shell_init<C: CommandFactory>(shell_type: &ShellType) {
     match shell_type {
         ShellType::Zsh => {
             println!(
-                r#"# terminal-session-proxy-manager Zsh Integration
+                r#"# tspm Zsh Integration
 proxy() {{
-    if command -v terminal-session-proxy-manager >/dev/null 2>&1; then
+    local _tspm_rc _tspm_exports
+    if command -v tspm >/dev/null 2>&1; then
         if [[ "$1" == "on" || "$1" == "off" ]]; then
-            eval "$(terminal-session-proxy-manager env "$1")"
+            _tspm_exports="$(tspm env "$1")" || return $?
+            eval "$_tspm_exports"
         elif [[ "$1" == "use" || "$1" == "switch" || "$1" == "best" ]]; then
             case "$1" in
-                use)    terminal-session-proxy-manager profile use "$2" ;;
-                switch) terminal-session-proxy-manager profile select ;;
-                best)   terminal-session-proxy-manager profile best ;;
+                use)    tspm profile use "$2" ;;
+                switch) tspm profile select ;;
+                best)   tspm profile best ;;
             esac
             # Capture first: the re-apply test used to become the function's
             # own status, so `proxy use work` reported failure on success when
             # the proxy was off, and success on failure when it was on.
             _tspm_rc=$?
             if [ $_tspm_rc -eq 0 ] && [ -n "$ALL_PROXY" ]; then
-                eval "$(terminal-session-proxy-manager env on)"
+                _tspm_exports="$(tspm env on)" || return $?
+                eval "$_tspm_exports"
             fi
             return $_tspm_rc
         else
-            terminal-session-proxy-manager "$@"
-            if [ -f "$HOME/.terminal-session-proxy-manager-eval" ]; then
-                if [ -f "$HOME/.terminal-session-proxy-manager-debug-enabled" ]; then
-                    echo "[DEBUG-SHELL] Found $HOME/.terminal-session-proxy-manager-eval. Content:"
-                    cat "$HOME/.terminal-session-proxy-manager-eval"
+            tspm "$@"
+            _tspm_rc=$?
+            if [ -f "$HOME/.tspm-eval" ]; then
+                if [ -f "$HOME/.tspm-debug-enabled" ]; then
+                    echo "[DEBUG-SHELL] Found $HOME/.tspm-eval. Content:"
+                    cat "$HOME/.tspm-eval"
                     echo
                 fi
-                eval "$(cat "$HOME/.terminal-session-proxy-manager-eval")"
-                rm -f "$HOME/.terminal-session-proxy-manager-eval"
+                eval "$(cat "$HOME/.tspm-eval")"
+                rm -f "$HOME/.tspm-eval"
             else
-                if [ -f "$HOME/.terminal-session-proxy-manager-debug-enabled" ]; then
-                    echo "[DEBUG-SHELL] $HOME/.terminal-session-proxy-manager-eval not found after terminal-session-proxy-manager exit."
+                if [ -f "$HOME/.tspm-debug-enabled" ]; then
+                    echo "[DEBUG-SHELL] $HOME/.tspm-eval not found after tspm exit."
                 fi
             fi
+            return $_tspm_rc
         fi
     else
-        echo "❌ terminal-session-proxy-manager binary not found in PATH"
+        echo "❌ tspm binary not found in PATH"
+        return 127
     fi
 }}
 
-proxy_on() {{ eval "$(terminal-session-proxy-manager env on)"; }}
-proxy_off() {{ eval "$(terminal-session-proxy-manager env off)"; }}
+proxy_on() {{ proxy on; }}
+proxy_off() {{ proxy off; }}
 proxy_toggle() {{ if [ -n "$ALL_PROXY" ]; then proxy_off; else proxy_on; fi; }}
-proxy_status() {{ terminal-session-proxy-manager status "$@"; }}
-proxy_ping() {{ terminal-session-proxy-manager ping "$@"; }}
-proxy_diagnose() {{ terminal-session-proxy-manager diagnose "$@"; }}
-proxy_benchmark() {{ terminal-session-proxy-manager benchmark "$@"; }}
-proxy_best() {{ terminal-session-proxy-manager best "$@"; }}
-proxy_switch() {{ terminal-session-proxy-manager switch "$@"; }}
-proxy_dash() {{ 
-    terminal-session-proxy-manager dash "$@"
-    if [ -f "$HOME/.terminal-session-proxy-manager-eval" ]; then
-        if [ -f "$HOME/.terminal-session-proxy-manager-debug-enabled" ]; then
-            echo "[DEBUG-SHELL] proxy_dash: Found $HOME/.terminal-session-proxy-manager-eval. Content:"
-            cat "$HOME/.terminal-session-proxy-manager-eval"
+proxy_status() {{ tspm status "$@"; }}
+proxy_ping() {{ tspm ping "$@"; }}
+proxy_diagnose() {{ tspm diagnose "$@"; }}
+proxy_benchmark() {{ tspm benchmark "$@"; }}
+proxy_best() {{ tspm best "$@"; }}
+proxy_switch() {{ tspm switch "$@"; }}
+proxy_dash() {{
+    local _tspm_rc
+    tspm dash "$@"
+    _tspm_rc=$?
+    if [ -f "$HOME/.tspm-eval" ]; then
+        if [ -f "$HOME/.tspm-debug-enabled" ]; then
+            echo "[DEBUG-SHELL] proxy_dash: Found $HOME/.tspm-eval. Content:"
+            cat "$HOME/.tspm-eval"
             echo
         fi
-        eval "$(cat "$HOME/.terminal-session-proxy-manager-eval")"
-        rm -f "$HOME/.terminal-session-proxy-manager-eval"
+        eval "$(cat "$HOME/.tspm-eval")"
+        rm -f "$HOME/.tspm-eval"
     else
-        if [ -f "$HOME/.terminal-session-proxy-manager-debug-enabled" ]; then
-            echo "[DEBUG-SHELL] proxy_dash: $HOME/.terminal-session-proxy-manager-eval not found."
+        if [ -f "$HOME/.tspm-debug-enabled" ]; then
+            echo "[DEBUG-SHELL] proxy_dash: $HOME/.tspm-eval not found."
         fi
     fi
+    return $_tspm_rc
 }}
-proxy_run() {{ terminal-session-proxy-manager run -- "$@"; }}
-prompt_proxy_status() {{ terminal-session-proxy-manager prompt; }}
+proxy_run() {{ tspm run -- "$@"; }}
+prompt_proxy_status() {{ tspm prompt; }}
 "#
             );
 
             let mut buf = Vec::new();
-            generate(
-                Shell::Zsh,
-                &mut cmd,
-                "terminal-session-proxy-manager",
-                &mut buf,
-            );
+            generate(Shell::Zsh, &mut cmd, env!("CARGO_PKG_NAME"), &mut buf);
             if let Ok(compl_str) = String::from_utf8(buf) {
                 println!("{compl_str}");
-                println!("compdef _terminal-session-proxy-manager proxy 2>/dev/null || true");
+                println!("compdef _tspm proxy 2>/dev/null || true");
             }
         }
         ShellType::Bash => {
             println!(
-                r#"# terminal-session-proxy-manager Bash Integration
+                r#"# tspm Bash Integration
 proxy() {{
-    if command -v terminal-session-proxy-manager >/dev/null 2>&1; then
+    local _tspm_rc _tspm_exports
+    if command -v tspm >/dev/null 2>&1; then
         if [ "$1" = "on" ] || [ "$1" = "off" ]; then
-            eval "$(terminal-session-proxy-manager env "$1")"
+            _tspm_exports="$(tspm env "$1")" || return $?
+            eval "$_tspm_exports"
         elif [ "$1" = "use" ] || [ "$1" = "switch" ] || [ "$1" = "best" ]; then
             case "$1" in
-                use)    terminal-session-proxy-manager profile use "$2" ;;
-                switch) terminal-session-proxy-manager profile select ;;
-                best)   terminal-session-proxy-manager profile best ;;
+                use)    tspm profile use "$2" ;;
+                switch) tspm profile select ;;
+                best)   tspm profile best ;;
             esac
             # Capture first: the re-apply test used to become the function's
             # own status, so `proxy use work` reported failure on success when
             # the proxy was off, and success on failure when it was on.
             _tspm_rc=$?
             if [ $_tspm_rc -eq 0 ] && [ -n "$ALL_PROXY" ]; then
-                eval "$(terminal-session-proxy-manager env on)"
+                _tspm_exports="$(tspm env on)" || return $?
+                eval "$_tspm_exports"
             fi
             return $_tspm_rc
         else
-            terminal-session-proxy-manager "$@"
-            if [ -f "$HOME/.terminal-session-proxy-manager-eval" ]; then
-                if [ -f "$HOME/.terminal-session-proxy-manager-debug-enabled" ]; then
-                    echo "[DEBUG-SHELL] Found $HOME/.terminal-session-proxy-manager-eval. Content:"
-                    cat "$HOME/.terminal-session-proxy-manager-eval"
+            tspm "$@"
+            _tspm_rc=$?
+            if [ -f "$HOME/.tspm-eval" ]; then
+                if [ -f "$HOME/.tspm-debug-enabled" ]; then
+                    echo "[DEBUG-SHELL] Found $HOME/.tspm-eval. Content:"
+                    cat "$HOME/.tspm-eval"
                     echo
                 fi
-                eval "$(cat "$HOME/.terminal-session-proxy-manager-eval")"
-                rm -f "$HOME/.terminal-session-proxy-manager-eval"
+                eval "$(cat "$HOME/.tspm-eval")"
+                rm -f "$HOME/.tspm-eval"
             else
-                if [ -f "$HOME/.terminal-session-proxy-manager-debug-enabled" ]; then
-                    echo "[DEBUG-SHELL] $HOME/.terminal-session-proxy-manager-eval not found after terminal-session-proxy-manager exit."
+                if [ -f "$HOME/.tspm-debug-enabled" ]; then
+                    echo "[DEBUG-SHELL] $HOME/.tspm-eval not found after tspm exit."
                 fi
             fi
+            return $_tspm_rc
         fi
     else
-        echo "❌ terminal-session-proxy-manager binary not found in PATH"
+        echo "❌ tspm binary not found in PATH"
+        return 127
     fi
 }}
 
-proxy_on() {{ eval "$(terminal-session-proxy-manager env on)"; }}
-proxy_off() {{ eval "$(terminal-session-proxy-manager env off)"; }}
+proxy_on() {{ proxy on; }}
+proxy_off() {{ proxy off; }}
 proxy_toggle() {{ if [ -n "$ALL_PROXY" ]; then proxy_off; else proxy_on; fi; }}
-proxy_status() {{ terminal-session-proxy-manager status "$@"; }}
-proxy_ping() {{ terminal-session-proxy-manager ping "$@"; }}
-proxy_diagnose() {{ terminal-session-proxy-manager diagnose "$@"; }}
-proxy_benchmark() {{ terminal-session-proxy-manager benchmark "$@"; }}
-proxy_best() {{ terminal-session-proxy-manager best "$@"; }}
-proxy_switch() {{ terminal-session-proxy-manager switch "$@"; }}
-proxy_dash() {{ 
-    terminal-session-proxy-manager dash "$@"
-    if [ -f "$HOME/.terminal-session-proxy-manager-eval" ]; then
-        if [ -f "$HOME/.terminal-session-proxy-manager-debug-enabled" ]; then
-            echo "[DEBUG-SHELL] proxy_dash: Found $HOME/.terminal-session-proxy-manager-eval. Content:"
-            cat "$HOME/.terminal-session-proxy-manager-eval"
+proxy_status() {{ tspm status "$@"; }}
+proxy_ping() {{ tspm ping "$@"; }}
+proxy_diagnose() {{ tspm diagnose "$@"; }}
+proxy_benchmark() {{ tspm benchmark "$@"; }}
+proxy_best() {{ tspm best "$@"; }}
+proxy_switch() {{ tspm switch "$@"; }}
+proxy_dash() {{
+    local _tspm_rc
+    tspm dash "$@"
+    _tspm_rc=$?
+    if [ -f "$HOME/.tspm-eval" ]; then
+        if [ -f "$HOME/.tspm-debug-enabled" ]; then
+            echo "[DEBUG-SHELL] proxy_dash: Found $HOME/.tspm-eval. Content:"
+            cat "$HOME/.tspm-eval"
             echo
         fi
-        eval "$(cat "$HOME/.terminal-session-proxy-manager-eval")"
-        rm -f "$HOME/.terminal-session-proxy-manager-eval"
+        eval "$(cat "$HOME/.tspm-eval")"
+        rm -f "$HOME/.tspm-eval"
     else
-        if [ -f "$HOME/.terminal-session-proxy-manager-debug-enabled" ]; then
-            echo "[DEBUG-SHELL] proxy_dash: $HOME/.terminal-session-proxy-manager-eval not found."
+        if [ -f "$HOME/.tspm-debug-enabled" ]; then
+            echo "[DEBUG-SHELL] proxy_dash: $HOME/.tspm-eval not found."
         fi
     fi
+    return $_tspm_rc
 }}
-proxy_run() {{ terminal-session-proxy-manager run -- "$@"; }}
+proxy_run() {{ tspm run -- "$@"; }}
 "#
             );
 
             let mut buf = Vec::new();
-            generate(
-                Shell::Bash,
-                &mut cmd,
-                "terminal-session-proxy-manager",
-                &mut buf,
-            );
+            generate(Shell::Bash, &mut cmd, env!("CARGO_PKG_NAME"), &mut buf);
             if let Ok(compl_str) = String::from_utf8(buf) {
                 println!("{compl_str}");
-                println!("complete -F _terminal-session-proxy-manager proxy 2>/dev/null || true");
+                println!("complete -F _tspm proxy 2>/dev/null || true");
             }
         }
     }

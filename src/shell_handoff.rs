@@ -12,11 +12,11 @@ use std::path::PathBuf;
 use anyhow::{Context, Result};
 
 /// File the shell wrapper evaluates and removes after the binary exits.
-const EVAL_FILE: &str = ".terminal-session-proxy-manager-eval";
+const EVAL_FILE: &str = ".tspm-eval";
 /// Marker file whose presence turns on hand-off debug logging.
-const DEBUG_FLAG_FILE: &str = ".terminal-session-proxy-manager-debug-enabled";
+const DEBUG_FLAG_FILE: &str = ".tspm-debug-enabled";
 /// Append-only log written only while the debug marker exists.
-const DEBUG_LOG_FILE: &str = ".terminal-session-proxy-manager-debug.log";
+const DEBUG_LOG_FILE: &str = ".tspm-debug.log";
 
 fn in_home(name: &str) -> Option<PathBuf> {
     dirs::home_dir().map(|home| home.join(name))
@@ -94,6 +94,13 @@ pub fn log_debug(message: &str) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn handoff_filenames_use_the_tspm_prefix() {
+        assert_eq!(EVAL_FILE, ".tspm-eval");
+        assert_eq!(DEBUG_FLAG_FILE, ".tspm-debug-enabled");
+        assert_eq!(DEBUG_LOG_FILE, ".tspm-debug.log");
+    }
 
     #[test]
     fn all_handoff_paths_sit_directly_in_the_home_directory() {

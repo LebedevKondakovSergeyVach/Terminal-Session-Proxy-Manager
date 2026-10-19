@@ -43,7 +43,7 @@
 **Homebrew (macOS / Linux):**
 
 ```bash title="Terminal" frame="terminal"
-brew install LebedevKondakovSergeyVach/tap/terminal-session-proxy-manager
+brew install LebedevKondakovSergeyVach/tap/tspm
 ```
 
 **Cargo** (требуется Rust 1.88+):
@@ -52,8 +52,7 @@ brew install LebedevKondakovSergeyVach/tap/terminal-session-proxy-manager
 cargo install tspm
 ```
 
-Команда — `terminal-session-proxy-manager`. Если этот бинарник уже установлен
-из git, сначала выполните `cargo uninstall terminal-session-proxy-manager`.
+В `~/.cargo/bin` появится команда `tspm`.
 
 **Из исходников:**
 
@@ -72,13 +71,13 @@ cargo install --path .
 **Zsh** (`~/.zshrc`):
 
 ```bash title="Terminal" frame="terminal"
-eval "$(terminal-session-proxy-manager init zsh)"
+eval "$(tspm init zsh)"
 ```
 
 **Bash** (`~/.bashrc`):
 
 ```bash title="Terminal" frame="terminal"
-eval "$(terminal-session-proxy-manager init bash)"
+eval "$(tspm init bash)"
 ```
 
 Перезапустите терминал или выполните `source ~/.zshrc`. После этого станут
@@ -205,8 +204,8 @@ TSPM_CONFIG=~/work-proxies.json proxy best
 - **`settings.json`** — язык интерфейса и необязательный путь к конфигурации.
 
 Оба располагаются в системном каталоге конфигурации
-(`~/Library/Application Support/terminal-session-proxy-manager` на macOS,
-`~/.config/terminal-session-proxy-manager` на Linux). Точный путь покажет
+(`~/Library/Application Support/tspm` на macOS,
+`~/.config/tspm` на Linux). Точный путь покажет
 `proxy config path`.
 
 Порядок разрешения `config.json`: `--config-file` → `TSPM_CONFIG` →

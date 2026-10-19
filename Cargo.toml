@@ -1,8 +1,7 @@
 [package]
-# crates.io name (`cargo install tspm`). The command and the Rust library keep
-# their own names below; collapsing them would break shell init and imports.
+# crates.io package. `cargo install tspm` / `cargo uninstall tspm`.
 name = "tspm"
-version = "2.4.0"
+version = "3.0.0"
 edition = "2024"
 # Set by the highest MSRV in the resolved tree (ratatui 0.30 requires 1.88).
 rust-version = "1.88"
@@ -17,14 +16,14 @@ keywords = ["proxy", "cli", "socks5", "tui", "shell"]
 categories = ["command-line-utilities", "network-programming"]
 exclude = ["/assets", "/.github", "/.ai", "/docs", "/website"]
 
-# Rust import path. Independent of the crates.io name.
+# Rust import path. Same as the package and installed command.
 [lib]
-name = "terminal_session_proxy_manager"
+name = "tspm"
 path = "src/lib.rs"
 
 # Installed command. Shell init, Homebrew and the release archives use this name.
 [[bin]]
-name = "terminal-session-proxy-manager"
+name = "tspm"
 path = "src/main.rs"
 
 [dependencies]
@@ -34,7 +33,7 @@ clap_complete = "4.6"
 colored = "3.1"
 crossterm = "0.29"
 dialoguer = "0.12"
-dirs = "6.0"
+dirs = "7.0"
 futures = "0.3"
 indicatif = "0.18"
 ratatui = "0.30"

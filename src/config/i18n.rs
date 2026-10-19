@@ -164,4 +164,25 @@ mod tests {
     fn lang_reports_what_was_requested() {
         assert_eq!(I18n::load("en").lang(), "en");
     }
+
+    #[test]
+    fn both_locales_agree_on_placeholder_counts() {
+        // Key equality does not catch a translation that dropped or added a
+        // `{}`. `format` would then leave a literal placeholder or skip a value.
+        let ru: Value = serde_json::from_str(RU_JSON).unwrap();
+        let en: Value = serde_json::from_str(EN_JSON).unwrap();
+        let ru_map = ru.as_object().unwrap();
+        let en_map = en.as_object().unwrap();
+
+        for (key, ru_value) in ru_map {
+            let (Some(ru_text), Some(en_text)) = (ru_value.as_str(), en_map[key].as_str()) else {
+                continue;
+            };
+            assert_eq!(
+                ru_text.matches("{}").count(),
+                en_text.matches("{}").count(),
+                "{key} has a different number of {{}} placeholders"
+            );
+        }
+    }
 }

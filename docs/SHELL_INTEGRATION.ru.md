@@ -11,12 +11,12 @@ Shell-функция `proxy` устраняет это ограничение: �
 
 1. **Добавьте скрипт в Zsh** (`~/.zshrc`):
    ```zsh
-   eval "$(terminal-session-proxy-manager init zsh)"
+   eval "$(tspm init zsh)"
    ```
 
 2. **Или в Bash** (`~/.bashrc`):
    ```bash
-   eval "$(terminal-session-proxy-manager init bash)"
+   eval "$(tspm init bash)"
    ```
 
 3. **Перезапустите терминал** или выполните `source` файла. Команда также
@@ -28,8 +28,8 @@ Shell-функция `proxy` устраняет это ограничение: �
 > Совместимо с instant prompt в Powerlevel10k — при запуске ничего не печатается.
 
 Если вы не хотите выполнять команду при старте оболочки, скопируйте
-[`shell/terminal-session-proxy-manager.zsh`](../shell/terminal-session-proxy-manager.zsh)
-или [`.bash`](../shell/terminal-session-proxy-manager.bash) и подключите через
+[`shell/tspm.zsh`](../shell/tspm.zsh)
+или [`.bash`](../shell/tspm.bash) и подключите через
 `source`. Эти файлы сгенерированы из `init`, но форма с `eval` не устаревает
 никогда.
 
@@ -41,7 +41,7 @@ Shell-функция `proxy` устраняет это ограничение: �
 Фоновый процесс не может изменить окружение запустившей его оболочки. Именно поэтому прямой запуск бинарника не позволяет экспортировать переменные в вашу активную сессию.
 <!--site:/aside-->
 
-При вызове `proxy on` shell-функция запускает `terminal-session-proxy-manager env on`.
+При вызове `proxy on` shell-функция запускает `tspm env on`.
 Бинарник читает активный профиль и выводит экранированные команды `export`;
 функция выполняет этот вывод в текущей сессии Zsh или Bash:
 
@@ -112,13 +112,13 @@ sequenceDiagram
 
 ```zsh
 setopt PROMPT_SUBST
-RPROMPT='$(terminal-session-proxy-manager prompt)'
+RPROMPT='$(tspm prompt)'
 ```
 
 Bash:
 
 ```bash
-PS1='$(terminal-session-proxy-manager prompt)'"$PS1"
+PS1='$(tspm prompt)'"$PS1"
 ```
 
 Когда прокси не задан, ничего не выводится, поэтому при выключенном прокси
@@ -129,14 +129,14 @@ PS1='$(terminal-session-proxy-manager prompt)'"$PS1"
 ## Как `proxy dash` обновляет сессию
 
 На вкладке профилей `Enter` сохраняет выбранный профиль, записывает
-экранированные команды экспорта в `~/.terminal-session-proxy-manager-eval`
+экранированные команды экспорта в `~/.tspm-eval`
 и закрывает дашборд. Затем shell-функция `proxy` или `proxy_dash` выполняет
 этот файл и удаляет его:
 
 ```mermaid
 sequenceDiagram
     accTitle: Как дашборд применяет профиль при выходе
-    accDescr: Shell-функция запускает дашборд. Enter на вкладке профилей сохраняет выбор и записывает экранированные команды export в ~/.terminal-session-proxy-manager-eval. После завершения дашборда оболочка читает, выполняет и удаляет этот файл.
+    accDescr: Shell-функция запускает дашборд. Enter на вкладке профилей сохраняет выбор и записывает экранированные команды export в ~/.tspm-eval. После завершения дашборда оболочка читает, выполняет и удаляет этот файл.
     participant Shell as Zsh / Bash
     participant Dash as Дашборд
     participant File as Файл экспортов
@@ -163,7 +163,7 @@ sequenceDiagram
 ```bash
 proxy debug on
 proxy dash
-cat ~/.terminal-session-proxy-manager-debug.log
+cat ~/.tspm-debug.log
 proxy debug off
 ```
 
@@ -174,7 +174,7 @@ proxy debug off
 **`proxy: command not found`** — строка инициализации отсутствует в rc-файле или
 файл не перечитан. Проверьте через `type proxy`.
 
-**`terminal-session-proxy-manager binary not found in PATH`** — функция
+**`tspm binary not found in PATH`** — функция
 установлена, но бинарник недоступен в `PATH`. См.
 [INSTALLATION.ru.md](INSTALLATION.ru.md).
 

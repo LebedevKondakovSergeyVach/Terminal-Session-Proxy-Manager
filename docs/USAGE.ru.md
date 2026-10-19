@@ -46,7 +46,7 @@
 ```bash title="Terminal" frame="terminal"
 # Рабочие и личные прокси в разных файлах
 TSPM_CONFIG=~/work-proxies.json proxy best
-terminal-session-proxy-manager --config-file ~/work-proxies.json profile list
+tspm --config-file ~/work-proxies.json profile list
 ```
 
 ---
@@ -56,7 +56,7 @@ terminal-session-proxy-manager --config-file ~/work-proxies.json profile list
 ```bash title="Terminal" frame="terminal"
 proxy on                     # Экспортировать переменные прокси в эту сессию
 proxy off                    # Убрать их
-terminal-session-proxy-manager env on   # Показать команды, не применяя их
+tspm env on   # Показать команды, не применяя их
 ```
 
 `proxy on` — это выполнение вывода `env on`. Обе команды задают каждую
@@ -245,8 +245,8 @@ proxy lang ru            # Сохранить язык интерфейса
 ## 11. Настройка shell (`init`, `completions`, `prompt`, `debug`)
 
 ```bash title="Terminal" frame="terminal"
-terminal-session-proxy-manager init zsh          # Скрипт интеграции
-terminal-session-proxy-manager completions zsh   # Только автодополнение
+tspm init zsh          # Скрипт интеграции
+tspm completions zsh   # Только автодополнение
 proxy prompt                                     # Индикатор для приглашения
 proxy debug on                                   # Логировать обмен с shell
 ```
@@ -255,4 +255,4 @@ proxy debug on                                   # Логировать обме
 включает автодополнение, поэтому достаточно чего-то одного.
 
 Включайте `debug on`, если `proxy dash` не обновляет сессию: обмен пишется в
-`~/.terminal-session-proxy-manager-debug.log`.
+`~/.tspm-debug.log`.

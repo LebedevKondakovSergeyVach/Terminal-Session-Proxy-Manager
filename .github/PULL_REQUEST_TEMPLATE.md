@@ -29,5 +29,5 @@ Releasing? If this is release/X.Y.Z -> main, merging publishes: CI builds four
 targets, tags the commit, bumps the Homebrew tap and publishes the tspm crate.
 Confirm first that Cargo.toml and Cargo.lock are at X.Y.Z, and that CHANGELOG.md
 and CHANGELOG.ru.md both have a `## [X.Y.Z]` section with updated link footers.
-CI checks only CHANGELOG.md.
+PR readiness checks CHANGELOG.md; release verification checks both changelogs.
 -->

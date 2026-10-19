@@ -137,15 +137,19 @@ release-readiness job checks that:
 - `vX.Y.Z` is not already tagged,
 - `CHANGELOG.md` has a `## [X.Y.Z]` section.
 
-It does not look at `CHANGELOG.ru.md`, and neither does `release.yml` — the
-Russian changelog is checked only by you.
+It does not look at `CHANGELOG.ru.md`; `release.yml` checks both changelogs
+before publishing and uses their release sections for the GitHub release notes.
 
 Merging it runs `release.yml`: `resolve` sees `main` at a version with no tag;
-`verify` re-runs fmt, clippy and tests, checks `CHANGELOG.md` for the section
+`verify` re-runs fmt, clippy and tests, checks both changelogs for the section
 and runs `cargo publish --dry-run --locked`; `build` produces macOS and Linux
 binaries for x86_64 and arm64 with SHA-256 checksums; `publish` creates and
 pushes the annotated tag, creates the GitHub release with those files, and
-bumps the Homebrew tap; `crates` then runs `cargo publish --locked`. The token
+updates the Homebrew tap; `crates` then runs `cargo publish --locked`. Before
+tagging, `.github/scripts/homebrew_formula.py` verifies all four downloaded
+archives and checksums and renders a native download for each OS/CPU pair.
+The tap update writes the complete formula with its current blob SHA, so all
+URLs and checksums advance together. The token
 is the `CARGO_API_KEY` actions secret, passed as `CARGO_REGISTRY_TOKEN`.
 
 **Nothing is published until that merge.** Pushing a `v*` tag by hand also

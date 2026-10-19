@@ -46,7 +46,7 @@ Accepted by every subcommand, before or after it.
 ```bash title="Terminal" frame="terminal"
 # Keep work and personal proxies in separate files
 TSPM_CONFIG=~/work-proxies.json proxy best
-terminal-session-proxy-manager --config-file ~/work-proxies.json profile list
+tspm --config-file ~/work-proxies.json profile list
 ```
 
 ---
@@ -56,7 +56,7 @@ terminal-session-proxy-manager --config-file ~/work-proxies.json profile list
 ```bash title="Terminal" frame="terminal"
 proxy on                     # Export proxy variables into this shell
 proxy off                    # Unset them
-terminal-session-proxy-manager env on   # Print the statements without applying them
+tspm env on   # Print the statements without applying them
 ```
 
 `proxy on` is shorthand for evaluating the output of `env on`. Both set every
@@ -243,8 +243,8 @@ proxy lang en            # Persist the interface language
 ## 11. Shell setup (`init`, `completions`, `prompt`, `debug`)
 
 ```bash title="Terminal" frame="terminal"
-terminal-session-proxy-manager init zsh          # Integration script
-terminal-session-proxy-manager completions zsh   # Completions only
+tspm init zsh          # Integration script
+tspm completions zsh   # Completions only
 proxy prompt                                     # Prompt indicator
 proxy debug on                                   # Log the shell hand-off
 ```
@@ -253,4 +253,4 @@ proxy debug on                                   # Log the shell hand-off
 includes completions, so you only need one of the two.
 
 Turn `debug on` when `proxy dash` fails to update your shell; it logs the
-hand-off to `~/.terminal-session-proxy-manager-debug.log`.
+hand-off to `~/.tspm-debug.log`.

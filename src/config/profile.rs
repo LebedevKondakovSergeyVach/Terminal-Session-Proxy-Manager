@@ -208,6 +208,22 @@ mod tests {
     }
 
     #[test]
+    fn a_name_with_a_control_character_is_rejected() {
+        let profile = Profile {
+            name: "bad\nname".to_string(),
+            ..valid()
+        };
+
+        assert!(
+            profile
+                .validate("k")
+                .unwrap_err()
+                .to_string()
+                .contains("control character")
+        );
+    }
+
+    #[test]
     fn a_host_carrying_shell_or_url_syntax_is_rejected() {
         for host in [
             "a b",

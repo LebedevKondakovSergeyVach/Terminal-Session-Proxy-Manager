@@ -34,6 +34,7 @@ applying its environment are separate operations.
 | `tests/cli.rs` | Tests spawning the binary with isolated configuration |
 | `shell/`, `configs/` | Shipped shell functions and default configuration |
 | `website/` | Generated bilingual documentation site; own contract |
+| `.github/scripts/homebrew_formula.py` | Release archive validation and native Homebrew formula generation |
 
 There is no separate `best` or `benchmark` module. `lang` shares the settings
 handler. `main.rs` has binary-local tests in addition to library and CLI tests.
