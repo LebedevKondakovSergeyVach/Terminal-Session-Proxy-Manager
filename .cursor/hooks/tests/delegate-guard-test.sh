@@ -90,6 +90,21 @@ cases=(
   'DENY|git tag -d v1'
   'DENY|git tag -a v1 -m x'
   'DENY|git worktree add /tmp/w'
+  # --- security review: programs git runs, find -exec, heredocs into a shell
+  "DENY|git -c core.pager='sh -c \"git push\"' log"
+  'DENY|git -c core.sshCommand=evil fetch'
+  'DENY|git -c diff.x.textconv=evil diff'
+  'DENY|git -c credential.helper=evil status'
+  'DENY|git --config-env=core.pager=X log'
+  'DENY|GIT_PAGER=evil git log'
+  'DENY|env GIT_SSH_COMMAND=evil git status'
+  'DENY|GIT_EXTERNAL_DIFF=evil git diff'
+  'DENY|find . -name x -exec git push {} ;'
+  'DENY|find . -execdir rm -rf {} +'
+  $'DENY|cat <<\'EOF\' | sh\ngit push\nEOF'
+  'ALLOW|git -c color.ui=never log -n 3'
+  'ALLOW|git -c core.quotepath=off status'
+  'ALLOW|find . -name "*.md" -exec grep -l Grok {} +'
   # --- second review: reads that must pass
   'ALLOW|git remote -v'
   'ALLOW|git remote get-url origin'

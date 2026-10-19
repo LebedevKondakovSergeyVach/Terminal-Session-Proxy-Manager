@@ -88,7 +88,9 @@ concrete fix; regressions separate from existing issues; no cosmetic findings.
   mutations including `fetch`, `git branch` and `git config` writes, `gh` writes and `gh api`,
   `cargo publish|install|login` (except `--dry-run`), `npm publish|login` and recursive `rm`. It
   fails closed. Cases: `.cursor/hooks/tests/delegate-guard-test.sh`. A user-level
-  `~/.cursor/hooks/guard-git.sh`, when installed, runs as well.
+  `~/.cursor/hooks/guard-git.sh`, when installed, runs as well. The guards catch mistakes, not
+  deliberate evasion; a brief that reads untrusted content (web pages, issues) still runs with the
+  user's git and GitHub credentials.
 - Default `--auto-review`: a Cursor classifier runs commands it judges safe; the guard is what
   blocks mutations. `--strict` drops it, leaving only `permissions.allow` of `~/.cursor/cli-config.json`.
 - Never `--force` or `--yolo`. Never add a project `.cursor/cli.json`: its `permissions.allow`
@@ -101,7 +103,9 @@ concrete fix; regressions separate from existing issues; no cosmetic findings.
 1. Read only the digest (`.log`, `.last.md`), never the `.jsonl`: it carries reasoning deltas.
 2. Digest lines: `SESSION`, `SAY`, `SHELL ok|success|failure|rejected <cmd>`, `READ`/`EDIT`/`GREP`,
    `DONE <status> <s> in/out/cache`, `QUESTION <text>`, closing `=== exit <code>` with the result
-   file's presence. `[WARN] git branch or HEAD changed`: the run touched git; stop, tell the user.
+   file's presence. `[WARN] git branch or HEAD changed`: the run touched git; `[WARN] guard or hook
+   files changed`: the run edited `.cursor/`, `.claude/hooks/` or the runner. Stop, tell the user.
+   `--answer` refuses a `.args` file holding anything but the flags a start writes.
 3. `QUESTION`: answer from the brief, `AGENTS.md` or the code; a decision that is the user's goes
    to them first (Claude Code: AskUserQuestion). Then `--answer`.
 4. Stuck run: stop its background task, or `pkill -f 'cursor-agent -p.*<NN-slug>.md'` (start round)

@@ -50,6 +50,9 @@ if [ -n "$answer" ]; then
     # A start round has the brief name in its argv, an answer round the session id.
     pgrep -f "cursor-agent -p.*($session|$name\.md)" >/dev/null && { echo "a round of $name is still running - wait for it" >&2; exit 2; }
     flags=$(cat "$base.args")
+    # The agent can write files in its workspace: accept only the flags a start writes, never --force.
+    printf '%s\n' "$flags" | grep -qxE -- '--model grok-4\.7\[context=(256k|500k),reasoning_effort=(low|medium|high|xhigh),fast=(true|false)\]( --auto-review)?( --mode (plan|ask))?' \
+        || { echo "$base.args holds unexpected flags - refusing to resume: $flags" >&2; exit 2; }
     prompt=$answer
     echo "=== resume $session $(date '+%d.%m.%Y %H:%M:%S')" >> "$base.log"
     set -- --resume "$session"
@@ -79,7 +82,10 @@ of your final message: QUESTION: <one concrete question, with options if there a
 fi
 
 git_state() { printf '%s %s\n' "$(git branch --show-current 2>/dev/null)" "$(git rev-parse --short HEAD 2>/dev/null)"; }
-before=$(git_state)
+# The guards live in the workspace the agent works in: detect any change to them during a round.
+guard_state() { find .cursor .claude/hooks .claude/settings.json "$here" -type f ! -path '*/logs-*' -print0 2>/dev/null \
+    | LC_ALL=C sort -z | xargs -0 shasum -a 256 2>/dev/null; }
+before=$(git_state); guards_before=$(guard_state)
 
 # shellcheck disable=SC2086 - $flags is a word list on purpose; set -f keeps the bracketed model id from globbing
 set -f
@@ -89,6 +95,9 @@ code=${PIPESTATUS[0]}
 set +f
 
 after=$(git_state)
+if [ "$guards_before" != "$(guard_state)" ]; then
+    echo "[WARN] guard or hook files changed during the run (.cursor/, .claude/hooks/, settings, $here) - stop, tell the user, review the diff" | tee -a "$base.log"
+fi
 if [ "$before" != "$after" ]; then
     echo "[WARN] git branch or HEAD changed during the run: '$before' -> '$after'" | tee -a "$base.log"
 fi

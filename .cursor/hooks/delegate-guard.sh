@@ -5,7 +5,10 @@
 # request is denied outright: git mutations, GitHub writes and the raw API, publishing and installing,
 # recursive rm. The command is split like a shell would (python3 shlex): quotes, ; && || | ( ) { },
 # $(...) and `...`, nested bash -c and eval, wrappers such as env or /usr/bin/ paths. Heredoc bodies
-# are data. Any failure of the check itself denies (fail-closed).
+# are data unless a shell reads them. `git -c` keys and environment variables that make git run
+# another program are denied. Any failure of the check itself denies (fail-closed). It catches agent mistakes, not
+# deliberate evasion: variables ($V), interpreters (python -c) and script bodies are invisible to it.
+# The real limit is the credentials the run has; run.sh warns when this file changes mid-run.
 # Tests: bash .cursor/hooks/tests/delegate-guard-test.sh .cursor/hooks/delegate-guard.sh
 # The user-level ~/.cursor/hooks/guard-git.sh, when installed, runs as well; any deny wins.
 
@@ -43,6 +46,14 @@ GIT_MUTATING = {"commit", "commit-tree", "push", "pull", "fetch", "checkout", "s
                 "init", "clone", "gc", "prune", "prune-packed", "repack", "pack-refs", "notes", "filter-branch",
                 "replace", "fast-import", "bisect", "sparse-checkout", "maintenance", "lfs", "send-pack",
                 "fetch-pack", "receive-pack"}
+# Config keys and environment variables that make git run another program.
+EXEC_KEY_RE = re.compile(r"^(core\.(pager|editor|sshcommand|fsmonitor|hookspath|askpass|gitproxy)|pager\..+|"
+                         r"sequence\.editor|diff\.external|diff\..+\.(textconv|command)|merge\..+\.driver|"
+                         r"filter\..+|credential\..*helper|gpg\..*program|uploadpack\..+|receivepack\..+|"
+                         r"remote\..+\.(uploadpack|receivepack)|protocol\..+|include\..+|includeif\..+)$", re.I)
+EXEC_ENV_RE = re.compile(r"^(GIT_(PAGER|EDITOR|SEQUENCE_EDITOR|EXTERNAL_DIFF|SSH|SSH_COMMAND|ASKPASS|PROXY_COMMAND|"
+                         r"CONFIG_PARAMETERS|CONFIG_COUNT|CONFIG_KEY_\d+|CONFIG_VALUE_\d+|EXEC_PATH|TEMPLATE_DIR)|"
+                         r"PAGER|EDITOR|VISUAL)=")
 TAG_READS = {"-l", "--list", "--contains", "--no-contains", "--merged", "--no-merged", "--points-at"}
 CONFIG_WITH_ARG = {"-f", "--file", "--blob", "-t", "--type", "--default", "--comment", "--value"}
 CONFIG_READ_FLAGS = {"--get", "--get-all", "--get-regexp", "--list", "-l", "--get-color", "--get-colorbool",
@@ -95,6 +106,7 @@ SHELL_HEREDOC_RE = re.compile(r"(^|[;&|(\s/])(bash|sh|zsh|dash|ksh)(\s[^<]*)?<<"
 def strip_heredocs(text):
     # Heredoc bodies are data, except when a shell reads them as its script.
     out, shell_bodies, lines, i = [], [], text.split("\n"), 0
+    all_bodies = []
     while i < len(lines):
         line = lines[i]
         out.append(line)
@@ -105,9 +117,10 @@ def strip_heredocs(text):
                 body.append(lines[i])
                 i += 1
             i += 1
+            all_bodies.append("\n".join(body))
             if SHELL_HEREDOC_RE.search(line):
                 shell_bodies.append("\n".join(body))
-    return "\n".join(out), shell_bodies
+    return "\n".join(out), shell_bodies, all_bodies
 
 def config_is_read(rest):
     words, flags, i = [], set(), 0
@@ -130,15 +143,22 @@ def config_is_read(rest):
         return False
     return bool(flags & CONFIG_READ_FLAGS) or len(words) < 2
 
-def check_git(args, depth):
+def check_git(args, depth, assignments=()):
+    for a in assignments:
+        if EXEC_ENV_RE.match(a):
+            raise Deny("git with " + a.split("=", 1)[0] + " set can run another program")
     j = 0
     while j < len(args):
         a = args[j]
+        if a.startswith(("--config-env", "-c=")) or a == "--config-env":
+            raise Deny("git --config-env is not allowed in a headless run")
         if a in GIT_GLOBAL_WITH_ARG:
             if a == "-c" and j + 1 < len(args):
                 key, _, value = args[j + 1].partition("=")
                 if key.lower().startswith("alias.") and value:
                     check_text(value[1:] if value.startswith("!") else "git " + value, depth + 1)
+                elif EXEC_KEY_RE.match(key):
+                    raise Deny("git -c " + key + " can run another program")
             j += 2
             continue
         if a.startswith("-"):
@@ -211,16 +231,21 @@ def check_command(tokens, depth):
             check_text(t[t.index("$(") + 2:], depth + 1)
         if "\n" in t:
             check_text(t, depth + 1)
-    i = 0
+    i, assignments = 0, []
     while i < len(tokens):
         t = tokens[i]
         base = os.path.basename(t).lower()
-        if re.match(r"^[A-Za-z_][A-Za-z0-9_]*=", t) or t in KEYWORDS:
+        if re.match(r"^[A-Za-z_][A-Za-z0-9_]*=", t):
+            assignments.append(t)
+            i += 1
+        elif t in KEYWORDS:
             i += 1
         elif base in WRAPPERS:
             i += 1
             while i < len(tokens) and (tokens[i].startswith("-") or re.match(r"^\d+[smhd]?$", tokens[i])
                                        or re.match(r"^[A-Za-z_][A-Za-z0-9_]*=", tokens[i])):
+                if re.match(r"^[A-Za-z_][A-Za-z0-9_]*=", tokens[i]):
+                    assignments.append(tokens[i])
                 i += 2 if tokens[i] in WRAPPER_WITH_ARG else 1
         else:
             break
@@ -242,7 +267,12 @@ def check_command(tokens, depth):
         # With a script argument the shell runs that file; without one it reads stdin.
         return all(a.startswith("-") for a in args)
     elif prog == "git":
-        check_git(args, depth)
+        check_git(args, depth, assignments)
+    elif prog == "find":
+        for k, a in enumerate(args):  # find -exec git push {} ; runs that command
+            if a in ("-exec", "-execdir", "-ok", "-okdir"):
+                end = next((m for m in range(k + 1, len(args)) if args[m] in (";", "+", "\\;")), len(args))
+                check_command(args[k + 1:end], depth + 1)
     elif prog == "gh":
         check_gh(args)
     elif prog == "rm":
@@ -257,14 +287,16 @@ def check_command(tokens, depth):
 def check_text(text, depth=0):
     if depth > 6:
         raise Deny("command nested too deeply to check")
-    text, shell_bodies = strip_heredocs(text)
+    text, shell_bodies, all_bodies = strip_heredocs(text)
     for body in shell_bodies:
         check_text(body, depth + 1)
     cmds = split_commands(text)
     stdin_shell = False
     for c in cmds:
         stdin_shell = check_command(c, depth) or stdin_shell
-    if stdin_shell:  # echo git push | sh: check what the other commands may feed the shell
+    if stdin_shell:  # echo git push | sh, cat <<EOF | sh: check what may reach the shell
+        for body in all_bodies:
+            check_text(body, depth + 1)
         for c in cmds:
             if os.path.basename(c[0]).lower() not in SHELLS:
                 check_text(" ".join(c[1:]).replace("\\n", "\n"), depth + 1)  # printf-style \n too
