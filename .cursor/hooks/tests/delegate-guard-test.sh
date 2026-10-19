@@ -121,6 +121,14 @@ cases=(
   'ALLOW|export LC_ALL=C; git log -n 1'
   'ALLOW|git grep -n foo'
   'ALLOW|find . -name "*.md"'
+  # --- security review, round 5
+  'DENY|git grep -nO foo'
+  'DENY|git grep --open foo'
+  'DENY|git --git-dir=/tmp/r log'
+  'DENY|git --work-tree=/tmp log'
+  'DENY|GIT_COMMON_DIR=/tmp/c git log'
+  'DENY|GIT_PAGER=evil; git log'
+  'DENY|GIT_PAGER=evil; export GIT_PAGER'
   # --- second review: reads that must pass
   'ALLOW|git remote -v'
   'ALLOW|git remote get-url origin'
