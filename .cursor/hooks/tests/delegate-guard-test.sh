@@ -129,6 +129,15 @@ cases=(
   'DENY|GIT_COMMON_DIR=/tmp/c git log'
   'DENY|GIT_PAGER=evil; git log'
   'DENY|GIT_PAGER=evil; export GIT_PAGER'
+  # --- security review, round 6
+  'DENY|for GIT_PAGER in evil; do git log; done'
+  'DENY|read GIT_SSH_COMMAND < f; git fetch'
+  'DENY|printf -v GIT_PAGER evil'
+  'DENY|LESSOPEN="|evil %s" git log'
+  'DENY|SSH_ASKPASS=evil git status'
+  'DENY|git grep -1O foo'
+  'DENY|git grep --op foo'
+  'ALLOW|git grep --or -e a -e b'
   # --- second review: reads that must pass
   'ALLOW|git remote -v'
   'ALLOW|git remote get-url origin'

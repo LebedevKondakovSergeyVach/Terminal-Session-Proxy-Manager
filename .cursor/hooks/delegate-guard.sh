@@ -54,7 +54,10 @@ EXEC_KEY_RE = re.compile(r"^(core\.(pager|editor|sshcommand|fsmonitor|hookspath|
                          r"filter\..+|credential\..*helper|gpg\..*program|uploadpack\..+|receivepack\..+|"
                          r"remote\..+\.(uploadpack|receivepack)|protocol\..+|include\..+|includeif\..+)$", re.I)
 EXEC_ENV_RE = re.compile(r"^(GIT_(PAGER|EDITOR|SEQUENCE_EDITOR|EXTERNAL_DIFF|SSH|SSH_COMMAND|ASKPASS|PROXY_COMMAND|"
-                         r"CONFIG.*|EXEC_PATH|TEMPLATE_DIR|DIR|COMMON_DIR|WORK_TREE)|PAGER|EDITOR|VISUAL|HOME|XDG_CONFIG_HOME)(=|$)")
+                         r"CONFIG.*|EXEC_PATH|TEMPLATE_DIR|DIR|COMMON_DIR|WORK_TREE)|PAGER|EDITOR|VISUAL|HOME|XDG_CONFIG_HOME|"
+                         r"LESS|LESSOPEN|LESSCLOSE|SSH_ASKPASS)(=|$)")
+# The same names as a bare word anywhere (for X in, read X, printf -v X, export X) set them too.
+EXEC_NAME_RE = re.compile(EXEC_ENV_RE.pattern[1:].replace("(=|$)", "") + r"$")
 DECLARERS = {"export", "declare", "typeset", "local", "readonly"}
 TAG_READS = {"-l", "--list", "--contains", "--no-contains", "--merged", "--no-merged", "--points-at"}
 CONFIG_WITH_ARG = {"-f", "--file", "--blob", "-t", "--type", "--default", "--comment", "--value"}
@@ -192,7 +195,7 @@ def check_git(args, depth, assignments=()):
                 continue
             if a.startswith("-") or not filtered:
                 raise Deny("git branch " + a + " changes refs")
-    if sub == "grep" and any(re.match(r"^-[A-Za-z]*O", a) or (a.startswith("--open")) for a in rest):
+    if sub == "grep" and any(re.match(r"^-[A-Za-z0-9]*O", a) or a.startswith("--op") for a in rest):
         raise Deny("git grep -O runs a pager program")
     if sub == "config" and not config_is_read(rest):
         raise Deny("git config writes configuration")
@@ -231,6 +234,9 @@ def check_rm(args):
 
 def check_command(tokens, depth):
     for t in tokens:
+        name = t.split("=", 1)[0].lstrip("$")
+        if EXEC_NAME_RE.match(name):
+            raise Deny(name + " decides which program git or a pager runs")
         if "$(" in t:
             check_text(t[t.index("$(") + 2:], depth + 1)
         if "\n" in t:
