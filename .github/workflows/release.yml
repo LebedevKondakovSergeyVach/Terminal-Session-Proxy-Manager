@@ -90,6 +90,9 @@ jobs:
             fi
           done
 
+      - name: Test release automation
+        run: python3 -m unittest discover -s .github/scripts -p 'test_*.py'
+
       # Packages and compiles the crate the way crates.io will, without uploading.
       # Still before the tag, so a bad package publishes nothing.
       - name: Check the crates.io package
@@ -143,7 +146,7 @@ jobs:
       # nothing about the bytes they actually received.
       - name: Package with checksum
         run: |
-          tar -czf "${{ matrix.artifact_name }}" \
+          COPYFILE_DISABLE=1 tar -czf "${{ matrix.artifact_name }}" \
             -C "target/${{ matrix.target }}/release" tspm
           shasum -a 256 "${{ matrix.artifact_name }}" > "${{ matrix.artifact_name }}.sha256"
 
@@ -186,6 +189,18 @@ jobs:
           Path("release-notes.md").write_text("\n\n".join(sections) + "\n")
           PY
 
+      - uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+
+      - name: Validate archives and prepare the native Homebrew formula
+        env:
+          RELEASE_VERSION: ${{ needs.resolve.outputs.version }}
+        run: |
+          python3 .github/scripts/homebrew_formula.py \
+            --version "$RELEASE_VERSION" --artifacts release-artifacts --output tspm.rb
+          ruby -c tspm.rb
+
       # Deliberately after `build`. Tagging first meant a failing matrix leg
       # left the tag pushed with nothing published, and every retry then saw
       # that tag, set should_release=false, and skipped the release for good.
@@ -198,10 +213,6 @@ jobs:
           git tag -a "$RELEASE_TAG" -m "Release $RELEASE_TAG"
           git push origin "refs/tags/$RELEASE_TAG"
 
-      - uses: actions/download-artifact@v4
-        with:
-          path: release-artifacts
-
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
         with:
@@ -212,15 +223,28 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Update Homebrew formula
-        uses: mislav/bump-homebrew-formula-action@v3
-        with:
-          formula-name: tspm
-          tag-name: ${{ needs.resolve.outputs.tag }}
-          homebrew-tap: LebedevKondakovSergeyVach/homebrew-tap
-          download-url: https://github.com/LebedevKondakovSergeyVach/Terminal-Session-Proxy-Manager/releases/download/${{ needs.resolve.outputs.tag }}/tspm-macos-x86_64.tar.gz
+      - name: Update the native Homebrew formula
         env:
-          COMMITTER_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          GH_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          set -euo pipefail
+          export TSPM_FORMULA_SHA
+          TSPM_FORMULA_SHA="$(gh api repos/LebedevKondakovSergeyVach/homebrew-tap/contents/Formula/tspm.rb --jq .sha)"
+          python3 - <<'PY'
+          import base64
+          import json
+          import os
+          from pathlib import Path
+
+          payload = {
+              "message": f"chore: update tspm to {os.environ['RELEASE_TAG']}",
+              "sha": os.environ["TSPM_FORMULA_SHA"],
+              "content": base64.b64encode(Path("tspm.rb").read_bytes()).decode(),
+          }
+          Path(os.environ["RUNNER_TEMP"], "tspm-formula-update.json").write_text(json.dumps(payload))
+          PY
+          gh api --method PUT repos/LebedevKondakovSergeyVach/homebrew-tap/contents/Formula/tspm.rb \
+            --input "$RUNNER_TEMP/tspm-formula-update.json" --silent
 
   crates:
     name: Publish to crates.io

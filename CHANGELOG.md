@@ -30,6 +30,9 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Shell handoff and debug files are `~/.tspm-eval`, `~/.tspm-debug-enabled`
   and `~/.tspm-debug.log`. Previous files are ignored. Release archives and
   the Homebrew formula use the `tspm` name; the Rust library import is `tspm`.
+- Homebrew selects the native macOS or Linux archive for arm64 or x86_64.
+  The release workflow verifies all four archives and checksums before tagging
+  and updates all four downloads in the formula together.
 - Update `dirs` from 6 to 7; both versions use `dirs-sys` 0.5.
 - Update locked `clap` to 4.6.7, `clap_complete` to 4.6.11, `futures` to
   0.3.34, `reqwest` to 0.13.5, `serde_json` to 1.0.154, `thiserror` to 2.0.21

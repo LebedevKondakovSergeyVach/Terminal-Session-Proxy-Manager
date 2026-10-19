@@ -19,8 +19,11 @@ what a job does — names are not behaviour. Reference: `.ai/GIT_WORKFLOW.md`,
   (pull requests into `release/*` only), release readiness (release → `main`).
 - `release.yml` — runs on any push to `main`, a pushed `v*` tag, or manual
   dispatch. Re-verifies, builds four targets, **then** creates the tag in the
-  `publish` job, publishes bilingual notes from both changelogs and bumps
-  the Homebrew tap. Both changelogs must have the release section.
+  `publish` job, publishes bilingual notes from both changelogs and updates
+  the Homebrew tap. Both changelogs must have the release section. Before
+  tagging, `.github/scripts/homebrew_formula.py` verifies all four archives
+  and their checksums, then renders the platform-specific downloads. The tap
+  write replaces the complete formula using its current GitHub blob SHA.
   The `crates` job runs after that and uploads the crate (`cargo publish
   --locked`). Its token is the `CARGO_API_KEY` secret, mapped to
   `CARGO_REGISTRY_TOKEN`. That job's `contents: read` cannot push a tag or

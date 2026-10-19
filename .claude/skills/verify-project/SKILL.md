@@ -61,6 +61,8 @@ Check these by hand when they apply:
 - `src/`, `locales/`, `shell/`, `configs/` or `Cargo.toml` changed → entries in
   **both** changelogs. Direct commits to the release branch are not checked by CI.
 - Agent instruction files changed → the `agent-docs-audit` skill.
+- Release workflows or `.github/scripts/` changed →
+  `python3 -m unittest discover -s .github/scripts -p 'test_*.py'`.
 
 ## 4. Reporting
 
