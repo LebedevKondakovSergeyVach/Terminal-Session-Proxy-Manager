@@ -29,10 +29,11 @@ Loading behavior is documented in the official
   permitted files, read/write scope, branch and attribution rules; request
   concise evidence and spot-check it before reporting.
 - Use project skills from `.claude/skills/`; the trigger map is in `AGENTS.md`.
-- Use `cursor-review` for independent checks; follow the model/review policy in
-  local `SESSION.md` when present.
-- `.claude/settings.json` disables commit/PR/session attribution. Remove any
-  attribution still proposed by a plugin; hooks enforce the commit rules.
+- Use `cursor-delegate` for Grok research and read-only re-checks; the model
+  policy is in local `SESSION.md` when present.
+- `.claude/settings.json` disables commit/PR/session attribution and runs the
+  PreToolUse hook `.claude/hooks/guard-git.sh` (exit 2 blocks the call). Remove
+  any attribution still proposed by a plugin; never work around a hook denial.
 
 ## Optional plugins and MCP
 
@@ -46,12 +47,20 @@ worktree/branch/commit defaults cannot authorize switching branches, merging,
 publishing or adding attribution against `AGENTS.md`. Project skills own this
 repository's verification and release procedures.
 
-`.mcp.json` declares the documentation servers. Check `/mcp` when tools are
-missing. If a plugin already supplies context7, use one instance; do not enable
-duplicate servers. Keep credentials and personal server settings out of
-tracked files.
+`.mcp.json` declares `astro-docs`. Context7 is a user-scope server that sends
+the API key in a header (`AGENTS.md`, "Skills and documentation tools"). The
+Context7 plugin and any Context7 server without an auth header are anonymous:
+do not call them. Check `/mcp` when tools are missing; a saved configuration
+does not prove the current session has the tools. Inspect header names without
+printing values, and keep keys out of tracked files.
 
-An environment API key is sent only when the selected MCP server configuration
-references it in an HTTP header. Inspect header names without printing values;
-a plugin with no auth header uses anonymous access. Keep authenticated overrides
-in explicitly authorized local/user configuration, never copy a literal key.
+## Compact instructions
+
+After compaction this file and `AGENTS.md` reload from disk; `SESSION.md`, path
+rules and skill bodies survive only as the summary.
+
+- Keep in the summary: every file changed, commands and gates run with their
+  outcome, background runs still going (brief and log paths), open questions to
+  the user and decisions already taken.
+- Before the next action, re-read `SESSION.md` when the session started with
+  it, then the current plan or brief; re-open a skill before using it again.
